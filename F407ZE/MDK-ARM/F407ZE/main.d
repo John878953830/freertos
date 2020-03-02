@@ -35,11 +35,6 @@ f407ze\main.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pwr_ex.h
 f407ze\main.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim.h
 f407ze\main.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim_ex.h
 f407ze\main.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h
-f407ze\main.o: D:\Keil_v5\ARM\ARMCC\Bin\..\include\stdio.h
-f407ze\main.o: ../Core/Inc/usart.h
-f407ze\main.o: ../Core/Inc/main.h
-f407ze\main.o: ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os.h
-f407ze\main.o: ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.h
 f407ze\main.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h
 f407ze\main.o: ../Core/Inc/FreeRTOSConfig.h
 f407ze\main.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h
@@ -48,6 +43,15 @@ f407ze\main.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/portable.h
 f407ze\main.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/deprecated_definitions.h
 f407ze\main.o: ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F/portmacro.h
 f407ze\main.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/mpu_wrappers.h
+f407ze\main.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/task.h
+f407ze\main.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/list.h
+f407ze\main.o: D:\Keil_v5\ARM\ARMCC\Bin\..\include\stdio.h
+f407ze\main.o: ../Core/Inc/usart.h
+f407ze\main.o: ../Core/Inc/main.h
+f407ze\main.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/semphr.h
+f407ze\main.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/queue.h
+f407ze\main.o: ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os.h
+f407ze\main.o: ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.h
 f407ze\main.o: ../Core/Inc/can.h
 f407ze\main.o: ../Core/Inc/crc.h
 f407ze\main.o: ../Core/Inc/i2c.h

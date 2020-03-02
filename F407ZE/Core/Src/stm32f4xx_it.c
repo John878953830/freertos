@@ -44,7 +44,14 @@
 
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN PV */
-BaseType_t b_tk_default;
+BaseType_t b_tk_default=pdTRUE;
+BaseType_t b_tk_sensor_monitor=pdTRUE;
+BaseType_t b_tk_pidoutput=pdTRUE;
+BaseType_t b_tk_conflict_monitor=pdTRUE;
+BaseType_t b_tk_grating_monitor=pdTRUE;
+BaseType_t b_tk_posture_monitor=pdTRUE;
+BaseType_t b_tk_commu_monitor=pdTRUE;
+BaseType_t b_tk_send_order=pdTRUE;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -83,6 +90,13 @@ extern TIM_HandleTypeDef htim6;
 
 /* USER CODE BEGIN EV */
 extern TaskHandle_t defaultTaskHandle;
+extern TaskHandle_t sensor_monitorHandle;
+extern TaskHandle_t pid_outputHandle;
+extern TaskHandle_t conflict_monitorHandle;
+extern TaskHandle_t grating_monitorHandle;
+extern TaskHandle_t posture_monitorHandle;
+extern TaskHandle_t commu_mornitorHandle;
+extern TaskHandle_t send_orderHandle;
 /* USER CODE END EV */
 
 /******************************************************************************/
@@ -331,12 +345,21 @@ void EXTI9_5_IRQHandler(void)
 void TIM1_BRK_TIM9_IRQHandler(void)
 {
   /* USER CODE BEGIN TIM1_BRK_TIM9_IRQn 0 */
-
+	if(grating_monitorHandle !=NULL)
+	{
+		xTaskNotifyFromISR(grating_monitorHandle,0x0001,eSetBits,&b_tk_grating_monitor);
+		portYIELD_FROM_ISR( b_tk_grating_monitor );
+	}
+	if(posture_monitorHandle !=NULL)
+	{
+		xTaskNotifyFromISR(posture_monitorHandle,0x0001,eSetBits,&b_tk_posture_monitor);
+		portYIELD_FROM_ISR(b_tk_posture_monitor);
+	}
   /* USER CODE END TIM1_BRK_TIM9_IRQn 0 */
   HAL_TIM_IRQHandler(&htim1);
   HAL_TIM_IRQHandler(&htim9);
   /* USER CODE BEGIN TIM1_BRK_TIM9_IRQn 1 */
-
+	
   /* USER CODE END TIM1_BRK_TIM9_IRQn 1 */
 }
 
@@ -346,6 +369,14 @@ void TIM1_BRK_TIM9_IRQHandler(void)
 void TIM1_UP_TIM10_IRQHandler(void)
 {
   /* USER CODE BEGIN TIM1_UP_TIM10_IRQn 0 */
+	if(__HAL_TIM_GET_FLAG(&htim10, TIM_FLAG_UPDATE) != RESET)
+	{
+		if(commu_mornitorHandle !=NULL)
+		{
+			xTaskNotifyFromISR(commu_mornitorHandle,0x0001,eSetBits,&b_tk_commu_monitor);
+			portYIELD_FROM_ISR(b_tk_commu_monitor);
+		}
+	}
 	
 
   /* USER CODE END TIM1_UP_TIM10_IRQn 0 */
@@ -362,7 +393,11 @@ void TIM1_UP_TIM10_IRQHandler(void)
 void TIM1_TRG_COM_TIM11_IRQHandler(void)
 {
   /* USER CODE BEGIN TIM1_TRG_COM_TIM11_IRQn 0 */
-
+	if(pid_outputHandle !=NULL)
+	{
+		xTaskNotifyFromISR(pid_outputHandle,0x0001,eSetBits,&b_tk_pidoutput);
+		portYIELD_FROM_ISR(b_tk_pidoutput);
+	}
   /* USER CODE END TIM1_TRG_COM_TIM11_IRQn 0 */
   HAL_TIM_IRQHandler(&htim1);
   HAL_TIM_IRQHandler(&htim11);
@@ -537,6 +572,11 @@ void TIM8_BRK_TIM12_IRQHandler(void)
 void TIM8_UP_TIM13_IRQHandler(void)
 {
   /* USER CODE BEGIN TIM8_UP_TIM13_IRQn 0 */
+	if(conflict_monitorHandle !=NULL)
+	{
+		xTaskNotifyFromISR(conflict_monitorHandle,0x0001,eSetBits,&b_tk_conflict_monitor);
+		portYIELD_FROM_ISR(b_tk_conflict_monitor);
+	}
 
   /* USER CODE END TIM8_UP_TIM13_IRQn 0 */
   HAL_TIM_IRQHandler(&htim8);
@@ -583,7 +623,11 @@ void TIM5_IRQHandler(void)
 {
   /* USER CODE BEGIN TIM5_IRQn 0 */
 	//触发传感器监测
-	
+	if(sensor_monitorHandle !=NULL)
+	{
+		xTaskNotifyFromISR(sensor_monitorHandle,0x0001,eSetBits,&b_tk_sensor_monitor);
+		portYIELD_FROM_ISR(b_tk_sensor_monitor);
+	}
   /* USER CODE END TIM5_IRQn 0 */
   HAL_TIM_IRQHandler(&htim5);
   /* USER CODE BEGIN TIM5_IRQn 1 */
@@ -625,10 +669,12 @@ void TIM6_DAC_IRQHandler(void)
 void TIM7_IRQHandler(void)
 {
   /* USER CODE BEGIN TIM7_IRQn 0 */
-	//触发打印线程执行情况
+	//触发打印线程执行情况,执行默认任务
 	if(defaultTaskHandle !=NULL)
 	{
 		xTaskNotifyFromISR(defaultTaskHandle,0x0001,eSetBits,&b_tk_default);
+		//xTaskNotifyFromISR(send_orderHandle,0x0001,eSetBits,&b_tk_send_order);
+		portYIELD_FROM_ISR(b_tk_default);
 	}
   /* USER CODE END TIM7_IRQn 0 */
   HAL_TIM_IRQHandler(&htim7);

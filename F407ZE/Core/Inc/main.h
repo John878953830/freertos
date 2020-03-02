@@ -33,8 +33,11 @@ extern "C" {
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "FreeRTOS.h"
+#include "task.h"
 #include "stdio.h"
 #include "usart.h"
+#include "semphr.h"
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
@@ -47,6 +50,7 @@ extern "C" {
 //打印缓存
 extern uint8_t tklog[500];
 extern uint32_t ulHighFrequencyTimerTicks;
+extern uint32_t queuespace;
 //数组定义
 //limitsw引脚--->电机映射
 extern const uint8_t limitsw_to_motorid[17][2];
@@ -55,7 +59,28 @@ extern const uint8_t limitsw_to_motorid[17][2];
 
 /* Exported macro ------------------------------------------------------------*/
 /* USER CODE BEGIN EM */
+//调试设置
+#define DEBUG_OUTPUT 0
 
+
+
+//输出gpio映射
+#define ENABLE_MOTOR             0
+#define ENABLE_PWM               1
+#define ENABLE_DIR               2
+#define ENABLE_POSTURE_POWER     3
+
+//错误码
+#define ERROR_UNKNOWN           0xFF
+#define ERROR_FUNC_BUSY         0xFE
+#define ERROR_SEMA_NULL         0x01
+#define ERROR_CANNOT_GIVE_SEM   0x02
+#define ERROR_MOTOR_ID_ERROR    0x03
+#define ERROR_CAN_SEND_FAIL     0x04
+#define ERROR_CAN_START_FAIL    0x05
+//电机个数和传感器个数设置
+#define MAX_MOTOR_NUMBER        3
+#define POSTURE_NUM             6
 /* USER CODE END EM */
 
 /* Exported functions prototypes ---------------------------------------------*/
@@ -63,10 +88,30 @@ void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
 void timer_start(void);
+uint8_t can_start(void);
+uint8_t switchGet(uint8_t motor_id);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
 /* USER CODE BEGIN Private defines */
+typedef struct queue_struct{
+	uint8_t property;                           //0: can 1: 485
+	uint8_t data[8];                            //数据数组
+	uint8_t length;                             //数据个数
+	uint8_t can_priority;                       //CAN 消息优先级
+	uint8_t can_target;                         //can 消息目标
+	uint8_t can_source;                         //can 消息源
+	uint8_t can_command;                        //can 命令
+	uint8_t can_if_last;                        //can 是否拼接标志
+	uint8_t can_if_return;                      //can 是否需要返回值
+	uint8_t can_if_ack;                         //can 是否需要ack确认
+	uint8_t can_version;                        //can 版本号
+	uint8_t modbus_addr;                        //485 功能
+	uint8_t modbus_func;                        //485 功能码
+	uint16_t modbus_data_addr;                  //485 数据地址
+	uint16_t modbus_data;                       //485 数据
+	uint16_t modbus_crc;                        //485 CRC
+}QUEUE_STRUCT;
 typedef struct command_struct{
 	uint8_t command_id;                         //当前执行的命令ID， 初始化为0
 	uint8_t command_id_history[20];             //执行的命令的历史数据，该变量备用
@@ -175,6 +220,8 @@ typedef struct gpio_table{
 }GPIO_TABLE;
 
 extern MOTOR_STRUCT motor_array[4];
+uint8_t can_send(QUEUE_STRUCT send_struct);
+uint8_t modbus_send(QUEUE_STRUCT send_struct);
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

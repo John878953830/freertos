@@ -35,10 +35,6 @@ f407ze\stm32f4xx_it.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pwr_ex.
 f407ze\stm32f4xx_it.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim.h
 f407ze\stm32f4xx_it.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim_ex.h
 f407ze\stm32f4xx_it.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h
-f407ze\stm32f4xx_it.o: D:\Keil_v5\ARM\ARMCC\Bin\..\include\stdio.h
-f407ze\stm32f4xx_it.o: ../Core/Inc/usart.h
-f407ze\stm32f4xx_it.o: ../Core/Inc/main.h
-f407ze\stm32f4xx_it.o: ../Core/Inc/stm32f4xx_it.h
 f407ze\stm32f4xx_it.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h
 f407ze\stm32f4xx_it.o: ../Core/Inc/FreeRTOSConfig.h
 f407ze\stm32f4xx_it.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h
@@ -49,3 +45,9 @@ f407ze\stm32f4xx_it.o: ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/
 f407ze\stm32f4xx_it.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/mpu_wrappers.h
 f407ze\stm32f4xx_it.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/task.h
 f407ze\stm32f4xx_it.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/list.h
+f407ze\stm32f4xx_it.o: D:\Keil_v5\ARM\ARMCC\Bin\..\include\stdio.h
+f407ze\stm32f4xx_it.o: ../Core/Inc/usart.h
+f407ze\stm32f4xx_it.o: ../Core/Inc/main.h
+f407ze\stm32f4xx_it.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/semphr.h
+f407ze\stm32f4xx_it.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/queue.h
+f407ze\stm32f4xx_it.o: ../Core/Inc/stm32f4xx_it.h

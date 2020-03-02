@@ -87,7 +87,7 @@ osThreadId_t limit_swHandle;
 uint32_t limit_swBuffer[ 256 ];
 osStaticThreadDef_t limit_swControlBlock;
 osMessageQueueId_t send_queueHandle;
-uint8_t send_queueBuffer[ 256 * sizeof( uint32_t ) ];
+uint8_t send_queueBuffer[ 256 * sizeof( QUEUE_STRUCT ) ];
 osStaticMessageQDef_t send_queueControlBlock;
 
 /* Private function prototypes -----------------------------------------------*/
@@ -159,7 +159,7 @@ osKernelInitialize();
     .mq_mem = &send_queueBuffer,
     .mq_size = sizeof(send_queueBuffer)
   };
-  send_queueHandle = osMessageQueueNew (256, sizeof(uint32_t), &send_queue_attributes);
+  send_queueHandle = osMessageQueueNew (256, sizeof(QUEUE_STRUCT), &send_queue_attributes);
 
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */
@@ -302,6 +302,7 @@ osKernelInitialize();
   /* add threads, ... */
 	//定时器初始化
 	timer_start();
+	can_start();
   /* USER CODE END RTOS_THREADS */
 
 }
@@ -317,9 +318,14 @@ void StartDefaultTask(void *argument)
 {
   /* USER CODE BEGIN StartDefaultTask */
 	uint32_t notify_use=0;
+	QUEUE_STRUCT queue_id;
+	portBASE_TYPE status;
   /* Infinite loop */
   for(;;)
   {
+		#ifdef DEBUG_OUTPUT
+		//printf("%s\n","start default task");
+		#endif
 		xTaskNotifyWait( 0x00,               /* Don't clear any bits on entry. */
                          0xffffffff,          /* Clear all bits on exit. */
                          &notify_use, /* Receives the notification value. */
@@ -333,6 +339,43 @@ void StartDefaultTask(void *argument)
 	    vTaskGetRunTimeStats((char *)&tklog);
 	    printf("%s\n",tklog);
 			
+			//发送消息测试，包括CAN MODBUS
+			//dummy data
+			queue_id.property=0;             //can send
+			queue_id.can_priority=0x05;      //can priority
+			queue_id.can_source=0x03;        //can source
+			queue_id.can_target=0x00;        //can target
+			queue_id.can_command=0x43;       //can command
+			queue_id.can_if_last=0x00;       //can if last
+			queue_id.can_if_return=0x00;     //can if return
+			queue_id.can_if_ack=0x00;        //can if ack
+			queue_id.can_version=0x07;       //can version
+			queue_id.data[0]=0x57;
+			queue_id.data[1]=0x39;
+			queue_id.data[2]=0xF6;
+			queue_id.data[3]=0x90;
+			queue_id.data[4]=0x13;
+			queue_id.data[5]=0x52;
+			queue_id.data[6]=0x30;
+			queue_id.data[7]=0x33;
+			queue_id.length=8;
+			queuespace= uxQueueSpacesAvailable( send_queueHandle );
+			uint8_t tmp=can_send(queue_id);
+			status = xQueueSendToBack(send_queueHandle, &queue_id, 0);
+			if(status!=pdPASS)
+			{
+				#ifdef DEBUG_OUTPUT
+				printf("%s\n","queue overflow");
+				#endif
+			}
+			else
+			{
+				#ifdef DEBUG_OUTPUT
+				printf("%s\n","send message to queue already");
+				#endif
+				//通知发送任务发送
+				xTaskNotifyGive( send_orderHandle );
+			}
 			;
 		}
     osDelay(1);
@@ -350,9 +393,22 @@ void StartDefaultTask(void *argument)
 void start_tk_pidoutput(void *argument)
 {
   /* USER CODE BEGIN start_tk_pidoutput */
+	uint32_t notify_use=0;
   /* Infinite loop */
   for(;;)
   {
+		xTaskNotifyWait( 0x00,               /* Don't clear any bits on entry. */
+                         0xffffffff,          /* Clear all bits on exit. */
+                         &notify_use, /* Receives the notification value. */
+                         portMAX_DELAY );
+		if(notify_use!=0)
+		{
+			#ifdef DEBUG_OUTPUT
+			printf("%s\n","start tk pid output");
+			#endif
+			
+			notify_use=0;
+		}
     osDelay(1);
   }
   /* USER CODE END start_tk_pidoutput */
@@ -368,9 +424,52 @@ void start_tk_pidoutput(void *argument)
 void start_tk_send_order(void *argument)
 {
   /* USER CODE BEGIN start_tk_send_order */
+	QUEUE_STRUCT id;
+  portBASE_TYPE status;
+	uint32_t notify_use=0;
   /* Infinite loop */
   for(;;)
   {
+    #ifdef DEBUG_OUTPUT
+			printf("%s\n","start tk send order");
+		#endif	
+
+		//等待发送队列有消息
+		status = xQueueReceive(send_queueHandle, &id, portMAX_DELAY);
+		if(status==pdPASS)
+		{
+			//id为发送结构体
+			if(id.property==0)
+			{
+				#ifdef DEBUG_OUTPUT
+				printf("%s, id : %d\n","queue receive  can send order",id.can_command);
+				#endif
+				can_send(id);
+			}
+			if(id.property==1)
+			{
+				modbus_send(id);
+			}
+		}
+		
+		//接收中断通知进行发送结果判断，CAN发送中断 + RS485中断
+		xTaskNotifyWait( 0x00,               /* Don't clear any bits on entry. */
+                         0xffffffff,          /* Clear all bits on exit. */
+                         &notify_use, /* Receives the notification value. */
+                         portMAX_DELAY );
+		
+		if(notify_use!=0)
+		{
+			#ifdef DEBUG_OUTPUT
+			printf("%s\n","send order task receive notify form isr");
+			#endif
+		}
+		
+		/* Block to wait for prvTask2() to notify this task. */
+    //ulTaskNotifyTake( pdTRUE, portMAX_DELAY );
+		
+		notify_use=0;
+		
     osDelay(1);
   }
   /* USER CODE END start_tk_send_order */
@@ -386,9 +485,22 @@ void start_tk_send_order(void *argument)
 void start_tk_commu_monitor(void *argument)
 {
   /* USER CODE BEGIN start_tk_commu_monitor */
+	uint32_t notify_use=0;
   /* Infinite loop */
   for(;;)
   {
+		xTaskNotifyWait( 0x00,               /* Don't clear any bits on entry. */
+                         0xffffffff,          /* Clear all bits on exit. */
+                         &notify_use, /* Receives the notification value. */
+                         portMAX_DELAY );
+		if(notify_use!=0)
+		{
+			#ifdef DEBUG_OUTPUT
+			printf("%s\n","start tk communicate monitor");
+			#endif
+			
+			notify_use=0;
+		}
     osDelay(1);
   }
   /* USER CODE END start_tk_commu_monitor */
@@ -404,9 +516,22 @@ void start_tk_commu_monitor(void *argument)
 void start_tk_conflict_monitor(void *argument)
 {
   /* USER CODE BEGIN start_tk_conflict_monitor */
+	uint32_t notify_use=0;
   /* Infinite loop */
   for(;;)
   {
+		xTaskNotifyWait( 0x00,               /* Don't clear any bits on entry. */
+                         0xffffffff,          /* Clear all bits on exit. */
+                         &notify_use, /* Receives the notification value. */
+                         portMAX_DELAY );
+		if(notify_use!=0)
+		{
+			#ifdef DEBUG_OUTPUT
+			printf("%s\n","start tk conflict monitor");
+			#endif
+			
+			notify_use=0;
+		}
     osDelay(1);
   }
   /* USER CODE END start_tk_conflict_monitor */
@@ -422,9 +547,22 @@ void start_tk_conflict_monitor(void *argument)
 void start_tk_sensor_monitor(void *argument)
 {
   /* USER CODE BEGIN start_tk_sensor_monitor */
+	uint32_t notify_use=0;
   /* Infinite loop */
   for(;;)
   {
+		xTaskNotifyWait( 0x00,               /* Don't clear any bits on entry. */
+                         0xffffffff,          /* Clear all bits on exit. */
+                         &notify_use, /* Receives the notification value. */
+                         100 );
+		if(notify_use!=0)
+		{
+			#ifdef DEBUG_OUTPUT
+			printf("%s\n","start tk sensor monitor");
+			#endif
+			
+			notify_use=0;
+		}
     osDelay(1);
   }
   /* USER CODE END start_tk_sensor_monitor */
@@ -440,9 +578,22 @@ void start_tk_sensor_monitor(void *argument)
 void start_tk_grating_monitor(void *argument)
 {
   /* USER CODE BEGIN start_tk_grating_monitor */
+	uint32_t notify_use=0;
   /* Infinite loop */
   for(;;)
   {
+		xTaskNotifyWait( 0x00,               /* Don't clear any bits on entry. */
+                         0xffffffff,          /* Clear all bits on exit. */
+                         &notify_use, /* Receives the notification value. */
+                         portMAX_DELAY );
+		if(notify_use!=0)
+		{
+			#ifdef DEBUG_OUTPUT
+			printf("%s\n","start tk grating monitor");
+			#endif
+			
+			notify_use=0;
+		}
     osDelay(1);
   }
   /* USER CODE END start_tk_grating_monitor */
@@ -458,9 +609,22 @@ void start_tk_grating_monitor(void *argument)
 void start_tk_posture_monitor(void *argument)
 {
   /* USER CODE BEGIN start_tk_posture_monitor */
+	uint32_t notify_use;
   /* Infinite loop */
   for(;;)
   {
+		xTaskNotifyWait( 0x00,               /* Don't clear any bits on entry. */
+                         0xffffffff,          /* Clear all bits on exit. */
+                         &notify_use, /* Receives the notification value. */
+                         portMAX_DELAY );
+		if(notify_use!=0)
+		{
+			#ifdef DEBUG_OUTPUT
+			printf("%s\n","start tk posture monitor");
+			#endif
+			
+			notify_use=0;
+		}
     osDelay(1);
   }
   /* USER CODE END start_tk_posture_monitor */
@@ -530,9 +694,34 @@ void start_tk_master_order(void *argument)
 void start_tk_limit_sw(void *argument)
 {
   /* USER CODE BEGIN start_tk_limit_sw */
+	uint32_t notify_use=0;
   /* Infinite loop */
   for(;;)
   {
+		xTaskNotifyWait( 0x00,               /* Don't clear any bits on entry. */
+                         0xffffffff,          /* Clear all bits on exit. */
+                         &notify_use, /* Receives the notification value. */
+                         portMAX_DELAY );
+		//下降沿触发，停止电机
+		HAL_GPIO_WritePin(motor_array[notify_use - 1].gpio_output[ENABLE_MOTOR].gpio_port,motor_array[notify_use - 1].gpio_output[ENABLE_MOTOR].pin_number, GPIO_PIN_RESET);
+		//更新限位开关状态
+		uint8_t switch_status_get_res=0;
+		switch_status_get_res=switchGet(notify_use - 1);
+		if(switch_status_get_res != 0)
+		{
+			if(switch_status_get_res==ERROR_FUNC_BUSY)
+			{
+				while(switch_status_get_res==ERROR_FUNC_BUSY)
+				{
+					HAL_Delay(10);//忙等待
+					switch_status_get_res=switchGet(notify_use - 1);
+				}
+			}
+			;
+		}else{
+			;
+		}
+		
     osDelay(1);
   }
   /* USER CODE END start_tk_limit_sw */

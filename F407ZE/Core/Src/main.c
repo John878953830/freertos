@@ -50,8 +50,34 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
+//调试信息输出
 uint8_t tklog[500]={0};
 uint32_t ulHighFrequencyTimerTicks=0;
+uint32_t queuespace=0;
+
+uint8_t tm=0;
+
+//信号量定义
+//位置获取信号量
+StaticSemaphore_t semaPositionGet;
+SemaphoreHandle_t xSemaphorePositionGet = NULL;
+//位置设置信号量
+StaticSemaphore_t semaPositionSet;
+SemaphoreHandle_t xSemaphorePositionSet = NULL;
+//开关量读取信号量，包括限位开关，0点开关，对射开关
+StaticSemaphore_t semaSwitchGet;
+SemaphoreHandle_t xSemaphoreSwitchGet = NULL;
+//光栅状态读取信号量
+StaticSemaphore_t semaGratingGet;
+SemaphoreHandle_t xSemaphoreGratingGet = NULL;
+
+
+
+//电机数组
+MOTOR_STRUCT motor_array[4];
+//姿态结构体
+POSTURE_STRUCT posture;
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -94,11 +120,374 @@ void timer_start()
 	HAL_TIM_Base_Start_IT(&htim8);
 	HAL_TIM_Base_Start_IT(&htim9);
 	HAL_TIM_Base_Start_IT(&htim10);
+	HAL_TIM_Base_Start_IT(&htim11);
 	
 	//开启任务统计定时器14
 	HAL_TIM_Base_Start_IT(&htim14);
 	return;
 }
+
+uint8_t can_start(void)
+{
+	HAL_CAN_DeInit(&hcan1);
+	CAN_FilterTypeDef  sFilterConfig;
+	
+	  /*##-1- Configure the CAN peripheral #######################################*/
+  hcan1.Instance = CAN1;
+
+  hcan1.Init.TimeTriggeredMode = DISABLE;
+  hcan1.Init.AutoBusOff = DISABLE;
+  hcan1.Init.AutoWakeUp = DISABLE;
+  hcan1.Init.AutoRetransmission = ENABLE;
+  hcan1.Init.ReceiveFifoLocked = DISABLE;
+  hcan1.Init.TransmitFifoPriority = DISABLE;
+  hcan1.Init.Mode = CAN_MODE_NORMAL;
+  hcan1.Init.SyncJumpWidth = CAN_SJW_1TQ;
+  hcan1.Init.TimeSeg1 = CAN_BS1_3TQ;
+  hcan1.Init.TimeSeg2 = CAN_BS2_3TQ;
+  hcan1.Init.Prescaler = 6;
+
+  if (HAL_CAN_Init(&hcan1) != HAL_OK)
+  {
+    /* Initialization Error */
+    Error_Handler();
+  }
+	
+  sFilterConfig.FilterBank = 0;
+  sFilterConfig.FilterMode = CAN_FILTERMODE_IDMASK;
+  sFilterConfig.FilterScale = CAN_FILTERSCALE_32BIT;
+  sFilterConfig.FilterIdHigh = 0x0000;
+  sFilterConfig.FilterIdLow = 0x0000;
+  sFilterConfig.FilterMaskIdHigh = 0x0000;
+  sFilterConfig.FilterMaskIdLow = 0x0000;
+  sFilterConfig.FilterFIFOAssignment = CAN_RX_FIFO0;
+  sFilterConfig.FilterActivation = ENABLE;
+  sFilterConfig.SlaveStartFilterBank = 14;
+
+  if (HAL_CAN_ConfigFilter(&hcan1, &sFilterConfig) != HAL_OK)
+  {
+    /* Filter configuration Error */
+    Error_Handler();
+		return ERROR_CAN_START_FAIL;
+  }
+	
+	if (HAL_CAN_Start(&hcan1) != HAL_OK)
+  {
+    /* Start Error */
+    Error_Handler();
+		return ERROR_CAN_START_FAIL;
+  }
+	return 0;
+}
+
+//信号量初始化
+uint8_t lock_init(void)
+{
+	//信号量初始化
+	//位置获取信号量
+	xSemaphorePositionGet=xSemaphoreCreateBinaryStatic(&semaPositionGet);
+	configASSERT(xSemaphorePositionGet);
+	//位置设置信号量
+	xSemaphorePositionSet=xSemaphoreCreateBinaryStatic(&semaPositionSet);
+	configASSERT(xSemaphorePositionSet);
+	//开关状态读取信号量
+	xSemaphoreSwitchGet=xSemaphoreCreateBinaryStatic(&semaSwitchGet);
+	configASSERT(xSemaphoreSwitchGet);
+	//光栅状态读取信号量
+	xSemaphoreGratingGet=xSemaphoreCreateBinaryStatic(&semaGratingGet);
+	configASSERT(xSemaphoreGratingGet);
+	
+	//给信号量赋值
+	if( xSemaphoreGive( xSemaphorePositionGet ) != pdTRUE )
+	{
+			return ERROR_CANNOT_GIVE_SEM;
+	}
+	if( xSemaphoreGive( xSemaphorePositionSet ) != pdTRUE )
+	{
+			return ERROR_CANNOT_GIVE_SEM;
+	}
+	if( xSemaphoreGive( xSemaphoreSwitchGet ) != pdTRUE )
+	{
+			return ERROR_CANNOT_GIVE_SEM;
+	}
+	if( xSemaphoreGive( xSemaphoreGratingGet ) != pdTRUE )
+	{
+			return ERROR_CANNOT_GIVE_SEM;
+	}
+	return 0;
+}
+
+//开关状态量获取
+uint8_t switchGet(uint8_t motor_id)
+{
+	if(xSemaphoreSwitchGet != NULL)
+	{
+		if(xSemaphoreTake(xSemaphoreSwitchGet,(TickType_t)10)==pdTRUE)
+		{
+			if(motor_id >6)
+			{
+				if( xSemaphoreGive( xSemaphoreSwitchGet ) != pdTRUE )
+				{
+						return ERROR_CANNOT_GIVE_SEM;
+				}
+				return ERROR_MOTOR_ID_ERROR;
+			}
+			else{
+				//GPIO 状态读取，读取后更新到相关结构体的开关量中，并根据开关的属性设置更新开关状态为触发或不触发
+				GPIO_PinState res=GPIO_PIN_RESET;
+				uint8_t i=0,j=0;
+				if(motor_id==4)//获取全部开关
+				{
+					
+					for(i=0;i<MAX_MOTOR_NUMBER;i++)
+					{
+						for(j=0;j<motor_array[i].limit_sw_number;j++)
+						{
+							res=HAL_GPIO_ReadPin((GPIO_TypeDef *)motor_array[i].limit_sw[j].gpio_port,motor_array[i].limit_sw[j].pin_number);
+							//更新限位开关触发状态
+							if(res^motor_array[i].limit_sw[j].type)
+							{
+								motor_array[i].limit_sw[j].status=1;
+							}
+							else{
+								motor_array[i].limit_sw[j].status=0;
+							}
+						}
+					}
+					//更新姿态开关状态
+					for(i=0;i<POSTURE_NUM;i++)
+					{
+						res=HAL_GPIO_ReadPin((GPIO_TypeDef*)posture.postureValue[i].gpio_port,posture.postureValue[i].pin_number);
+						if(res^posture.postureValue[i].type)
+						{
+							posture.postureValue[i].status=1;
+						}
+						else{
+							posture.postureValue[i].status=0;
+						}
+					}
+					
+				}else if(motor_id==5){//获取光栅状态
+					//更新光栅状态，MODBUS RTU 通信， 获取光点信息未完成未完成
+					
+					
+					posture.gratingValue.distance=0;//此值存储遮挡信息
+					if(posture.gratingValue.distance>posture.gratingValue.distance_max)
+					{
+						posture.gratingValue.status=1;
+					}
+					else{
+						posture.gratingValue.status=0;
+					}
+					//遮挡信息为0的情况，没有目标
+					if(posture.gratingValue.dark_point==0)
+					{
+						posture.gratingValue.if_have_target=0;
+					}
+					else{
+						posture.gratingValue.if_have_target=1;
+					}
+				}else if(motor_id==4){//获取电机抱闸状态
+					res=GPIO_PIN_RESET;
+					res=HAL_GPIO_ReadPin(motor_array[0].gpio_input[0].gpio_port,motor_array[0].gpio_input[0].pin_number);
+					if(res==GPIO_PIN_RESET)
+					{
+						motor_array[0].gpio_input[0].break_status=0;
+					}
+					else
+					{
+						motor_array[0].gpio_input[0].break_status=1;
+					}
+				}else{//获取电机限位状态
+					res=GPIO_PIN_RESET;
+					for(j=0;j<motor_array[motor_id].limit_sw_number;j++)
+					{
+						res=HAL_GPIO_ReadPin((GPIO_TypeDef *)motor_array[i].limit_sw[j].gpio_port,motor_array[i].limit_sw[j].pin_number);
+						//更新限位开关触发状态
+						if(res^motor_array[i].limit_sw[j].type)
+						{
+							motor_array[i].limit_sw[j].status=1;
+						}
+						else{
+							motor_array[i].limit_sw[j].status=0;
+						}
+					}
+				}
+			}
+			
+			//释放信号量返回
+			if( xSemaphoreGive( xSemaphoreSwitchGet ) != pdTRUE )
+			{
+					return ERROR_CANNOT_GIVE_SEM;
+			}
+			return 0;
+		}
+		else{
+			return ERROR_FUNC_BUSY;
+		}
+	}
+	else
+	{
+		return ERROR_SEMA_NULL;
+	}
+}
+
+//电机目标获取
+uint8_t positionGet(uint8_t motorId,int32_t* position)
+{
+	if(xSemaphorePositionGet != NULL)
+	{
+		if(xSemaphoreTake(xSemaphorePositionGet,( TickType_t )10) == pdTRUE)
+		{
+			//MODBUS RTU 获取电机位置,未完成，获取电机位置后要更新电机位置到电机结构体的当前位置中
+			*position=0;
+			
+			
+			xSemaphoreGive(xSemaphorePositionGet);
+			return 0;
+		}
+		else{
+			return ERROR_FUNC_BUSY;
+		}
+	}
+	else{
+		return ERROR_SEMA_NULL;
+	}
+}
+
+//can 发送
+uint8_t can_send(QUEUE_STRUCT send_struct)
+{
+	CAN_TxHeaderTypeDef   TxHeader;
+	uint32_t              TxMailbox;
+	
+	//固定值
+	TxHeader.StdId = 0x000;
+  TxHeader.RTR = CAN_RTR_DATA;
+  TxHeader.IDE = CAN_ID_EXT;
+	TxHeader.TransmitGlobalTime = DISABLE;
+	
+	//发送长度
+	if(send_struct.length>8)
+	{
+		return ERROR_CAN_SEND_FAIL;
+	}
+	else{
+		TxHeader.DLC = send_struct.length;
+	}
+  
+  //扩展ID
+	uint32_t tmpexid=0;
+	uint32_t exid=0;
+	
+	tmpexid=send_struct.can_priority & 0x07;
+	exid|=(tmpexid<<26);
+	
+	tmpexid=send_struct.can_source & 0x1F;
+	exid|=(tmpexid<<21);
+	
+	tmpexid=send_struct.can_target & 0x1F;
+	exid|=(tmpexid<<16);
+	
+	tmpexid=send_struct.can_command & 0x7F;
+	exid|=(tmpexid<<9);
+	
+	tmpexid=send_struct.can_if_last & 0x01;
+	exid|=(tmpexid<<8);
+	
+	tmpexid=send_struct.can_if_return & 0x01;
+	exid|=(tmpexid<<7);
+	
+	tmpexid=send_struct.can_if_ack & 0x01;
+	exid|=(tmpexid<<6);
+	
+	tmpexid=send_struct.can_version & 0x07;
+	exid|=(tmpexid);
+	
+	TxHeader.ExtId = exid;
+	
+	if (HAL_CAN_AddTxMessage(&hcan1, &TxHeader, send_struct.data, &TxMailbox) != HAL_OK)
+	{
+		/* Transmission request Error */
+	  Error_Handler();
+		return ERROR_CAN_SEND_FAIL;
+	}
+	return 0;
+}
+
+//485 发送
+uint8_t modbus_send(QUEUE_STRUCT send_struct)
+{
+	return 0;
+}
+
+//IIC 发送
+uint8_t iic_send(uint8_t* data)
+{
+	return 0;
+}
+
+//电机目标设置
+uint8_t positionSet(uint8_t motorId, int32_t * position)
+{
+	if(xSemaphorePositionSet != NULL)
+	{
+		if(xSemaphoreTake(xSemaphorePositionSet,(TickType_t)10)==pdTRUE)
+		{
+			//MODBUS RTU 设置电机位置， 未完成,设置后更新电机位置到电机结构体中的目标位置中，同时更新电机运行方向到dir的第0位
+			xSemaphoreGive(xSemaphorePositionSet);
+			return 0;
+		}
+		else{
+			return ERROR_FUNC_BUSY;
+		}
+	}
+	else
+	{
+		return ERROR_SEMA_NULL;
+	}
+}
+
+
+//光点状态获取
+uint8_t gratingGet(void)
+{
+	if(xSemaphoreGratingGet != NULL)
+	{
+		if(xSemaphoreTake(xSemaphoreGratingGet,(TickType_t)10)==pdTRUE)
+		{
+			//MODBUS RTU 读取光栅位置，读取后更新到姿态结构体，未完成
+			
+			
+			if( xSemaphoreGive( xSemaphoreGratingGet ) != pdTRUE )
+			{
+					return ERROR_CANNOT_GIVE_SEM;
+			}
+			return 0;
+		}
+		else{
+			return ERROR_FUNC_BUSY;
+		}
+	}
+	else
+	{
+		return ERROR_SEMA_NULL;
+	}
+}
+
+
+//姿态获取
+ANGLE_STRUCT angleCalculate(GRATING grating)
+{
+	ANGLE_STRUCT res;
+	res.dir=0;
+	res.angle=0;
+	//计算角度,未完成，需根据扫描位置再更改
+	
+	return res;
+}
+
+
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -158,6 +547,9 @@ int main(void)
   MX_USART3_UART_Init();
   MX_USART6_UART_Init();
   /* USER CODE BEGIN 2 */
+	
+	//初始化信号量
+	lock_init();
 
 	printf("%s\n","start free rtos");
   /* USER CODE END 2 */
