@@ -36,7 +36,8 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-
+extern uint8_t RxData[8];
+extern CAN_RxHeaderTypeDef   RxHeader;
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -92,7 +93,16 @@ osStaticMessageQDef_t send_queueControlBlock;
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
-   
+void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
+{
+  /* Get RX message */
+  if (HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &RxHeader, RxData) != HAL_OK)
+  {
+    /* Reception Error */
+    Error_Handler();
+  }
+	//xTaskNotifyGive(master_orderHandle );
+}
 /* USER CODE END FunctionPrototypes */
 
 void StartDefaultTask(void *argument);
@@ -676,9 +686,24 @@ void start_tk_co_order(void *argument)
 void start_tk_master_order(void *argument)
 {
   /* USER CODE BEGIN start_tk_master_order */
+	uint32_t notify_use=0;
   /* Infinite loop */
   for(;;)
   {
+		xTaskNotifyWait( 0x00,               /* Don't clear any bits on entry. */
+                         0xffffffff,          /* Clear all bits on exit. */
+                         &notify_use, /* Receives the notification value. */
+                         portMAX_DELAY );
+		if(notify_use!=0)
+		{
+			#ifdef DEBUG_OUTPUT
+			printf("%s\n","start tk master order");
+			#endif
+			
+			
+			notify_use=0;
+			;
+		}
     osDelay(1);
   }
   /* USER CODE END start_tk_master_order */

@@ -55,7 +55,8 @@ uint8_t tklog[500]={0};
 uint32_t ulHighFrequencyTimerTicks=0;
 uint32_t queuespace=0;
 
-uint8_t tm=0;
+CAN_RxHeaderTypeDef   RxHeader;
+uint8_t               RxData[8];
 
 //信号量定义
 //位置获取信号量
@@ -138,7 +139,7 @@ uint8_t can_start(void)
   hcan1.Init.TimeTriggeredMode = DISABLE;
   hcan1.Init.AutoBusOff = DISABLE;
   hcan1.Init.AutoWakeUp = DISABLE;
-  hcan1.Init.AutoRetransmission = ENABLE;
+  hcan1.Init.AutoRetransmission = DISABLE;
   hcan1.Init.ReceiveFifoLocked = DISABLE;
   hcan1.Init.TransmitFifoPriority = DISABLE;
   hcan1.Init.Mode = CAN_MODE_NORMAL;
@@ -156,10 +157,10 @@ uint8_t can_start(void)
   sFilterConfig.FilterBank = 0;
   sFilterConfig.FilterMode = CAN_FILTERMODE_IDMASK;
   sFilterConfig.FilterScale = CAN_FILTERSCALE_32BIT;
-  sFilterConfig.FilterIdHigh = 0x0000;
-  sFilterConfig.FilterIdLow = 0x0000;
-  sFilterConfig.FilterMaskIdHigh = 0x0000;
-  sFilterConfig.FilterMaskIdLow = 0x0000;
+  sFilterConfig.FilterIdHigh = 0x0018;
+  sFilterConfig.FilterIdLow = 0x0004;
+  sFilterConfig.FilterMaskIdHigh = 0x1F18;
+  sFilterConfig.FilterMaskIdLow = 0x0004;
   sFilterConfig.FilterFIFOAssignment = CAN_RX_FIFO0;
   sFilterConfig.FilterActivation = ENABLE;
   sFilterConfig.SlaveStartFilterBank = 14;
@@ -176,6 +177,19 @@ uint8_t can_start(void)
     /* Start Error */
     Error_Handler();
 		return ERROR_CAN_START_FAIL;
+  }
+	
+	/*##-5- Start the Reception process ########################################*/
+  //if(HAL_CAN_GetRxFifoFillLevel(&hcan1, CAN_RX_FIFO0) != 1)
+  {
+    /* Reception Missing */
+   // Error_Handler();
+  }
+
+  //if(HAL_CAN_GetRxMessage(&hcan1, CAN_RX_FIFO0, &RxHeader, RxData) != HAL_OK)
+  {
+    /* Reception Error */
+   // Error_Handler();
   }
 	return 0;
 }
@@ -377,32 +391,23 @@ uint8_t can_send(QUEUE_STRUCT send_struct)
 	}
   
   //扩展ID
-	uint32_t tmpexid=0;
 	uint32_t exid=0;
 	
-	tmpexid=send_struct.can_priority & 0x07;
-	exid|=(tmpexid<<26);
+	exid|=((send_struct.can_priority & 0x07)<<26);
 	
-	tmpexid=send_struct.can_source & 0x1F;
-	exid|=(tmpexid<<21);
+	exid|=((send_struct.can_source & 0x1F)<<21);
 	
-	tmpexid=send_struct.can_target & 0x1F;
-	exid|=(tmpexid<<16);
+	exid|=((send_struct.can_target & 0x1F)<<16);
 	
-	tmpexid=send_struct.can_command & 0x7F;
-	exid|=(tmpexid<<9);
+	exid|=((send_struct.can_command & 0x7F)<<9);
 	
-	tmpexid=send_struct.can_if_last & 0x01;
-	exid|=(tmpexid<<8);
+	exid|=((send_struct.can_if_last & 0x01)<<8);
 	
-	tmpexid=send_struct.can_if_return & 0x01;
-	exid|=(tmpexid<<7);
+	exid|=((send_struct.can_if_return & 0x01)<<7);
 	
-	tmpexid=send_struct.can_if_ack & 0x01;
-	exid|=(tmpexid<<6);
+	exid|=((send_struct.can_if_ack & 0x01)<<6);
 	
-	tmpexid=send_struct.can_version & 0x07;
-	exid|=(tmpexid);
+	exid|=(send_struct.can_version & 0x07);
 	
 	TxHeader.ExtId = exid;
 	

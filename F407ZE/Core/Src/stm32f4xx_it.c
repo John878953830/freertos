@@ -52,6 +52,7 @@ BaseType_t b_tk_grating_monitor=pdTRUE;
 BaseType_t b_tk_posture_monitor=pdTRUE;
 BaseType_t b_tk_commu_monitor=pdTRUE;
 BaseType_t b_tk_send_order=pdTRUE;
+BaseType_t b_tk_master_order=pdTRUE;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -97,6 +98,7 @@ extern TaskHandle_t grating_monitorHandle;
 extern TaskHandle_t posture_monitorHandle;
 extern TaskHandle_t commu_mornitorHandle;
 extern TaskHandle_t send_orderHandle;
+extern TaskHandle_t master_orderHandle;
 /* USER CODE END EV */
 
 /******************************************************************************/
@@ -285,6 +287,11 @@ void CAN1_TX_IRQHandler(void)
 void CAN1_RX0_IRQHandler(void)
 {
   /* USER CODE BEGIN CAN1_RX0_IRQn 0 */
+	if(master_orderHandle!=NULL)
+	{
+		xTaskNotifyFromISR(master_orderHandle,0x0001,eSetBits,&b_tk_master_order);
+		portYIELD_FROM_ISR( b_tk_master_order );
+	}
 
   /* USER CODE END CAN1_RX0_IRQn 0 */
   HAL_CAN_IRQHandler(&hcan1);
