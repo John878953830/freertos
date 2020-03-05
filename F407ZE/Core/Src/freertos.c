@@ -92,26 +92,20 @@ osStaticThreadDef_t limit_swControlBlock;
 osMessageQueueId_t send_queueHandle;
 uint8_t send_queueBuffer[ 256 * sizeof( QUEUE_STRUCT ) ];
 osStaticMessageQDef_t send_queueControlBlock;
-
-
+osMessageQueueId_t rece_queueHandle;
+uint8_t rece_queueBuffer[ 10 * sizeof( QUEUE_STRUCT ) ];
+osStaticMessageQDef_t rece_queueControlBlock;
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
-osMessageQueueId_t rece_queueHandle;
-uint8_t rece_queueBuffer[ 256 * sizeof( QUEUE_STRUCT ) ];
-osStaticMessageQDef_t rece_queueControlBlock;
 
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 {
-	QUEUE_STRUCT can_rece;
+	//QUEUE_STRUCT can_rece;
   /* Get RX message */
-  if (HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &(can_rece.RxHeader), can_rece.data) != HAL_OK)
-  {
-    /* Reception Error */
-    Error_Handler();
-  }
+  
 
-	
+	/*
 	if(rece_queueHandle!=NULL)
 	{
 		portBASE_TYPE status;
@@ -135,6 +129,7 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 		printf("%s\n","send master order queue error");
 		#endif
 	}
+	*/
 	//xTaskNotifyGive( master_orderHandle );
 	
 }
@@ -205,6 +200,16 @@ osKernelInitialize();
     .mq_size = sizeof(send_queueBuffer)
   };
   send_queueHandle = osMessageQueueNew (256, sizeof(QUEUE_STRUCT), &send_queue_attributes);
+
+  /* definition and creation of rece_queue */
+  const osMessageQueueAttr_t rece_queue_attributes = {
+    .name = "rece_queue",
+    .cb_mem = &rece_queueControlBlock,
+    .cb_size = sizeof(rece_queueControlBlock),
+    .mq_mem = &rece_queueBuffer,
+    .mq_size = sizeof(rece_queueBuffer)
+  };
+  rece_queueHandle = osMessageQueueNew (10, sizeof(QUEUE_STRUCT), &rece_queue_attributes);
 
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */
@@ -345,15 +350,6 @@ osKernelInitialize();
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
-	//接收队列
-	const osMessageQueueAttr_t rece_queue_attributes = {
-    .name = "rece_queue",
-    .cb_mem = &rece_queueControlBlock,
-    .cb_size = sizeof(rece_queueControlBlock),
-    .mq_mem = &rece_queueBuffer,
-    .mq_size = sizeof(rece_queueBuffer)
-  };
-  rece_queueHandle = osMessageQueueNew (256, sizeof(QUEUE_STRUCT), &rece_queue_attributes);
 	//定时器初始化
 	timer_start();
 	can_start();
@@ -736,12 +732,12 @@ void start_tk_master_order(void *argument)
   /* Infinite loop */
   for(;;)
   {
-		xTaskNotifyWait( 0x00,               /* Don't clear any bits on entry. */
-                         0xffffffff,          /* Clear all bits on exit. */
-                         &notify_use, /* Receives the notification value. */
-                         portMAX_DELAY );
-		if(notify_use!=0)
-		{
+		//xTaskNotifyWait( 0x00,               /* Don't clear any bits on entry. */
+    //                     0xffffffff,          /* Clear all bits on exit. */
+    //                     &notify_use, /* Receives the notification value. */
+    //                     portMAX_DELAY );
+		//if(notify_use!=0)
+		//{
 			#ifdef DEBUG_OUTPUT
 			printf("%s\n","start tk master order");
 			#endif
@@ -765,8 +761,35 @@ void start_tk_master_order(void *argument)
 					uint8_t tmp_if_last=(id.RxHeader.ExtId & MASK_IF_LAST) >> 8;
 					uint8_t tmp_can_version=(id.RxHeader.ExtId & MASK_VERSION) >> 0;
 					
+					//判断ACK是否需要立即回复发送方
+					
+					
+					if(tmp_if_ack==1)
+					{
+						//tmp填充为cansend
+						tmp.property=0;
+						tmp.can_command=tmp_command_id;
+						status = xQueueSendToBack(send_queueHandle, &tmp, 0);
+						if(status!=pdPASS)
+						{
+							#ifdef DEBUG_OUTPUT
+							printf("%s\n","queue overflow");
+							#endif
+						}
+						else
+						{
+							#ifdef DEBUG_OUTPUT
+							printf("%s\n","send message to queue already");
+							#endif
+							//通知发送任务发送
+							//xTaskNotifyGive( send_orderHandle );
+						}
+					}
+					
+					
 					//根据命令电机映射表找到要动作的电机，并将参数压入电机中的命令结构
 					uint8_t motor_id=command_to_motor[tmp_command_id];
+					
 					
 					
 					
@@ -779,7 +802,7 @@ void start_tk_master_order(void *argument)
 			}
 			notify_use=0;
 			;
-		}
+		//}
     osDelay(1);
   }
   /* USER CODE END start_tk_master_order */

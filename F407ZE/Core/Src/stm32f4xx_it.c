@@ -83,13 +83,13 @@ extern TIM_HandleTypeDef htim12;
 extern TIM_HandleTypeDef htim13;
 extern TIM_HandleTypeDef htim14;
 extern UART_HandleTypeDef huart4;
-extern UART_HandleTypeDef huart1;
 extern UART_HandleTypeDef huart2;
 extern UART_HandleTypeDef huart3;
 extern UART_HandleTypeDef huart6;
 extern TIM_HandleTypeDef htim6;
 
 /* USER CODE BEGIN EV */
+extern QueueHandle_t rece_queueHandle;
 extern TaskHandle_t defaultTaskHandle;
 extern TaskHandle_t sensor_monitorHandle;
 extern TaskHandle_t pid_outputHandle;
@@ -289,6 +289,46 @@ void CAN1_RX0_IRQHandler(void)
   /* USER CODE BEGIN CAN1_RX0_IRQn 0 */
 	if(master_orderHandle!=NULL)
 	{
+		QUEUE_STRUCT can_rece;
+		if (HAL_CAN_GetRxMessage(&hcan1, CAN_RX_FIFO0, &(can_rece.RxHeader), can_rece.data) != HAL_OK)
+		{
+			/* Reception Error */
+			Error_Handler();
+		}
+		if(rece_queueHandle!=NULL)
+		{
+			portBASE_TYPE status;
+			uint32_t fifo_level=0;
+			fifo_level=HAL_CAN_GetRxFifoFillLevel(&hcan1,CAN_RX_FIFO0);
+			#ifdef DEBUG_OUTPUT
+			printf("%s%d\n","rx fifo level is",fifo_level);
+			#endif
+			//while(fifo_level>0)
+			{
+				status = xQueueSendToBackFromISR(rece_queueHandle, &can_rece, &b_tk_master_order);
+				if(status!=pdPASS)
+				{
+					#ifdef DEBUG_OUTPUT
+					printf("%s\n","queue overflow");
+					#endif
+					//break;
+				}
+				else
+				{
+					#ifdef DEBUG_OUTPUT
+					printf("%s\n","send message to queue already");
+					#endif
+					//fifo_level--;
+				}
+			}
+			
+		}
+		else
+		{
+			#ifdef DEBUG_OUTPUT
+			printf("%s\n","send master order queue error");
+			#endif
+		}
 		//xTaskNotifyFromISR(master_orderHandle,0x0001,eSetBits,&b_tk_master_order);
 		portYIELD_FROM_ISR( b_tk_master_order );
 	}
@@ -495,20 +535,6 @@ void I2C1_ER_IRQHandler(void)
   /* USER CODE BEGIN I2C1_ER_IRQn 1 */
 
   /* USER CODE END I2C1_ER_IRQn 1 */
-}
-
-/**
-  * @brief This function handles USART1 global interrupt.
-  */
-void USART1_IRQHandler(void)
-{
-  /* USER CODE BEGIN USART1_IRQn 0 */
-
-  /* USER CODE END USART1_IRQn 0 */
-  HAL_UART_IRQHandler(&huart1);
-  /* USER CODE BEGIN USART1_IRQn 1 */
-
-  /* USER CODE END USART1_IRQn 1 */
 }
 
 /**
