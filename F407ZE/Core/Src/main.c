@@ -78,7 +78,35 @@ SemaphoreHandle_t xSemaphoreGratingGet = NULL;
 MOTOR_STRUCT motor_array[4];
 //姿态结构体
 POSTURE_STRUCT posture;
-
+//限位开关映射数组定义
+const uint8_t limitsw_to_motorid[17][2]={
+	{0,0},//此组无用
+	{1,0},
+	{2,0},
+	{3,0},
+	{4,0},
+	{5,1},
+	{6,1},
+	{7,1},
+	{8,1},
+	{9,2},
+	{10,2},
+	{11,2},
+	{12,2},
+	{13,3},
+	{14,3},
+	{15,3},
+	{16,3},
+};
+//命令ID数组映射定义
+const uint8_t command_to_motor[60]={
+	0,0,0,0,0,0,0,0,0,0,
+	0,0,0,0,0,0,0,0,0,0,
+	0,0,0,0,0,0,0,0,0,0,
+	0,0,0,0,0,0,0,0,0,0,
+	0,0,0,0,0,0,0,0,0,0,
+	0,0,0,0,0,0,0,0,0,0,
+};
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -179,6 +207,12 @@ uint8_t can_start(void)
 		return ERROR_CAN_START_FAIL;
   }
 	
+	/*##-4- Activate CAN RX notification #######################################*/
+  if (HAL_CAN_ActivateNotification(&hcan1, CAN_IT_RX_FIFO0_MSG_PENDING) != HAL_OK)
+  {
+    /* Notification Error */
+    Error_Handler();
+  }
 	/*##-5- Start the Reception process ########################################*/
   //if(HAL_CAN_GetRxFifoFillLevel(&hcan1, CAN_RX_FIFO0) != 1)
   {

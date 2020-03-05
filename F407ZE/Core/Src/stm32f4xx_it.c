@@ -289,7 +289,7 @@ void CAN1_RX0_IRQHandler(void)
   /* USER CODE BEGIN CAN1_RX0_IRQn 0 */
 	if(master_orderHandle!=NULL)
 	{
-		xTaskNotifyFromISR(master_orderHandle,0x0001,eSetBits,&b_tk_master_order);
+		//xTaskNotifyFromISR(master_orderHandle,0x0001,eSetBits,&b_tk_master_order);
 		portYIELD_FROM_ISR( b_tk_master_order );
 	}
 
@@ -680,7 +680,7 @@ void TIM7_IRQHandler(void)
 	if(defaultTaskHandle !=NULL)
 	{
 		xTaskNotifyFromISR(defaultTaskHandle,0x0001,eSetBits,&b_tk_default);
-		//xTaskNotifyFromISR(send_orderHandle,0x0001,eSetBits,&b_tk_send_order);
+		//xTaskNotifyFromISR(send_orderHandle,0x0009,eSetBits,&b_tk_send_order);
 		portYIELD_FROM_ISR(b_tk_default);
 	}
   /* USER CODE END TIM7_IRQn 0 */

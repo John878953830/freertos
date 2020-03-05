@@ -38,6 +38,8 @@
 /* USER CODE BEGIN PD */
 extern uint8_t RxData[8];
 extern CAN_RxHeaderTypeDef   RxHeader;
+
+extern CAN_HandleTypeDef hcan1;
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -91,17 +93,50 @@ osMessageQueueId_t send_queueHandle;
 uint8_t send_queueBuffer[ 256 * sizeof( QUEUE_STRUCT ) ];
 osStaticMessageQDef_t send_queueControlBlock;
 
+
+
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
+osMessageQueueId_t rece_queueHandle;
+uint8_t rece_queueBuffer[ 256 * sizeof( QUEUE_STRUCT ) ];
+osStaticMessageQDef_t rece_queueControlBlock;
+
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 {
+	QUEUE_STRUCT can_rece;
   /* Get RX message */
-  if (HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &RxHeader, RxData) != HAL_OK)
+  if (HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &(can_rece.RxHeader), can_rece.data) != HAL_OK)
   {
     /* Reception Error */
     Error_Handler();
   }
-	//xTaskNotifyGive(master_orderHandle );
+
+	
+	if(rece_queueHandle!=NULL)
+	{
+		portBASE_TYPE status;
+		status = xQueueSendToBack(rece_queueHandle, &can_rece, 0);
+		if(status!=pdPASS)
+		{
+			#ifdef DEBUG_OUTPUT
+			printf("%s\n","queue overflow");
+			#endif
+		}
+		else
+		{
+			#ifdef DEBUG_OUTPUT
+			printf("%s\n","send message to queue already");
+			#endif
+		}
+	}
+	else
+	{
+		#ifdef DEBUG_OUTPUT
+		printf("%s\n","send master order queue error");
+		#endif
+	}
+	//xTaskNotifyGive( master_orderHandle );
+	
 }
 /* USER CODE END FunctionPrototypes */
 
@@ -310,6 +345,15 @@ osKernelInitialize();
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
+	//接收队列
+	const osMessageQueueAttr_t rece_queue_attributes = {
+    .name = "rece_queue",
+    .cb_mem = &rece_queueControlBlock,
+    .cb_size = sizeof(rece_queueControlBlock),
+    .mq_mem = &rece_queueBuffer,
+    .mq_size = sizeof(rece_queueBuffer)
+  };
+  rece_queueHandle = osMessageQueueNew (256, sizeof(QUEUE_STRUCT), &rece_queue_attributes);
 	//定时器初始化
 	timer_start();
 	can_start();
@@ -384,7 +428,7 @@ void StartDefaultTask(void *argument)
 				printf("%s\n","send message to queue already");
 				#endif
 				//通知发送任务发送
-				xTaskNotifyGive( send_orderHandle );
+				//xTaskNotifyGive( send_orderHandle );
 			}
 			;
 		}
@@ -462,16 +506,16 @@ void start_tk_send_order(void *argument)
 			}
 		}
 		
-		//接收中断通知进行发送结果判断，CAN发送中断 + RS485中断
-		xTaskNotifyWait( 0x00,               /* Don't clear any bits on entry. */
-                         0xffffffff,          /* Clear all bits on exit. */
-                         &notify_use, /* Receives the notification value. */
-                         portMAX_DELAY );
+		//接收中断通知进行发送结果判断，CAN发送中断 + RS485发送中断
+		//xTaskNotifyWait( 0x00,               /* Don't clear any bits on entry. */
+    //                     0xffffffff,          /* Clear all bits on exit. */
+     //                    &notify_use, /* Receives the notification value. */
+     //                    portMAX_DELAY );
 		
-		if(notify_use!=0)
+		//if(notify_use!=0)
 		{
 			#ifdef DEBUG_OUTPUT
-			printf("%s\n","send order task receive notify form isr");
+			//printf("%s,%u\n","send order task receive notify form isr",notify_use);
 			#endif
 		}
 		
@@ -687,6 +731,8 @@ void start_tk_master_order(void *argument)
 {
   /* USER CODE BEGIN start_tk_master_order */
 	uint32_t notify_use=0;
+	QUEUE_STRUCT id;
+  portBASE_TYPE status;
   /* Infinite loop */
   for(;;)
   {
@@ -699,8 +745,38 @@ void start_tk_master_order(void *argument)
 			#ifdef DEBUG_OUTPUT
 			printf("%s\n","start tk master order");
 			#endif
-			
-			
+			QUEUE_STRUCT tmp;
+			//queue space 
+			//等待发送队列有消息
+			status = xQueueReceive(rece_queueHandle, &id, portMAX_DELAY);
+			if(status==pdPASS)
+			{
+				//解析ID
+				if(id.property!=0)
+				{
+					//收到的CAN消息有误，将需要组帧的数据压入send queue队列
+					;
+				}else{
+					//解析收到的数据，解码并压入发送队列，发送485指令命令电机动作
+					uint8_t tmp_command_id=(id.RxHeader.ExtId & MASK_COMMAND)>>9;
+					uint8_t tmp_priority=(id.RxHeader.ExtId & MASK_PRIORITY)>>26;
+					uint8_t tmp_if_ack=(id.RxHeader.ExtId & MASK_IF_ACK) >> 6;
+					uint8_t tmp_if_return=(id.RxHeader.ExtId & MASK_IF_RETURN) >> 7;
+					uint8_t tmp_if_last=(id.RxHeader.ExtId & MASK_IF_LAST) >> 8;
+					uint8_t tmp_can_version=(id.RxHeader.ExtId & MASK_VERSION) >> 0;
+					
+					//根据命令电机映射表找到要动作的电机，并将参数压入电机中的命令结构
+					uint8_t motor_id=command_to_motor[tmp_command_id];
+					
+					
+					
+					;
+				}
+			}
+			else
+			{
+				;
+			}
 			notify_use=0;
 			;
 		}

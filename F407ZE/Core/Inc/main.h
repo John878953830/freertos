@@ -54,6 +54,8 @@ extern uint32_t queuespace;
 //数组定义
 //limitsw引脚--->电机映射
 extern const uint8_t limitsw_to_motorid[17][2];
+//命令到电机号映射
+extern const uint8_t command_to_motor[60];
 
 /* USER CODE END EC */
 
@@ -78,6 +80,14 @@ extern const uint8_t limitsw_to_motorid[17][2];
 #define ERROR_MOTOR_ID_ERROR    0x03
 #define ERROR_CAN_SEND_FAIL     0x04
 #define ERROR_CAN_START_FAIL    0x05
+
+//帧结构掩码
+#define MASK_PRIORITY           (uint32_t)(0x07 << 26)
+#define MASK_COMMAND            (uint32_t)(0x7F << 9)
+#define MASK_IF_LAST            (uint32_t)(0x01 << 8)
+#define MASK_IF_RETURN          (uint32_t)(0x01 << 7)
+#define MASK_IF_ACK             (uint32_t)(0x01 << 6)
+#define MASK_VERSION            (uint32_t)(0x07 << 0)
 //电机个数和传感器个数设置
 #define MAX_MOTOR_NUMBER        3
 #define POSTURE_NUM             6
@@ -94,6 +104,15 @@ uint8_t switchGet(uint8_t motor_id);
 
 /* Private defines -----------------------------------------------------------*/
 /* USER CODE BEGIN Private defines */
+typedef struct list_struct{
+	uint8_t command_id;                         //CAN 命令ID
+	uint8_t command_status;                     //命令状态， 0： 未执行， 1： 执行中  2：执行完成
+	struct LIST_STRUCT * next;
+}LIST;
+typedef struct can_struct{
+	uint32_t exid;                              //扩展ID
+	uint8_t  data[8];                           //数据域
+}CAN_STRUCT;
 typedef struct queue_struct{
 	uint8_t property;                           //0: can 1: 485
 	uint8_t data[8];                            //数据数组
@@ -111,12 +130,19 @@ typedef struct queue_struct{
 	uint16_t modbus_data_addr;                  //485 数据地址
 	uint16_t modbus_data;                       //485 数据
 	uint16_t modbus_crc;                        //485 CRC
+	CAN_RxHeaderTypeDef   RxHeader;             //CAN 接收报头数据
 }QUEUE_STRUCT;
 typedef struct command_struct{
 	uint8_t command_id;                         //当前执行的命令ID， 初始化为0
-	uint8_t command_id_history[20];             //执行的命令的历史数据，该变量备用
+	CAN_STRUCT command_id_history[20];             //执行的命令的历史数据，该变量备用
 	uint8_t command_process_mark;               //0: 并行执行， 命令ID标识为并行执行时，默认并行执行  1： 串行执行， 命令ID标识为串行执行时，此标志置位， 该变量备用
+	uint8_t priority;                           //命令优先级
+	uint8_t if_ack;                             //是否需要ACK
+	uint8_t if_return;                          //是否需要执行完回复
+	uint8_t if_last;                            //是否需要拼接
+	uint8_t can_version;                        //版本号
 	uint16_t command_status;                    //当前执行的命令的状态， 0：未执行， 1： 执行中 2： 执行完成 其他： 错误码
+	
 }COMMAND_STRUCT;
 typedef struct speed{
 	int32_t current_speed;                      //当前速度，测速函数在测得当前速度后将速度存入此变量
@@ -153,7 +179,15 @@ typedef struct position{
 	int32_t position_max;                       //最大位置
 	int32_t position_min;                       //最小位置
 	int32_t current_position;                   //当前位置，位置获取函数在获取位置后，将位置存入此变量
-	int32_t target_position;                    //目标位置，存储CAN指令中的目标位置
+	int32_t target_position;                    //目标位置，存储CAN指令中的目标位置，仅用于调试单步指令
+	int32_t tp1;                                //配置文件位置,根据命令文件映射不同的位置，最多支持8个位置
+	int32_t tp2;
+	int32_t tp3;
+	int32_t tp4;
+	int32_t tp5;
+	int32_t tp6;
+	int32_t tp7;
+	int32_t tp8;
 }POSITION;
 typedef struct dimension{
 	int32_t dim_x;                              //电机所推动终端的X方向维度
