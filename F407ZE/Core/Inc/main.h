@@ -38,6 +38,7 @@ extern "C" {
 #include "stdio.h"
 #include "usart.h"
 #include "semphr.h"
+#include "string.h"
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/

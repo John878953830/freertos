@@ -51,3 +51,4 @@ f407ze\gpio.o: ../Core/Inc/usart.h
 f407ze\gpio.o: ../Core/Inc/main.h
 f407ze\gpio.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/semphr.h
 f407ze\gpio.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/queue.h
+f407ze\gpio.o: D:\Keil_v5\ARM\ARMCC\Bin\..\include\string.h

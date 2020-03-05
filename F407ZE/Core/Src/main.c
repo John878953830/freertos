@@ -187,8 +187,8 @@ uint8_t can_start(void)
   sFilterConfig.FilterScale = CAN_FILTERSCALE_32BIT;
   sFilterConfig.FilterIdHigh = 0x0018;
   sFilterConfig.FilterIdLow = 0x0004;
-  sFilterConfig.FilterMaskIdHigh = 0x1F18;
-  sFilterConfig.FilterMaskIdLow = 0x0004;
+  sFilterConfig.FilterMaskIdHigh = 0x0000;//0x1F18;
+  sFilterConfig.FilterMaskIdLow = 0x0000;//0x0004;
   sFilterConfig.FilterFIFOAssignment = CAN_RX_FIFO0;
   sFilterConfig.FilterActivation = ENABLE;
   sFilterConfig.SlaveStartFilterBank = 14;

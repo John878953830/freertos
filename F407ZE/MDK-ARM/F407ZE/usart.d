@@ -50,3 +50,4 @@ f407ze\usart.o: D:\Keil_v5\ARM\ARMCC\Bin\..\include\stdio.h
 f407ze\usart.o: ../Core/Inc/usart.h
 f407ze\usart.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/semphr.h
 f407ze\usart.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/queue.h
+f407ze\usart.o: D:\Keil_v5\ARM\ARMCC\Bin\..\include\string.h

@@ -93,7 +93,7 @@ osMessageQueueId_t send_queueHandle;
 uint8_t send_queueBuffer[ 256 * sizeof( QUEUE_STRUCT ) ];
 osStaticMessageQDef_t send_queueControlBlock;
 osMessageQueueId_t rece_queueHandle;
-uint8_t rece_queueBuffer[ 10 * sizeof( QUEUE_STRUCT ) ];
+uint8_t rece_queueBuffer[ 256 * sizeof( QUEUE_STRUCT ) ];
 osStaticMessageQDef_t rece_queueControlBlock;
 
 /* Private function prototypes -----------------------------------------------*/
@@ -209,7 +209,7 @@ osKernelInitialize();
     .mq_mem = &rece_queueBuffer,
     .mq_size = sizeof(rece_queueBuffer)
   };
-  rece_queueHandle = osMessageQueueNew (10, sizeof(QUEUE_STRUCT), &rece_queue_attributes);
+  rece_queueHandle = osMessageQueueNew (256, sizeof(QUEUE_STRUCT), &rece_queue_attributes);
 
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */
@@ -494,7 +494,12 @@ void start_tk_send_order(void *argument)
 				#ifdef DEBUG_OUTPUT
 				printf("%s, id : %d\n","queue receive  can send order",id.can_command);
 				#endif
+				if(id.can_command==3)
+				{
+					HAL_GPIO_WritePin(GPIOE,GPIO_PIN_3,GPIO_PIN_SET);
+				}
 				can_send(id);
+				HAL_GPIO_WritePin(GPIOE,GPIO_PIN_3,GPIO_PIN_RESET);
 			}
 			if(id.property==1)
 			{
@@ -748,6 +753,7 @@ void start_tk_master_order(void *argument)
 			if(status==pdPASS)
 			{
 				//解析ID
+				id.property=(id.RxHeader.ExtId & MASK_PRIORITY)>>26;
 				if(id.property!=0)
 				{
 					//收到的CAN消息有误，将需要组帧的数据压入send queue队列
@@ -764,11 +770,29 @@ void start_tk_master_order(void *argument)
 					//判断ACK是否需要立即回复发送方
 					
 					
-					if(tmp_if_ack==1)
+					//if(tmp_if_ack==1)
 					{
 						//tmp填充为cansend
-						tmp.property=0;
-						tmp.can_command=tmp_command_id;
+						
+						tmp.property=0;             //can send
+						tmp.can_priority=0x05;      //can priority
+						tmp.can_source=0x03;        //can source
+						tmp.can_target=0x00;        //can target
+						tmp.can_command=0x40;       //can command
+						tmp.can_if_last=0x00;       //can if last
+						tmp.can_if_return=0x00;     //can if return
+						tmp.can_if_ack=0x00;        //can if ack
+						tmp.can_version=0x07;       //can version
+						tmp.data[0]=0x00;
+						tmp.data[1]=0x00;
+						tmp.data[2]=0x00;
+						tmp.data[3]=0xFF;
+						tmp.data[4]=0x13;
+						tmp.data[5]=0x52;
+						tmp.data[6]=0x30;
+						tmp.data[7]=0x33;
+						tmp.length=4;
+						
 						status = xQueueSendToBack(send_queueHandle, &tmp, 0);
 						if(status!=pdPASS)
 						{
