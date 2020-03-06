@@ -40,11 +40,60 @@ extern uint8_t RxData[8];
 extern CAN_RxHeaderTypeDef   RxHeader;
 
 extern CAN_HandleTypeDef hcan1;
+extern I2C_HandleTypeDef hi2c1;
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
+extern xTimerHandle broadcast_timer;
+static void prvAutoReloadTimerCallback( TimerHandle_t xTimer )
+{
+	//广播
+	//发送消息测试，包括CAN MODBUS
+	//dummy data
+	QUEUE_STRUCT queue_id;
+	portBASE_TYPE status;
+	queue_id.property=0;             //can send
+	queue_id.can_priority=0x05;      //can priority
+	queue_id.can_source=0x03;        //can source
+	queue_id.can_target=0x00;        //can target
+	queue_id.can_command=0x43;       //can command
+	queue_id.can_if_last=0x00;       //can if last
+	queue_id.can_if_return=0x00;     //can if return
+	queue_id.can_if_ack=0x00;        //can if ack
+	queue_id.can_version=0x07;       //can version
+	queue_id.data[0]=0x57;
+	queue_id.data[1]=0x39;
+	queue_id.data[2]=0xF6;
+	queue_id.data[3]=0x90;
+	queue_id.data[4]=0x13;
+	queue_id.data[5]=0x52;
+	queue_id.data[6]=0x30;
+	queue_id.data[7]=0x33;
+	queue_id.length=8;
+	queuespace= uxQueueSpacesAvailable( send_queueHandle );
+	uint8_t tmp=can_send(queue_id);
+	status = xQueueSendToBack(send_queueHandle, &queue_id, 0);
+	if(status!=pdPASS)
+	{
+		#ifdef DEBUG_OUTPUT
+		printf("%s\n","queue overflow");
+		#endif
+	}
+	else
+	{
+		#ifdef DEBUG_OUTPUT
+		printf("%s\n","send message to queue already");
+		#endif
+	}
+}
 
+void start_soft_timer(void)
+{
+	broadcast_timer = xTimerCreate( "AutoReload",timer_period,pdTRUE,0,prvAutoReloadTimerCallback );
+	xTimerStart(broadcast_timer,0);
+	;
+}
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
@@ -350,6 +399,8 @@ osKernelInitialize();
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
+	//启动软件定时器
+	start_soft_timer();
 	//定时器初始化
 	timer_start();
 	can_start();
@@ -368,8 +419,8 @@ void StartDefaultTask(void *argument)
 {
   /* USER CODE BEGIN StartDefaultTask */
 	uint32_t notify_use=0;
-	QUEUE_STRUCT queue_id;
-	portBASE_TYPE status;
+	//QUEUE_STRUCT queue_id;
+	//portBASE_TYPE status;
   /* Infinite loop */
   for(;;)
   {
@@ -388,44 +439,52 @@ void StartDefaultTask(void *argument)
 	    printf("%s\n",tklog);
 	    vTaskGetRunTimeStats((char *)&tklog);
 	    printf("%s\n",tklog);
+			//iic
+			uint16_t dev_addr=0xA0;
+			uint8_t tx_data[8];
+			tx_data[0]=0xA0;
+			tx_data[1]=0xFF;
+			tx_data[2]=0x50;
+			uint8_t rx_data[8];
+			rx_data[0]=0xF0;
+			//write
+			if(HAL_I2C_Master_Transmit(&hi2c1,dev_addr,tx_data,2,100)!=HAL_OK)
+			{
+				#ifdef DEBUG_OUTPUT
+				printf("%s\n","start tk iic send error");
+				#endif
+			}
+			else{
+				#ifdef DEBUG_OUTPUT
+				printf("%s\n","start tk iic send success");
+				#endif
+			}
+			//read
+			tx_data[2]=0xA1;
+			if(HAL_I2C_Master_Transmit(&hi2c1,dev_addr,tx_data,2,100)!=HAL_OK)
+			{
+				#ifdef DEBUG_OUTPUT
+				printf("%s\n","start tk iic send 2 error");
+				#endif
+			}
+			else{
+				#ifdef DEBUG_OUTPUT
+				printf("%s\n","start tk iic send 2 success");
+				#endif
+				if(HAL_I2C_Master_Receive(&hi2c1, (uint16_t)dev_addr, (uint8_t *)rx_data, 1, 100) != HAL_OK)
+				{
+					#ifdef DEBUG_OUTPUT
+					printf("%s\n","start tk iic rece error");
+					#endif
+				}
+				else{
+					#ifdef DEBUG_OUTPUT
+					printf("%s, %d\n","start tk iic rece success",rx_data[0]);
+					#endif
+				}
+			}
 			
-			//发送消息测试，包括CAN MODBUS
-			//dummy data
-			queue_id.property=0;             //can send
-			queue_id.can_priority=0x05;      //can priority
-			queue_id.can_source=0x03;        //can source
-			queue_id.can_target=0x00;        //can target
-			queue_id.can_command=0x43;       //can command
-			queue_id.can_if_last=0x00;       //can if last
-			queue_id.can_if_return=0x00;     //can if return
-			queue_id.can_if_ack=0x00;        //can if ack
-			queue_id.can_version=0x07;       //can version
-			queue_id.data[0]=0x57;
-			queue_id.data[1]=0x39;
-			queue_id.data[2]=0xF6;
-			queue_id.data[3]=0x90;
-			queue_id.data[4]=0x13;
-			queue_id.data[5]=0x52;
-			queue_id.data[6]=0x30;
-			queue_id.data[7]=0x33;
-			queue_id.length=8;
-			queuespace= uxQueueSpacesAvailable( send_queueHandle );
-			uint8_t tmp=can_send(queue_id);
-			status = xQueueSendToBack(send_queueHandle, &queue_id, 0);
-			if(status!=pdPASS)
-			{
-				#ifdef DEBUG_OUTPUT
-				printf("%s\n","queue overflow");
-				#endif
-			}
-			else
-			{
-				#ifdef DEBUG_OUTPUT
-				printf("%s\n","send message to queue already");
-				#endif
-				//通知发送任务发送
-				//xTaskNotifyGive( send_orderHandle );
-			}
+			
 			;
 		}
     osDelay(1);
@@ -494,12 +553,7 @@ void start_tk_send_order(void *argument)
 				#ifdef DEBUG_OUTPUT
 				printf("%s, id : %d\n","queue receive  can send order",id.can_command);
 				#endif
-				if(id.can_command==3)
-				{
-					HAL_GPIO_WritePin(GPIOE,GPIO_PIN_3,GPIO_PIN_SET);
-				}
 				can_send(id);
-				HAL_GPIO_WritePin(GPIOE,GPIO_PIN_3,GPIO_PIN_RESET);
 			}
 			if(id.property==1)
 			{
@@ -754,9 +808,9 @@ void start_tk_master_order(void *argument)
 			{
 				//解析ID
 				id.property=(id.RxHeader.ExtId & MASK_PRIORITY)>>26;
-				if(id.property!=0)
+				if(id.property==0)
 				{
-					//收到的CAN消息有误，将需要组帧的数据压入send queue队列
+					//收到的CAN消息有误，不动作
 					;
 				}else{
 					//解析收到的数据，解码并压入发送队列，发送485指令命令电机动作
@@ -766,32 +820,22 @@ void start_tk_master_order(void *argument)
 					uint8_t tmp_if_return=(id.RxHeader.ExtId & MASK_IF_RETURN) >> 7;
 					uint8_t tmp_if_last=(id.RxHeader.ExtId & MASK_IF_LAST) >> 8;
 					uint8_t tmp_can_version=(id.RxHeader.ExtId & MASK_VERSION) >> 0;
+					uint8_t tmp_target=(id.RxHeader.ExtId & MASK_TARGET) >> 16;
 					
 					//判断ACK是否需要立即回复发送方
-					
-					
-					//if(tmp_if_ack==1)
+					if(tmp_if_ack==1)
 					{
 						//tmp填充为cansend
-						
-						tmp.property=0;             //can send
-						tmp.can_priority=0x05;      //can priority
-						tmp.can_source=0x03;        //can source
-						tmp.can_target=0x00;        //can target
-						tmp.can_command=0x40;       //can command
-						tmp.can_if_last=0x00;       //can if last
-						tmp.can_if_return=0x00;     //can if return
-						tmp.can_if_ack=0x00;        //can if ack
-						tmp.can_version=0x07;       //can version
-						tmp.data[0]=0x00;
-						tmp.data[1]=0x00;
-						tmp.data[2]=0x00;
-						tmp.data[3]=0xFF;
-						tmp.data[4]=0x13;
-						tmp.data[5]=0x52;
-						tmp.data[6]=0x30;
-						tmp.data[7]=0x33;
-						tmp.length=4;
+						tmp.property=0;                     //can send 
+						tmp.can_priority=0x01;              //can priority, ACK帧
+						tmp.can_source=0x03;                //can source， 本模块为3号模块
+						tmp.can_target=0x00;                //can target， 00：主控
+						tmp.can_command=tmp_command_id;     //can command
+						tmp.can_if_last=0x00;               //can if last, 0: 最后一帧
+						tmp.can_if_return=0x00;             //can if return， 0：保留
+						tmp.can_if_ack=0x00;                //can if ack， 0：无需ACK
+						tmp.can_version=0x01;               //can version，1：暂定为1
+						tmp.length=0;                       //ack帧无需数据
 						
 						status = xQueueSendToBack(send_queueHandle, &tmp, 0);
 						if(status!=pdPASS)
@@ -805,19 +849,72 @@ void start_tk_master_order(void *argument)
 							#ifdef DEBUG_OUTPUT
 							printf("%s\n","send message to queue already");
 							#endif
-							//通知发送任务发送
-							//xTaskNotifyGive( send_orderHandle );
 						}
 					}
 					
-					
+					if(tmp_command_id>CAN_COMMAND_NUMBER)
+					{
+						//命令ID错误
+						#ifdef DEBUG_OUTPUT
+						printf("%s\n","command id error");
+						#endif
+					}
+					else
+					{
+						if(tmp_target==31)
+						{
+							//广播ID， 只有一组急停指令
+							uint8_t data=0;
+							uint8_t para=tmp_if_return;
+							command_to_function[tmp_command_id](&data,para);
+						}
+						else
+						{
+							if(
+							tmp_command_id==0  || 
+						  tmp_command_id==2  ||
+						  tmp_command_id==4  ||
+						  tmp_command_id==5  ||
+						  tmp_command_id==6  ||
+						  tmp_command_id==10 ||
+						  tmp_command_id==15 ||
+						  tmp_command_id==16 ||
+						  tmp_command_id==17 ||
+						  tmp_command_id==18 ||
+						  tmp_command_id==19)
+							{
+								uint8_t data=0;
+								uint8_t para=tmp_if_return;
+								command_to_function[tmp_command_id](&data,para);
+							}
+							if(tmp_command_id==1  ||
+								 tmp_command_id==2  ||
+							   tmp_command_id==3  ||
+							   tmp_command_id==4  ||
+							   tmp_command_id==5  ||
+							   tmp_command_id==7  ||
+							   tmp_command_id==10 ||
+							   tmp_command_id==19)
+							{
+								uint8_t data[8];
+								//memcpy(&data[0],&id.data,id.RxHeader.DLC);
+								data[0]=id.data[0];
+								data[1]=id.data[1];
+								data[2]=id.data[2];
+								data[3]=id.data[3];
+								data[4]=id.data[4];
+								data[5]=id.data[5];
+								data[6]=id.data[6];
+								data[7]=id.data[7];
+								uint32_t para=id.RxHeader.DLC;
+								para|=(tmp_if_return << 4);   //bit 4表示是否返回return帧
+								para|=(tmp_if_last << 5);     //bit 5表示是否是最后一帧
+								command_to_function[tmp_command_id](data,para);
+							}
+						}
 					//根据命令电机映射表找到要动作的电机，并将参数压入电机中的命令结构
 					uint8_t motor_id=command_to_motor[tmp_command_id];
-					
-					
-					
-					
-					;
+					}
 				}
 			}
 			else

@@ -51,3 +51,5 @@ f407ze\stm32f4xx_hal_msp.o: ../Core/Inc/main.h
 f407ze\stm32f4xx_hal_msp.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/semphr.h
 f407ze\stm32f4xx_hal_msp.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/queue.h
 f407ze\stm32f4xx_hal_msp.o: D:\Keil_v5\ARM\ARMCC\Bin\..\include\string.h
+f407ze\stm32f4xx_hal_msp.o: ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.h
+f407ze\stm32f4xx_hal_msp.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/timers.h

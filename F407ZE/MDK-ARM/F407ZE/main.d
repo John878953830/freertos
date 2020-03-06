@@ -51,8 +51,9 @@ f407ze\main.o: ../Core/Inc/main.h
 f407ze\main.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/semphr.h
 f407ze\main.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/queue.h
 f407ze\main.o: D:\Keil_v5\ARM\ARMCC\Bin\..\include\string.h
-f407ze\main.o: ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os.h
 f407ze\main.o: ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.h
+f407ze\main.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/timers.h
+f407ze\main.o: ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os.h
 f407ze\main.o: ../Core/Inc/can.h
 f407ze\main.o: ../Core/Inc/crc.h
 f407ze\main.o: ../Core/Inc/i2c.h

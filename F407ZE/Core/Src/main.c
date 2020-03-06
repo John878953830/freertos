@@ -35,11 +35,319 @@
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
-
+uint32_t timer_period=1000;
+xTimerHandle broadcast_timer;
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+//0号指令，停止电机
+int command_0(uint8_t* data,uint32_t para)
+{
+	uint8_t i=0;
+	GPIO_PinState status;
+	for(i=0;i<MAX_MOTOR_NUMBER+1;i++)
+	{
+		//各电机GPIO使能输出低电平
+		HAL_GPIO_WritePin(motor_array[i].gpio_output[ENABLE_MOTOR].gpio_port,motor_array[i].gpio_output[ENABLE_MOTOR].pin_number,GPIO_PIN_RESET);
+		status=HAL_GPIO_ReadPin(motor_array[i].gpio_output[ENABLE_MOTOR].gpio_port,motor_array[i].gpio_output[ENABLE_MOTOR].pin_number);
+		if(status!=GPIO_PIN_RESET)
+		{
+			if(para==1)
+			{
+				QUEUE_STRUCT tmp;
+        tmp.can_command=0x00;          //停止指令
+        tmp.can_if_ack=0x01;           //需要ACK
+				tmp.can_source=0x03;           //本模块
+				tmp.can_target=0x00;
+				tmp.can_priority=0x03;         //命令结束返回帧
+				tmp.can_if_last=0x00;
+				tmp.can_if_return=0x00;
+				tmp.length=1;
+				tmp.data[0]=ERROR_COMMAND_0_FAIL;
+			  status = xQueueSendToBack(send_queueHandle, &tmp, 0);
+				if(status!=pdPASS)
+				{
+					#ifdef DEBUG_OUTPUT
+					printf("%s\n","queue overflow");
+					#endif
+				}
+				else
+				{
+					#ifdef DEBUG_OUTPUT
+					printf("%s\n","send command 0 error to queue already");
+					#endif
+				}
+				;
+			}
+			return ERROR_COMMAND_0_FAIL;
+		}
+	}
+	if(para==1)
+	{
+		QUEUE_STRUCT tmp;
+		tmp.property=0x00;             //can send
+		tmp.can_command=0x00;          //停止指令
+		tmp.can_if_ack=0x01;           //需要ACK
+		tmp.can_source=0x03;           //本模块
+		tmp.can_target=0x00;
+		tmp.can_priority=0x03;         //命令结束返回帧
+		tmp.can_if_last=0x00;
+		tmp.can_if_return=0x00;
+		tmp.length=1;
+		tmp.data[0]=0x00;
+		status = xQueueSendToBack(send_queueHandle, &tmp, 0);
+		if(status!=pdPASS)
+		{
+			#ifdef DEBUG_OUTPUT
+			printf("%s\n","queue overflow");
+			#endif
+		}
+		else
+		{
+			#ifdef DEBUG_OUTPUT
+			printf("%s\n","send command 0 success to queue already");
+			#endif
+		}
+	}
+	return 0;
+}
+int command_1(uint8_t* data,uint32_t para)
+{
+	GPIO_PinState status;
+	uint8_t module=data[0];
+	uint8_t action=data[1];
+	uint8_t if_return=(para>>4)&0x01;
+	GPIO_PinState ACT=GPIO_PIN_RESET;
+	if(action==1)
+	{
+		ACT=GPIO_PIN_SET;
+	}
+	if(module==0)
+	{
+		HAL_GPIO_WritePin(GRATING_POWER_SW,GRATING_POWER_PIN,ACT);
+		status=HAL_GPIO_ReadPin(GRATING_POWER_SW,GRATING_POWER_PIN);
+		if(status!=ACT)
+		{
+			if(if_return==1)
+			{
+				QUEUE_STRUCT tmp;
+				tmp.property=0x00;             //can send
+				tmp.can_command=0x01;          //停止指令
+				tmp.can_if_ack=0x01;           //需要ACK
+				tmp.can_source=0x03;           //本模块
+				tmp.can_target=0x00;
+				tmp.can_priority=0x03;         //命令结束返回帧
+				tmp.can_if_last=0x00;
+				tmp.can_if_return=0x00;
+				tmp.length=1;
+				tmp.data[0]=ERROR_COMMAND_1_FAIL;
+				status = xQueueSendToBack(send_queueHandle, &tmp, 0);
+				if(status!=pdPASS)
+				{
+					#ifdef DEBUG_OUTPUT
+					printf("%s\n","queue overflow");
+					#endif
+				}
+				else
+				{
+					#ifdef DEBUG_OUTPUT
+					printf("%s\n","send command 1 error to queue already");
+					#endif
+				}
+			}
+			return ERROR_COMMAND_1_FAIL;
+		}
+		if(if_return==1)
+		{
+			QUEUE_STRUCT tmp;
+			tmp.property=0x00;             //can send
+			tmp.can_command=0x01;          //停止指令
+			tmp.can_if_ack=0x01;           //需要ACK
+			tmp.can_source=0x03;           //本模块
+			tmp.can_target=0x00;
+			tmp.can_priority=0x03;         //命令结束返回帧
+			tmp.can_if_last=0x00;
+			tmp.can_if_return=0x00;
+			tmp.length=1;
+			tmp.data[0]=0x00;
+			status = xQueueSendToBack(send_queueHandle, &tmp, 0);
+			if(status!=pdPASS)
+			{
+				#ifdef DEBUG_OUTPUT
+				printf("%s\n","queue overflow");
+				#endif
+			}
+			else
+			{
+				#ifdef DEBUG_OUTPUT
+				printf("%s\n","send command 1 success to queue already");
+				#endif
+			}
+		}
+	}		
+	return 0;
+}
+int command_2(uint8_t* data,uint32_t para)
+{
+	return 0;
+}
+int command_3(uint8_t* data,uint32_t para)
+{
+	return 0;
+}
+int command_4(uint8_t* data,uint32_t para)
+{
+	return 0;
+}
+int command_5(uint8_t* data,uint32_t para)
+{
+	return 0;
+}
+int command_6(uint8_t* data,uint32_t para)
+{
+	return 0;
+}
+int command_7(uint8_t* data,uint32_t para)
+{
+	uint8_t if_return=(para>>4)&0x01;
+	int32_t period=(data[0] << 24)|(data[1]<<16)|(data[2]<<8)|data[3];
+	if(xTimerChangePeriod(broadcast_timer,period/portTICK_PERIOD_MS,50)!=pdPASS)
+	{
+		if(if_return==1)
+		{
+			QUEUE_STRUCT tmp;
+			tmp.property=0x00;             //can send
+			tmp.can_command=0x07;          //停止指令
+			tmp.can_if_ack=0x01;           //需要ACK
+			tmp.can_source=0x03;           //本模块
+			tmp.can_target=0x00;
+			tmp.can_priority=0x03;         //命令结束返回帧
+			tmp.can_if_last=0x00;
+			tmp.can_if_return=0x00;
+			tmp.length=1;
+			tmp.data[0]=ERROR_COMMAND_7_FAIL;
+			portBASE_TYPE status = xQueueSendToBack(send_queueHandle, &tmp, 0);
+			if(status!=pdPASS)
+			{
+				#ifdef DEBUG_OUTPUT
+				printf("%s\n","queue overflow");
+				#endif
+			}
+			else
+			{
+				#ifdef DEBUG_OUTPUT
+				printf("%s\n","send command 7 error to queue already");
+				#endif
+			}
+		}
+		return ERROR_COMMAND_7_FAIL;
+	}
+	if(if_return==1)
+	{
+		QUEUE_STRUCT tmp;
+		tmp.property=0x00;             //can send
+		tmp.can_command=0x07;          //停止指令
+		tmp.can_if_ack=0x01;           //需要ACK
+		tmp.can_source=0x03;           //本模块
+		tmp.can_target=0x00;
+		tmp.can_priority=0x03;         //命令结束返回帧
+		tmp.can_if_last=0x00;
+		tmp.can_if_return=0x00;
+		tmp.length=1;
+		tmp.data[0]=0x00;
+	  portBASE_TYPE	status = xQueueSendToBack(send_queueHandle, &tmp, 0);
+		if(status!=pdPASS)
+		{
+			#ifdef DEBUG_OUTPUT
+			printf("%s\n","queue overflow");
+			#endif
+		}
+		else
+		{
+			#ifdef DEBUG_OUTPUT
+			printf("%s\n","send command 7 succes to queue already");
+			#endif
+		}
+	}
+	return 0;
+}
+int command_8(uint8_t* data,uint32_t para)
+{
+	return 0;
+}
+int command_9(uint8_t* data,uint32_t para)
+{
+	return 0;
+}
+int command_10(uint8_t* data,uint32_t para)
+{
+	return 0;
+}
+int command_11(uint8_t* data,uint32_t para)
+{
+	return 0;
+}
+int command_12(uint8_t* data,uint32_t para)
+{
+	return 0;
+}
+int command_13(uint8_t* data,uint32_t para)
+{
+	return 0;
+}
+int command_14(uint8_t* data,uint32_t para)
+{
+	return 0;
+}
+int command_15(uint8_t* data,uint32_t para)
+{
+	return 0;
+}
+int command_16(uint8_t* data,uint32_t para)
+{
+	return 0;
+}
+int command_17(uint8_t* data,uint32_t para)
+{
+	return 0;
+}
+int command_18(uint8_t* data,uint32_t para)
+{
+	return 0;
+}
+int command_19(uint8_t* data,uint32_t para)
+{
+	return 0;
+}
+int command_20(uint8_t* data,uint32_t para)
+{
+	return 0;
+}
+int command_21(uint8_t* data,uint32_t para)
+{
+	return 0;
+}
+int command_22(uint8_t* data,uint32_t para)
+{
+	return 0;
+}
+int command_23(uint8_t* data,uint32_t para)
+{
+	return 0;
+}
+int command_24(uint8_t* data,uint32_t para)
+{
+	return 0;
+}
+int command_25(uint8_t* data,uint32_t para)
+{
+	return 0;
+}
+int command_26(uint8_t* data,uint32_t para)
+{
+	return 0;
+}
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -106,6 +414,36 @@ const uint8_t command_to_motor[60]={
 	0,0,0,0,0,0,0,0,0,0,
 	0,0,0,0,0,0,0,0,0,0,
 	0,0,0,0,0,0,0,0,0,0,
+};
+//命令数组映射
+int(*command_to_function[27])(uint8_t*,uint32_t) = {
+	command_0,
+	command_1,
+	command_2,
+	command_3,
+	command_4,
+	command_5,
+	command_6,
+	command_7,
+	command_8,
+	command_9,
+	command_10,
+	command_11,
+	command_12,
+	command_13,
+	command_14,
+	command_15,
+	command_16,
+	command_17,
+	command_18,
+	command_19,
+	command_20,
+	command_21,
+	command_22,
+	command_23,
+	command_24,
+	command_25,
+	command_26,
 };
 /* USER CODE END PV */
 
@@ -228,6 +566,11 @@ uint8_t can_start(void)
 	return 0;
 }
 
+
+void iic_start(void)
+{
+	;
+}
 //信号量初始化
 uint8_t lock_init(void)
 {
@@ -287,7 +630,7 @@ uint8_t switchGet(uint8_t motor_id)
 				if(motor_id==4)//获取全部开关
 				{
 					
-					for(i=0;i<MAX_MOTOR_NUMBER;i++)
+					for(i=0;i<=MAX_MOTOR_NUMBER;i++)
 					{
 						for(j=0;j<motor_array[i].limit_sw_number;j++)
 						{

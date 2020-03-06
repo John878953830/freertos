@@ -39,6 +39,8 @@ extern "C" {
 #include "usart.h"
 #include "semphr.h"
 #include "string.h"
+#include "cmsis_os2.h"
+#include "timers.h"
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
@@ -52,19 +54,24 @@ extern "C" {
 extern uint8_t tklog[500];
 extern uint32_t ulHighFrequencyTimerTicks;
 extern uint32_t queuespace;
+//发送队列句柄
+extern osMessageQueueId_t send_queueHandle;
 //数组定义
 //limitsw引脚--->电机映射
 extern const uint8_t limitsw_to_motorid[17][2];
 //命令到电机号映射
 extern const uint8_t command_to_motor[60];
-
+//定时器定时时间
+extern uint32_t timer_period;
+extern xTimerHandle broadcast_timer;
 /* USER CODE END EC */
 
 /* Exported macro ------------------------------------------------------------*/
 /* USER CODE BEGIN EM */
 //调试设置
 #define DEBUG_OUTPUT 0
-
+//命令参数映射
+#define CAN_COMMAND_NUMBER      20
 
 
 //输出gpio映射
@@ -82,6 +89,37 @@ extern const uint8_t command_to_motor[60];
 #define ERROR_CAN_SEND_FAIL     0x04
 #define ERROR_CAN_START_FAIL    0x05
 
+#define ERROR_COMMAND_0_FAIL    0x06
+#define ERROR_COMMAND_1_FAIL    0x07
+#define ERROR_COMMAND_2_FAIL    0x08
+#define ERROR_COMMAND_3_FAIL    0x09
+#define ERROR_COMMAND_4_FAIL    0x0A
+#define ERROR_COMMAND_5_FAIL    0x0B
+#define ERROR_COMMAND_6_FAIL    0x0C
+#define ERROR_COMMAND_7_FAIL    0x0D
+#define ERROR_COMMAND_8_FAIL    0x0E
+#define ERROR_COMMAND_9_FAIL    0x0F
+#define ERROR_COMMAND_10_FAIL   0x10
+#define ERROR_COMMAND_11_FAIL   0x11
+#define ERROR_COMMAND_12_FAIL   0x12
+#define ERROR_COMMAND_13_FAIL   0x13
+#define ERROR_COMMAND_14_FAIL   0x14
+#define ERROR_COMMAND_15_FAIL   0x15
+#define ERROR_COMMAND_16_FAIL   0x16
+#define ERROR_COMMAND_17_FAIL   0x17
+#define ERROR_COMMAND_18_FAIL   0x18
+#define ERROR_COMMAND_19_FAIL   0x19
+#define ERROR_COMMAND_20_FAIL   0x1A
+#define ERROR_COMMAND_21_FAIL   0x1B
+#define ERROR_COMMAND_22_FAIL   0x1C
+#define ERROR_COMMAND_23_FAIL   0x1D
+#define ERROR_COMMAND_24_FAIL   0x1E
+#define ERROR_COMMAND_25_FAIL   0x1F
+#define ERROR_COMMAND_26_FAIL   0x20
+#define ERROR_COMMAND_27_FAIL   0x21
+#define ERROR_COMMAND_28_FAIL   0x22
+#define ERROR_COMMAND_29_FAIL   0x23
+
 //帧结构掩码
 #define MASK_PRIORITY           (uint32_t)(0x07 << 26)
 #define MASK_COMMAND            (uint32_t)(0x7F << 9)
@@ -89,15 +127,50 @@ extern const uint8_t command_to_motor[60];
 #define MASK_IF_RETURN          (uint32_t)(0x01 << 7)
 #define MASK_IF_ACK             (uint32_t)(0x01 << 6)
 #define MASK_VERSION            (uint32_t)(0x07 << 0)
+#define MASK_TARGET             (uint32_t)(0x1F << 16)
 //电机个数和传感器个数设置
 #define MAX_MOTOR_NUMBER        3
 #define POSTURE_NUM             6
+
+//光栅GPIO电源开关
+#define GRATING_POWER_SW        GPIOE
+#define GRATING_POWER_PIN       GPIO_PIN_3
 /* USER CODE END EM */
 
 /* Exported functions prototypes ---------------------------------------------*/
 void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
+typedef int (*command)(uint8_t*, uint32_t);
+//命令回调函数, 26组，7组预留命令
+int command_0(uint8_t* data,uint32_t para);
+int command_1(uint8_t* data,uint32_t para);
+int command_2(uint8_t* data,uint32_t para);
+int command_3(uint8_t* data,uint32_t para);
+int command_4(uint8_t* data,uint32_t para);
+int command_5(uint8_t* data,uint32_t para);
+int command_6(uint8_t* data,uint32_t para);
+int command_7(uint8_t* data,uint32_t para);
+int command_8(uint8_t* data,uint32_t para);
+int command_9(uint8_t* data,uint32_t para);
+int command_10(uint8_t* data,uint32_t para);
+int command_11(uint8_t* data,uint32_t para);
+int command_12(uint8_t* data,uint32_t para);
+int command_13(uint8_t* data,uint32_t para);
+int command_14(uint8_t* data,uint32_t para);
+int command_15(uint8_t* data,uint32_t para);
+int command_16(uint8_t* data,uint32_t para);
+int command_17(uint8_t* data,uint32_t para);
+int command_18(uint8_t* data,uint32_t para);
+int command_19(uint8_t* data,uint32_t para);
+int command_20(uint8_t* data,uint32_t para);
+int command_21(uint8_t* data,uint32_t para);
+int command_22(uint8_t* data,uint32_t para);
+int command_23(uint8_t* data,uint32_t para);
+int command_24(uint8_t* data,uint32_t para);
+int command_25(uint8_t* data,uint32_t para);
+int command_26(uint8_t* data,uint32_t para);
+
 void timer_start(void);
 uint8_t can_start(void);
 uint8_t switchGet(uint8_t motor_id);
@@ -135,7 +208,7 @@ typedef struct queue_struct{
 }QUEUE_STRUCT;
 typedef struct command_struct{
 	uint8_t command_id;                         //当前执行的命令ID， 初始化为0
-	CAN_STRUCT command_id_history[20];             //执行的命令的历史数据，该变量备用
+	CAN_STRUCT command_id_history[20];          //执行的命令的历史数据，该变量备用
 	uint8_t command_process_mark;               //0: 并行执行， 命令ID标识为并行执行时，默认并行执行  1： 串行执行， 命令ID标识为串行执行时，此标志置位， 该变量备用
 	uint8_t priority;                           //命令优先级
 	uint8_t if_ack;                             //是否需要ACK
@@ -220,7 +293,7 @@ typedef struct grating_struct{
 typedef struct gpio_action{
 	GPIO_TypeDef*  gpio_port;                    //GPIO 动作输出组
 	uint16_t       pin_number;                   //GPIO 引脚号
-	uint8_t        break_status;                 //0: 抱闸未放开  1： 抱闸已放开
+	uint8_t        break_status;                 //0: 抱闸未放开  1： 抱闸已放开，只对特定电机的特定组有意义
 }GPIO_ACTION;
 typedef struct motor_struct{
 	uint8_t id;                                  //电机ID
@@ -257,6 +330,7 @@ typedef struct gpio_table{
 extern MOTOR_STRUCT motor_array[4];
 uint8_t can_send(QUEUE_STRUCT send_struct);
 uint8_t modbus_send(QUEUE_STRUCT send_struct);
+extern int(*command_to_function[27])(uint8_t*,uint32_t);
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus
