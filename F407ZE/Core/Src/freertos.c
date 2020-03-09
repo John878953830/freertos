@@ -439,51 +439,6 @@ void StartDefaultTask(void *argument)
 	    printf("%s\n",tklog);
 	    vTaskGetRunTimeStats((char *)&tklog);
 	    printf("%s\n",tklog);
-			//iic
-			uint16_t dev_addr=0xA0;
-			uint8_t tx_data[8];
-			tx_data[0]=0xA0;
-			tx_data[1]=0xFF;
-			tx_data[2]=0x50;
-			uint8_t rx_data[8];
-			rx_data[0]=0xF0;
-			//write
-			if(HAL_I2C_Master_Transmit(&hi2c1,dev_addr,tx_data,2,100)!=HAL_OK)
-			{
-				#ifdef DEBUG_OUTPUT
-				printf("%s\n","start tk iic send error");
-				#endif
-			}
-			else{
-				#ifdef DEBUG_OUTPUT
-				printf("%s\n","start tk iic send success");
-				#endif
-			}
-			//read
-			tx_data[2]=0xA1;
-			if(HAL_I2C_Master_Transmit(&hi2c1,dev_addr,tx_data,2,100)!=HAL_OK)
-			{
-				#ifdef DEBUG_OUTPUT
-				printf("%s\n","start tk iic send 2 error");
-				#endif
-			}
-			else{
-				#ifdef DEBUG_OUTPUT
-				printf("%s\n","start tk iic send 2 success");
-				#endif
-				if(HAL_I2C_Master_Receive(&hi2c1, (uint16_t)dev_addr, (uint8_t *)rx_data, 1, 100) != HAL_OK)
-				{
-					#ifdef DEBUG_OUTPUT
-					printf("%s\n","start tk iic rece error");
-					#endif
-				}
-				else{
-					#ifdef DEBUG_OUTPUT
-					printf("%s, %d\n","start tk iic rece success",rx_data[0]);
-					#endif
-				}
-			}
-			
 			
 			;
 		}
@@ -835,7 +790,9 @@ void start_tk_master_order(void *argument)
 						tmp.can_if_return=0x00;             //can if return， 0：保留
 						tmp.can_if_ack=0x00;                //can if ack， 0：无需ACK
 						tmp.can_version=0x01;               //can version，1：暂定为1
-						tmp.length=0;                       //ack帧无需数据
+						
+						tmp.length=id.RxHeader.DLC;         //ack帧需要返回数据,所有数据原路返回
+						memcpy(tmp.data,id.data,id.RxHeader.DLC);
 						
 						status = xQueueSendToBack(send_queueHandle, &tmp, 0);
 						if(status!=pdPASS)
@@ -897,7 +854,8 @@ void start_tk_master_order(void *argument)
 							   tmp_command_id==19)
 							{
 								uint8_t data[8];
-								//memcpy(&data[0],&id.data,id.RxHeader.DLC);
+								//memcpy(data,id.data,id.RxHeader.DLC);
+								
 								data[0]=id.data[0];
 								data[1]=id.data[1];
 								data[2]=id.data[2];
@@ -906,6 +864,7 @@ void start_tk_master_order(void *argument)
 								data[5]=id.data[5];
 								data[6]=id.data[6];
 								data[7]=id.data[7];
+								
 								uint32_t para=id.RxHeader.DLC;
 								para|=(tmp_if_return << 4);   //bit 4表示是否返回return帧
 								para|=(tmp_if_last << 5);     //bit 5表示是否是最后一帧

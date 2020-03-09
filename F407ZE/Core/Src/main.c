@@ -37,10 +37,13 @@
 /* USER CODE BEGIN PTD */
 uint32_t timer_period=1000;
 xTimerHandle broadcast_timer;
+
+uint16_t iic_cache=0;
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+
 //0号指令，停止电机
 int command_0(uint8_t* data,uint32_t para)
 {
@@ -65,8 +68,8 @@ int command_0(uint8_t* data,uint32_t para)
 				tmp.can_if_return=0x00;
 				tmp.length=1;
 				tmp.data[0]=ERROR_COMMAND_0_FAIL;
-			  status = xQueueSendToBack(send_queueHandle, &tmp, 0);
-				if(status!=pdPASS)
+			  BaseType_t status_q = xQueueSendToBack(send_queueHandle, &tmp, 0);
+				if(status_q!=pdPASS)
 				{
 					#ifdef DEBUG_OUTPUT
 					printf("%s\n","queue overflow");
@@ -96,8 +99,8 @@ int command_0(uint8_t* data,uint32_t para)
 		tmp.can_if_return=0x00;
 		tmp.length=1;
 		tmp.data[0]=0x00;
-		status = xQueueSendToBack(send_queueHandle, &tmp, 0);
-		if(status!=pdPASS)
+		BaseType_t status_q = xQueueSendToBack(send_queueHandle, &tmp, 0);
+		if(status_q!=pdPASS)
 		{
 			#ifdef DEBUG_OUTPUT
 			printf("%s\n","queue overflow");
@@ -142,8 +145,8 @@ int command_1(uint8_t* data,uint32_t para)
 				tmp.can_if_return=0x00;
 				tmp.length=1;
 				tmp.data[0]=ERROR_COMMAND_1_FAIL;
-				status = xQueueSendToBack(send_queueHandle, &tmp, 0);
-				if(status!=pdPASS)
+				BaseType_t status_q = xQueueSendToBack(send_queueHandle, &tmp, 0);
+				if(status_q!=pdPASS)
 				{
 					#ifdef DEBUG_OUTPUT
 					printf("%s\n","queue overflow");
@@ -171,8 +174,8 @@ int command_1(uint8_t* data,uint32_t para)
 			tmp.can_if_return=0x00;
 			tmp.length=1;
 			tmp.data[0]=0x00;
-			status = xQueueSendToBack(send_queueHandle, &tmp, 0);
-			if(status!=pdPASS)
+			BaseType_t status_q = xQueueSendToBack(send_queueHandle, &tmp, 0);
+			if(status_q!=pdPASS)
 			{
 				#ifdef DEBUG_OUTPUT
 				printf("%s\n","queue overflow");
@@ -190,10 +193,127 @@ int command_1(uint8_t* data,uint32_t para)
 }
 int command_2(uint8_t* data,uint32_t para)
 {
+	uint8_t if_return=(para>>4)&0x01;
+	uint8_t if_last=(para>>5)&0x01;
+	uint16_t len = EEPROM_CONFIG_LENGTH;
+	uint16_t len_already=0;
+	QUEUE_STRUCT tmp;
+	if(if_return==1)
+	{
+		while(len>8)
+		{
+			//取得EEPROM数据循环发送
+			while(iic_rw(0,len_already,tmp.data,8)!=0)
+			{
+				vTaskDelay(1);
+			}
+			//can send
+			tmp.property=0;
+			tmp.can_command=0x02;
+			tmp.can_if_ack=0x01;
+			tmp.can_source=0x03;
+			tmp.can_target=0x00;
+			tmp.can_priority=0x03;
+			tmp.can_if_return=0x00;
+			tmp.can_if_last=0x01;
+			tmp.length=8;
+			BaseType_t status_q = xQueueSendToBack(send_queueHandle, &tmp, 0);
+			if(status_q!=pdPASS)
+			{
+				#ifdef DEBUG_OUTPUT
+				printf("%s\n","queue overflow");
+				#endif
+			}
+			else
+			{
+				#ifdef DEBUG_OUTPUT
+				printf("%s\n","send command 2 success to queue already");
+				#endif
+			}
+			len-=8;
+			len_already+=8;
+		}
+		//取得EEPROM数据发送
+		while(iic_rw(0,len_already,tmp.data,len)!=0)
+		{
+			vTaskDelay(1);
+		}
+		//can send
+		tmp.property=0;
+		tmp.can_command=0x02;
+		tmp.can_if_ack=0x01;
+		tmp.can_source=0x03;
+		tmp.can_target=0x00;
+		tmp.can_priority=0x03;
+		tmp.can_if_return=0x00;
+		tmp.can_if_last=0x00;
+		tmp.length=len;
+		BaseType_t status_q = xQueueSendToBack(send_queueHandle, &tmp, 0);
+		if(status_q!=pdPASS)
+		{
+			#ifdef DEBUG_OUTPUT
+			printf("%s\n","queue overflow");
+			#endif
+		}
+		else
+		{
+			#ifdef DEBUG_OUTPUT
+			printf("%s\n","send command 2 success to queue already");
+			#endif
+		}
+	}
 	return 0;
 }
 int command_3(uint8_t* data,uint32_t para)
 {
+	uint8_t if_return=(para>>4)&0x01;
+	uint8_t if_last=(para>>5)&0x01;
+	uint16_t len = EEPROM_CONFIG_LENGTH;
+	QUEUE_STRUCT tmp;
+	uint16_t addr=0;
+	if(if_last==1)
+	{
+		while(iic_rw(1,iic_cache,data,8)!=0)
+		{
+			vTaskDelay(1);
+		}
+		iic_cache+=8;
+	}
+	if(if_last==0)
+	{
+		while(iic_rw(1,iic_cache,data,EEPROM_CONFIG_LENGTH - iic_cache)!=0)
+		{
+			vTaskDelay(1);
+		}
+		iic_cache=0;
+		if(if_return==1)
+		{
+			//can send
+			tmp.property=0;
+			tmp.can_command=0x02;
+			tmp.can_if_ack=0x01;
+			tmp.can_source=0x03;
+			tmp.can_target=0x00;
+			tmp.can_priority=0x03;
+			tmp.can_if_return=0x00;
+			tmp.can_if_last=0x00;
+			tmp.length=1;
+			tmp.data[0]=0x00;
+			BaseType_t status_q = xQueueSendToBack(send_queueHandle, &tmp, 0);
+			if(status_q!=pdPASS)
+			{
+				#ifdef DEBUG_OUTPUT
+				printf("%s\n","queue overflow");
+				#endif
+			}
+			else
+			{
+				#ifdef DEBUG_OUTPUT
+				printf("%s\n","send command 2 success to queue already");
+				#endif
+			}
+		}
+	}
 	return 0;
 }
 int command_4(uint8_t* data,uint32_t para)
@@ -567,8 +687,101 @@ uint8_t can_start(void)
 }
 
 
-void iic_start(void)
+uint8_t iic_rw(uint8_t rw_flag, uint8_t addr,uint8_t* data,uint8_t length) //addr 首地址 ，地址连续 ， data： 数据指针， length： 数据长度
 {
+	//uint8_t* txdata=(uint8_t*)pvPortMalloc(2*length);
+	uint8_t txdata[2*EEPROM_CONFIG_LENGTH]={0};
+	uint8_t rxdata[2*EEPROM_CONFIG_LENGTH]={0};
+	uint8_t tmp_addr=addr;
+	uint16_t i=0;
+	for(i=0;i<length;i++)
+	{
+		txdata[i]=tmp_addr++;
+	}
+	for(i=0;i<length;i++)
+	{
+		txdata[i+length]=data[i];
+	}
+		
+	if(rw_flag==1)
+	{
+		//write one by one
+		for(i=0;i<length;i++)
+		{
+			uint8_t txcache[2];
+			txcache[0]=txdata[i];
+			txcache[1]=txdata[i+length];
+			if(HAL_I2C_Master_Transmit(&hi2c1,IIC_ADDRESS,txcache,2,100)!=HAL_OK)
+			{
+				#ifdef DEBUG_OUTPUT
+				printf("%s\n","start tk iic send error");
+				#endif
+				//vPortFree(txdata);
+				return ERROR_EEPROM_FAIL;
+			}
+			else{
+				//vPortFree(txdata);
+				#ifdef DEBUG_OUTPUT
+				printf("%s\n","start tk iic send success");
+				#endif
+			}
+		}
+		
+		HAL_Delay(1);
+	}
+	
+	if(rw_flag==0)
+	{
+		//read
+		//uint8_t* rxdata=pvPortMalloc(length);
+		uint8_t txcache;
+		for(i=0;i<length;i++)
+		{
+			txcache=txdata[i];
+			if(HAL_I2C_Master_Transmit(&hi2c1,IIC_ADDRESS,(uint8_t*)&txcache,1,100)!=HAL_OK)
+			{
+				#ifdef DEBUG_OUTPUT
+				printf("%s\n","start tk iic send 2 error");
+				#endif
+				//vPortFree(rxdata);
+				//vPortFree(txdata);
+				return ERROR_EEPROM_FAIL;
+			}
+			else{
+				#ifdef DEBUG_OUTPUT
+				printf("%s\n","start tk iic send 2 success");
+				#endif
+			}
+		  HAL_Delay(1);
+			//HAL_I2C_Master_Receive_IT(&hi2c1,IIC_ADDRESS,&rxdata[i],1)
+			if(HAL_I2C_Master_Receive(&hi2c1, (uint16_t)IIC_ADDRESS, (uint8_t *)&rxdata[i], 1, 100) != HAL_OK)
+			{
+				
+				#ifdef DEBUG_OUTPUT
+				printf("%s\n","start tk iic rece error");
+				#endif
+				//vPortFree(rxdata);
+				//vPortFree(txdata);
+				return ERROR_EEPROM_FAIL;
+			}
+			else{
+				/*
+				for(i=0;i<length;i++)
+				{
+					data[i]=rxdata[i];
+				}
+				*/
+				data[i]=rxdata[i];
+				#ifdef DEBUG_OUTPUT
+				printf("%s\n","start tk iic rece success");
+				#endif
+			}
+		}
+		
+		//vPortFree(rxdata);
+	}
+	//vPortFree(txdata);
+	return 0;
 	;
 }
 //信号量初始化

@@ -64,6 +64,8 @@ extern const uint8_t command_to_motor[60];
 //定时器定时时间
 extern uint32_t timer_period;
 extern xTimerHandle broadcast_timer;
+//IIC长度缓存
+extern uint16_t iic_cache;
 /* USER CODE END EC */
 
 /* Exported macro ------------------------------------------------------------*/
@@ -119,6 +121,7 @@ extern xTimerHandle broadcast_timer;
 #define ERROR_COMMAND_27_FAIL   0x21
 #define ERROR_COMMAND_28_FAIL   0x22
 #define ERROR_COMMAND_29_FAIL   0x23
+#define ERROR_EEPROM_FAIL       0x24
 
 //帧结构掩码
 #define MASK_PRIORITY           (uint32_t)(0x07 << 26)
@@ -135,6 +138,10 @@ extern xTimerHandle broadcast_timer;
 //光栅GPIO电源开关
 #define GRATING_POWER_SW        GPIOE
 #define GRATING_POWER_PIN       GPIO_PIN_3
+
+#define IIC_ADDRESS             0xA0
+
+#define EEPROM_CONFIG_LENGTH    0xF0
 /* USER CODE END EM */
 
 /* Exported functions prototypes ---------------------------------------------*/
@@ -174,6 +181,7 @@ int command_26(uint8_t* data,uint32_t para);
 void timer_start(void);
 uint8_t can_start(void);
 uint8_t switchGet(uint8_t motor_id);
+uint8_t iic_rw(uint8_t rw_flag, uint8_t addr,uint8_t* data,uint8_t length);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
