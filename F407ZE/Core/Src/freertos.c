@@ -854,8 +854,8 @@ void start_tk_master_order(void *argument)
 							   tmp_command_id==19)
 							{
 								uint8_t data[8];
-								//memcpy(data,id.data,id.RxHeader.DLC);
-								
+								memcpy(data,id.data,id.RxHeader.DLC);
+								/*
 								data[0]=id.data[0];
 								data[1]=id.data[1];
 								data[2]=id.data[2];
@@ -864,7 +864,7 @@ void start_tk_master_order(void *argument)
 								data[5]=id.data[5];
 								data[6]=id.data[6];
 								data[7]=id.data[7];
-								
+								*/
 								uint32_t para=id.RxHeader.DLC;
 								para|=(tmp_if_return << 4);   //bit 4表示是否返回return帧
 								para|=(tmp_if_last << 5);     //bit 5表示是否是最后一帧

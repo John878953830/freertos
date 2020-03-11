@@ -269,48 +269,116 @@ int command_3(uint8_t* data,uint32_t para)
 	uint8_t if_return=(para>>4)&0x01;
 	uint8_t if_last=(para>>5)&0x01;
 	uint16_t len = EEPROM_CONFIG_LENGTH;
+	uint8_t left_length=para&0x0F;
 	QUEUE_STRUCT tmp;
 	uint16_t addr=0;
 	if(if_last==1)
 	{
-		while(iic_rw(1,iic_cache,data,8)!=0)
+		if(left_length!=8)
 		{
-			vTaskDelay(1);
+			if(if_return==1)
+			{
+				//can send
+				tmp.property=0;
+				tmp.can_command=0x02;
+				tmp.can_if_ack=0x01;
+				tmp.can_source=0x03;
+				tmp.can_target=0x00;
+				tmp.can_priority=0x03;
+				tmp.can_if_return=0x00;
+				tmp.can_if_last=0x00;
+				tmp.length=1;
+				tmp.data[0]=ERROR_COMMAND_3_FAIL;
+				BaseType_t status_q = xQueueSendToBack(send_queueHandle, &tmp, 0);
+				if(status_q!=pdPASS)
+				{
+					#ifdef DEBUG_OUTPUT
+					printf("%s\n","queue overflow");
+					#endif
+				}
+				else
+				{
+					#ifdef DEBUG_OUTPUT
+					printf("%s\n","send command 2 success to queue already");
+					#endif
+				}
+			}
 		}
-		iic_cache+=8;
+		else
+		{
+			while(iic_rw(1,iic_cache,data,8)!=0)
+			{
+				vTaskDelay(1);
+			}
+			iic_cache+=8;
+		}
+		
 	}
 	if(if_last==0)
 	{
-		while(iic_rw(1,iic_cache,data,EEPROM_CONFIG_LENGTH - iic_cache)!=0)
+		if((iic_cache > EEPROM_CONFIG_LENGTH) || (EEPROM_CONFIG_LENGTH - iic_cache != left_length))
 		{
-			vTaskDelay(1);
-		}
-		iic_cache=0;
-		if(if_return==1)
-		{
-			//can send
-			tmp.property=0;
-			tmp.can_command=0x02;
-			tmp.can_if_ack=0x01;
-			tmp.can_source=0x03;
-			tmp.can_target=0x00;
-			tmp.can_priority=0x03;
-			tmp.can_if_return=0x00;
-			tmp.can_if_last=0x00;
-			tmp.length=1;
-			tmp.data[0]=0x00;
-			BaseType_t status_q = xQueueSendToBack(send_queueHandle, &tmp, 0);
-			if(status_q!=pdPASS)
+			//数据个数错误，返回错误码
+			if(if_return==1)
 			{
-				#ifdef DEBUG_OUTPUT
-				printf("%s\n","queue overflow");
-				#endif
+				//can send
+				tmp.property=0;
+				tmp.can_command=0x02;
+				tmp.can_if_ack=0x01;
+				tmp.can_source=0x03;
+				tmp.can_target=0x00;
+				tmp.can_priority=0x03;
+				tmp.can_if_return=0x00;
+				tmp.can_if_last=0x00;
+				tmp.length=1;
+				tmp.data[0]=ERROR_COMMAND_3_FAIL;
+				BaseType_t status_q = xQueueSendToBack(send_queueHandle, &tmp, 0);
+				if(status_q!=pdPASS)
+				{
+					#ifdef DEBUG_OUTPUT
+					printf("%s\n","queue overflow");
+					#endif
+				}
+				else
+				{
+					#ifdef DEBUG_OUTPUT
+					printf("%s\n","send command 2 success to queue already");
+					#endif
+				}
 			}
-			else
+		}
+		else{
+			while(iic_rw(1,iic_cache,data,EEPROM_CONFIG_LENGTH - iic_cache)!=0)
 			{
-				#ifdef DEBUG_OUTPUT
-				printf("%s\n","send command 2 success to queue already");
-				#endif
+				vTaskDelay(1);
+			}
+			iic_cache=0;
+			if(if_return==1)
+			{
+				//can send
+				tmp.property=0;
+				tmp.can_command=0x02;
+				tmp.can_if_ack=0x01;
+				tmp.can_source=0x03;
+				tmp.can_target=0x00;
+				tmp.can_priority=0x03;
+				tmp.can_if_return=0x00;
+				tmp.can_if_last=0x00;
+				tmp.length=1;
+				tmp.data[0]=0x00;
+				BaseType_t status_q = xQueueSendToBack(send_queueHandle, &tmp, 0);
+				if(status_q!=pdPASS)
+				{
+					#ifdef DEBUG_OUTPUT
+					printf("%s\n","queue overflow");
+					#endif
+				}
+				else
+				{
+					#ifdef DEBUG_OUTPUT
+					printf("%s\n","send command 2 success to queue already");
+					#endif
+				}
 			}
 		}
 	}
@@ -1013,6 +1081,7 @@ uint8_t can_send(QUEUE_STRUCT send_struct)
 //485 发送
 uint8_t modbus_send(QUEUE_STRUCT send_struct)
 {
+	
 	return 0;
 }
 
