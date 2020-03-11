@@ -21,7 +21,7 @@
 #include "usart.h"
 
 /* USER CODE BEGIN 0 */
-
+DMA_HandleTypeDef hdma_usart2_tx;
 /* USER CODE END 0 */
 
 UART_HandleTypeDef huart4;
@@ -192,6 +192,7 @@ void HAL_UART_MspInit(UART_HandleTypeDef* uartHandle)
   {
   /* USER CODE BEGIN USART2_MspInit 0 */
 
+		
   /* USER CODE END USART2_MspInit 0 */
     /* USART2 clock enable */
     __HAL_RCC_USART2_CLK_ENABLE();
@@ -208,6 +209,25 @@ void HAL_UART_MspInit(UART_HandleTypeDef* uartHandle)
     GPIO_InitStruct.Alternate = GPIO_AF7_USART2;
     HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
+		hdma_usart2_tx.Instance = DMA1_Stream6;
+    hdma_usart2_tx.Init.Channel = DMA_CHANNEL_4;
+    hdma_usart2_tx.Init.Direction = DMA_MEMORY_TO_PERIPH;
+    hdma_usart2_tx.Init.PeriphInc = DMA_PINC_DISABLE;
+    hdma_usart2_tx.Init.MemInc = DMA_MINC_ENABLE;
+    hdma_usart2_tx.Init.PeriphDataAlignment = DMA_PDATAALIGN_BYTE;
+    hdma_usart2_tx.Init.MemDataAlignment = DMA_MDATAALIGN_BYTE;
+    hdma_usart2_tx.Init.Mode = DMA_NORMAL;
+    hdma_usart2_tx.Init.Priority = DMA_PRIORITY_HIGH;
+    hdma_usart2_tx.Init.FIFOMode = DMA_FIFOMODE_ENABLE;
+    hdma_usart2_tx.Init.FIFOThreshold = DMA_FIFO_THRESHOLD_HALFFULL;
+    hdma_usart2_tx.Init.MemBurst = DMA_MBURST_SINGLE;
+    hdma_usart2_tx.Init.PeriphBurst = DMA_PBURST_SINGLE;
+    if (HAL_DMA_Init(&hdma_usart2_tx) != HAL_OK)
+    {
+      Error_Handler();
+    }
+
+    __HAL_LINKDMA(uartHandle,hdmarx,hdma_usart2_tx);
     /* USART2 interrupt Init */
     HAL_NVIC_SetPriority(USART2_IRQn, 5, 0);
     HAL_NVIC_EnableIRQ(USART2_IRQn);

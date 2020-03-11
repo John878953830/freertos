@@ -404,6 +404,7 @@ osKernelInitialize();
 	//定时器初始化
 	timer_start();
 	can_start();
+	
   /* USER CODE END RTOS_THREADS */
 
 }
@@ -439,7 +440,6 @@ void StartDefaultTask(void *argument)
 	    printf("%s\n",tklog);
 	    vTaskGetRunTimeStats((char *)&tklog);
 	    printf("%s\n",tklog);
-			
 			;
 		}
     osDelay(1);
@@ -512,6 +512,9 @@ void start_tk_send_order(void *argument)
 			}
 			if(id.property==1)
 			{
+				#ifdef DEBUG_OUTPUT
+				printf("%s, id : %d\n","queue receive  modbus send order",id.can_command);
+				#endif
 				modbus_send(id);
 			}
 		}
@@ -845,13 +848,14 @@ void start_tk_master_order(void *argument)
 								command_to_function[tmp_command_id](&data,para);
 							}
 							if(tmp_command_id==1  ||
-								 tmp_command_id==2  ||
-							   tmp_command_id==3  ||
-							   tmp_command_id==4  ||
-							   tmp_command_id==5  ||
+								 tmp_command_id==3  ||
 							   tmp_command_id==7  ||
-							   tmp_command_id==10 ||
-							   tmp_command_id==19)
+							   tmp_command_id==8  ||
+							   tmp_command_id==9  ||
+							   tmp_command_id==11 ||
+							   tmp_command_id==12 ||
+							   tmp_command_id==13 ||
+							   tmp_command_id==14 )
 							{
 								uint8_t data[8];
 								memcpy(data,id.data,id.RxHeader.DLC);
@@ -872,7 +876,7 @@ void start_tk_master_order(void *argument)
 							}
 						}
 					//根据命令电机映射表找到要动作的电机，并将参数压入电机中的命令结构
-					uint8_t motor_id=command_to_motor[tmp_command_id];
+					//uint8_t motor_id=command_to_motor[tmp_command_id];
 					}
 				}
 			}

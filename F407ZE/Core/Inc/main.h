@@ -207,10 +207,12 @@ typedef struct queue_struct{
 	uint8_t can_if_return;                      //can 是否需要返回值
 	uint8_t can_if_ack;                         //can 是否需要ack确认
 	uint8_t can_version;                        //can 版本号
-	uint8_t modbus_addr;                        //485 功能
+	uint8_t modbus_addr;                        //485 模块地址
 	uint8_t modbus_func;                        //485 功能码
-	uint16_t modbus_data_addr;                  //485 数据地址
-	uint16_t modbus_data;                       //485 数据
+	uint8_t modbus_data_addr_h;                  //485 数据地址
+	uint8_t modbus_data_addr_l; 
+	uint8_t modbus_data_h;                       //485 数据
+	uint8_t modbus_data_l;   
 	uint16_t modbus_crc;                        //485 CRC
 	CAN_RxHeaderTypeDef   RxHeader;             //CAN 接收报头数据
 }QUEUE_STRUCT;
@@ -317,6 +319,7 @@ typedef struct motor_struct{
 	DIM dim_value;                               //维度结构体
 	GPIO_ACTION gpio_output[5];                     //gpio 输出组， 0： 电机使能 1： PWM输出， 2： 方向输出 3： 姿态电源继电器输出
 	GPIO_ACTION gpio_input[1];                      //gpio 输入组， 0：电机抱闸输入确认信号
+	uint32_t register_move;                         //电机运动寄存器的485地址
 }MOTOR_STRUCT;
 
 typedef struct angle_struct{
