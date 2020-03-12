@@ -40,7 +40,11 @@ uint32_t timer_period=1000;
 xTimerHandle broadcast_timer;
 
 uint16_t iic_cache=0;
-uint8_t send_cache[8];
+//modbus cache
+uint8_t send_cache[16];
+uint8_t rece_cache[16];
+uint8_t rece_count=0;
+uint8_t modbus_status=0;        //modbus 状态参量， 0： 空闲 1：传输中
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -527,7 +531,7 @@ int command_7(uint8_t* data,uint32_t para)
 }
 int command_8(uint8_t* data,uint32_t para)
 {
-	//电机单步调试
+	//电机单步调试,写动作
 	uint8_t if_return=(para>>4)&0x01;
 	int32_t offset=(data[1] << 24) | (data[2] << 16) | (data[3] << 8) | data[4];
 	QUEUE_STRUCT tmp;
@@ -565,13 +569,20 @@ int command_8(uint8_t* data,uint32_t para)
 	else
 	{
 		//填充485发送结构体
-		tmp.property=1;                    //485 send
-		tmp.modbus_func=0x06;              //写寄存器
-		tmp.modbus_addr=data[0];           //电机485地址
-		tmp.modbus_data_addr_h=0x01;
-		tmp.modbus_data_addr_l=0x00;
-		tmp.modbus_data_h=data[1];
-		tmp.modbus_data_l=data[2];
+		tmp.property=1;                            //485 send
+		tmp.modbus_addr=data[0];
+		tmp.modbus_func=0x10;                      //写多个寄存器
+		tmp.modbus_addr_h=(uint8_t)(P412_H>>8);
+		tmp.modbus_addr_l=(uint8_t)(P412_H&0xFF);                   //电机485地址
+		//tmp.modbus_addr_h=0x03;
+		//tmp.modbus_addr_l=0xF2;
+		tmp.modbus_data_len_h=0x00;
+		tmp.modbus_data_len_l=0x02;
+		tmp.modbus_data_byte=0x04;
+		tmp.modbus_data_1=data[3];
+		tmp.modbus_data_2=data[4];
+		tmp.modbus_data_3=data[1];
+		tmp.modbus_data_4=data[2];
 		portBASE_TYPE status = xQueueSendToBack(send_queueHandle, &tmp, 0);
 		if(status!=pdPASS)
 		{
@@ -591,6 +602,68 @@ int command_8(uint8_t* data,uint32_t para)
 }
 int command_9(uint8_t* data,uint32_t para)
 {
+	//电机调试，读状态
+	uint8_t if_return=(para>>4)&0x01;
+	int32_t offset=(data[1] << 24) | (data[2] << 16) | (data[3] << 8) | data[4];
+	QUEUE_STRUCT tmp;
+	if(data[0]>4)
+	{
+		//索引错误
+		if(if_return==1)
+		{
+			tmp.property=0x00;             //can send
+			tmp.can_command=0x08;          //停止指令
+			tmp.can_if_ack=0x01;           //需要ACK
+			tmp.can_source=0x03;           //本模块
+			tmp.can_target=0x00;
+			tmp.can_priority=0x03;         //命令结束返回帧
+			tmp.can_if_last=0x00;
+			tmp.can_if_return=0x00;
+			tmp.length=1;
+			tmp.data[0]=ERROR_COMMAND_8_FAIL;
+			portBASE_TYPE status = xQueueSendToBack(send_queueHandle, &tmp, 0);
+			if(status!=pdPASS)
+			{
+				#ifdef DEBUG_OUTPUT
+				printf("%s\n","queue overflow");
+				#endif
+			}
+			else
+			{
+				#ifdef DEBUG_OUTPUT
+				printf("%s\n","send command 7 error to queue already");
+				#endif
+			}
+		}
+		return ERROR_COMMAND_8_FAIL;
+	}
+	else
+	{
+		//填充485发送结构体
+		tmp.property=1;                            //485 send
+		tmp.modbus_addr=data[0];
+		tmp.modbus_func=0x03;                      //读多个寄存器
+		tmp.modbus_addr_h=(uint8_t)(P412_H>>8);
+		tmp.modbus_addr_l=(uint8_t)(P412_H&0xFF);  //电机485地址
+		//tmp.modbus_addr_h=0x03;
+		//tmp.modbus_addr_l=0xF2;
+		tmp.modbus_data_len_h=0x00;
+		tmp.modbus_data_len_l=0x02;
+		portBASE_TYPE status = xQueueSendToBack(send_queueHandle, &tmp, 0);
+		if(status!=pdPASS)
+		{
+			#ifdef DEBUG_OUTPUT
+			printf("%s\n","queue overflow");
+			#endif
+		}
+		else
+		{
+			#ifdef DEBUG_OUTPUT
+			printf("%s\n","send command 8 error to queue already");
+			#endif
+		}
+		
+	}
 	return 0;
 }
 int command_10(uint8_t* data,uint32_t para)
@@ -1209,44 +1282,44 @@ uint8_t can_send(QUEUE_STRUCT send_struct)
 //485 发送
 uint8_t modbus_send(QUEUE_STRUCT send_struct)
 {
-	if(send_struct.modbus_func == 0x03 || send_struct.modbus_func == 0x06)
+	//写寄存器
+	if(send_struct.modbus_func == 0x10)
 	{
-		taskENTER_CRITICAL();
-		
-		send_cache[0]=1;
-		send_cache[1]=6;
-		send_cache[2]=0;
-		send_cache[3]=0;
-		send_cache[4]=0;
-		send_cache[5]=0;
+		HAL_GPIO_WritePin(GPIOG,GPIO_PIN_6,GPIO_PIN_SET);
+		send_cache[0]=send_struct.modbus_addr;
+		send_cache[1]=send_struct.modbus_func;
+		send_cache[2]=send_struct.modbus_addr_h;
+		send_cache[3]=send_struct.modbus_addr_l;
+		send_cache[4]=send_struct.modbus_data_len_h;
+		send_cache[5]=send_struct.modbus_data_len_l;
+		send_cache[6]=send_struct.modbus_data_byte;
+		send_cache[7]=send_struct.modbus_data_1;
+		send_cache[8]=send_struct.modbus_data_2;
+		send_cache[9]=send_struct.modbus_data_3;
+		send_cache[10]=send_struct.modbus_data_4;
+		send_struct.modbus_crc=usMBCRC16(send_cache,11);
+		send_cache[11]=(uint8_t)(send_struct.modbus_crc & 0xFF);
+		send_cache[12]=(uint8_t)(send_struct.modbus_crc >> 8);
+		HAL_UART_Transmit_DMA(&huart2,(uint8_t*)send_cache,13);
+	  rece_count=8;
+	}
+	//读寄存器
+	if(send_struct.modbus_func==0x03)
+	{
+		HAL_GPIO_WritePin(GPIOG,GPIO_PIN_6,GPIO_PIN_SET);
+		send_cache[0]=send_struct.modbus_addr;
+		send_cache[1]=send_struct.modbus_func;
+		send_cache[2]=send_struct.modbus_addr_h;
+		send_cache[3]=send_struct.modbus_addr_l;
+		send_cache[4]=send_struct.modbus_data_len_h;
+		send_cache[5]=send_struct.modbus_data_len_l;
 		send_struct.modbus_crc=usMBCRC16(send_cache,6);
 		send_cache[6]=(uint8_t)(send_struct.modbus_crc & 0xFF);
 		send_cache[7]=(uint8_t)(send_struct.modbus_crc >> 8);
-		
-		HAL_GPIO_WritePin(GPIOG,GPIO_PIN_6,GPIO_PIN_SET);
-		//HAL_UART_Transmit_DMA(&huart2,(uint8_t*)send_cache,8);
-		//HAL_UART_Abort(&huart2);
-		//HAL_DMA_Start_IT(&hdma_usart2_tx,(uint32_t)send_cache,(uint32_t)&huart2.Instance->DR,8);
-		
 		HAL_UART_Transmit_DMA(&huart2,(uint8_t*)send_cache,8);
-		//huart2.Instance->CR3 |= USART_CR3_DMAT;
-		//HAL_UART_Transmit_IT(&huart2,(uint8_t*)send_cache,8);
-		/*
-		int i=0;
-		for(i=0;i<8;i++)
-		{
-			USART2->DR=send_cache[i];
-			while((USART1->SR&0X40)==0)
-			{
-				;
-			}
-		}
-		*/
-		taskEXIT_CRITICAL();
-		
+	  rece_count=9;
+		;
 	}
-	
-	
 	return 0;
 }
 

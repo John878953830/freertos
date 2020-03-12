@@ -101,6 +101,7 @@ extern TaskHandle_t posture_monitorHandle;
 extern TaskHandle_t commu_mornitorHandle;
 extern TaskHandle_t send_orderHandle;
 extern TaskHandle_t master_orderHandle;
+
 /* USER CODE END EV */
 
 /******************************************************************************/
@@ -289,7 +290,8 @@ void DMA1_Stream5_IRQHandler(void)
 void DMA1_Stream6_IRQHandler(void)
 {
   /* USER CODE BEGIN DMA1_Stream6_IRQn 0 */
-
+	HAL_GPIO_WritePin(GPIOG,GPIO_PIN_6,GPIO_PIN_RESET);
+	HAL_UART_Receive_DMA(&huart2,(uint8_t*)rece_cache,rece_count);
   /* USER CODE END DMA1_Stream6_IRQn 0 */
   HAL_DMA_IRQHandler(&hdma_usart2_tx);
   /* USER CODE BEGIN DMA1_Stream6_IRQn 1 */

@@ -490,12 +490,11 @@ void start_tk_send_order(void *argument)
   /* USER CODE BEGIN start_tk_send_order */
 	QUEUE_STRUCT id;
   portBASE_TYPE status;
-	uint32_t notify_use=0;
   /* Infinite loop */
   for(;;)
   {
     #ifdef DEBUG_OUTPUT
-			printf("%s\n","start tk send order");
+		printf("%s\n","start tk send order");
 		#endif	
 
 		//等待发送队列有消息
@@ -518,25 +517,7 @@ void start_tk_send_order(void *argument)
 				modbus_send(id);
 			}
 		}
-		
-		//接收中断通知进行发送结果判断，CAN发送中断 + RS485发送中断
-		//xTaskNotifyWait( 0x00,               /* Don't clear any bits on entry. */
-    //                     0xffffffff,          /* Clear all bits on exit. */
-     //                    &notify_use, /* Receives the notification value. */
-     //                    portMAX_DELAY );
-		
-		//if(notify_use!=0)
-		{
-			#ifdef DEBUG_OUTPUT
-			//printf("%s,%u\n","send order task receive notify form isr",notify_use);
-			#endif
-		}
-		
 		/* Block to wait for prvTask2() to notify this task. */
-    //ulTaskNotifyTake( pdTRUE, portMAX_DELAY );
-		
-		notify_use=0;
-		
     osDelay(1);
   }
   /* USER CODE END start_tk_send_order */
