@@ -23,6 +23,7 @@
 #include "cmsis_os.h"
 #include "can.h"
 #include "crc.h"
+#include "dma.h"
 #include "i2c.h"
 #include "tim.h"
 #include "usart.h"
@@ -1223,8 +1224,12 @@ uint8_t modbus_send(QUEUE_STRUCT send_struct)
 		send_cache[7]=(uint8_t)(send_struct.modbus_crc >> 8);
 		
 		HAL_GPIO_WritePin(GPIOG,GPIO_PIN_6,GPIO_PIN_SET);
-		HAL_UART_Transmit_DMA(&huart2,(uint8_t*)send_cache,8);
+		//HAL_UART_Transmit_DMA(&huart2,(uint8_t*)send_cache,8);
+		//HAL_UART_Abort(&huart2);
+		//HAL_DMA_Start_IT(&hdma_usart2_tx,(uint32_t)send_cache,(uint32_t)&huart2.Instance->DR,8);
 		
+		HAL_UART_Transmit_DMA(&huart2,(uint8_t*)send_cache,8);
+		//huart2.Instance->CR3 |= USART_CR3_DMAT;
 		//HAL_UART_Transmit_IT(&huart2,(uint8_t*)send_cache,8);
 		/*
 		int i=0;
@@ -1366,12 +1371,17 @@ int main(void)
   MX_USART2_UART_Init();
   MX_USART3_UART_Init();
   MX_USART6_UART_Init();
+  MX_DMA_Init();
   /* USER CODE BEGIN 2 */
 	
 	//初始化信号量
 	lock_init();
-
+	HAL_DMA_DeInit(&hdma_usart2_tx);
+	HAL_DMA_Init(&hdma_usart2_tx);
+	HAL_DMA_DeInit(&hdma_usart2_rx);
+	HAL_DMA_Init(&hdma_usart2_rx);
 	printf("%s\n","start free rtos");
+	
   /* USER CODE END 2 */
 
   /* Call init function for freertos objects (in freertos.c) */
