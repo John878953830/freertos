@@ -45,10 +45,44 @@ uint8_t send_cache[16];
 uint8_t rece_cache[16];
 uint8_t rece_count=0;
 uint8_t modbus_status=0;        //modbus 状态参量， 0： 空闲 1：传输中
+uint8_t modbus_read_status;     //modbus 读取指令完成标志， 0： 空闲 1：读取进行中 2：读取完成
+uint8_t modbus_act_status;      //modbus 电机动作完成标志， 0：空闲， 1：动作指令交互中 2： 动作指令交互完成
+uint8_t modbus_time_status;     //modbus 超时标志， 0：空闲， 1：交互超时 2：交互完成
+
+MODBUS_LIST* modbus_list_head=NULL;  //head 指向寻找到的第一个不为空的节点
+MODBUS_LIST* modbus_list_tail=NULL;  //tail 指向不为空的节点的下一个节点
+uint16_t modbus_period=89;
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+//链表创建函数
+MODBUS_LIST* modbus_list_gen(uint16_t count)
+{
+	MODBUS_LIST* tmp=(MODBUS_LIST*)pvPortMalloc(sizeof(MODBUS_LIST));
+	MODBUS_LIST* head=tmp;
+	if(count==1)
+	{
+		tmp->if_over=0;
+		tmp->next=tmp;
+		return tmp;
+	}
+	else
+	{
+		uint16_t i=0;
+		tmp->if_over=0;
+		MODBUS_LIST* loop_tmp;
+		for(i=0;i<count - 1;i++)
+		{
+			loop_tmp=(MODBUS_LIST*)pvPortMalloc(sizeof(MODBUS_LIST));
+			loop_tmp->if_over=0;
+			head->next=loop_tmp;
+			head=loop_tmp;
+		}
+		head->next=tmp;
+		return tmp;
+	}
+}
 //CRC表
 static const uint8_t aucCRCHi[] = {
     0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41,
@@ -337,10 +371,10 @@ int command_3(uint8_t* data,uint32_t para)
 {
 	uint8_t if_return=(para>>4)&0x01;
 	uint8_t if_last=(para>>5)&0x01;
-	uint16_t len = EEPROM_CONFIG_LENGTH;
+	//uint16_t len = EEPROM_CONFIG_LENGTH;
 	uint8_t left_length=para&0x0F;
 	QUEUE_STRUCT tmp;
-	uint16_t addr=0;
+	//uint16_t addr=0;
 	if(if_last==1)
 	{
 		if(left_length!=8)
@@ -533,7 +567,7 @@ int command_8(uint8_t* data,uint32_t para)
 {
 	//电机单步调试,写动作
 	uint8_t if_return=(para>>4)&0x01;
-	int32_t offset=(data[1] << 24) | (data[2] << 16) | (data[3] << 8) | data[4];
+	//int32_t offset=(data[1] << 24) | (data[2] << 16) | (data[3] << 8) | data[4];
 	QUEUE_STRUCT tmp;
 	if(data[0]>4)
 	{
@@ -604,7 +638,7 @@ int command_9(uint8_t* data,uint32_t para)
 {
 	//电机调试，读状态
 	uint8_t if_return=(para>>4)&0x01;
-	int32_t offset=(data[1] << 24) | (data[2] << 16) | (data[3] << 8) | data[4];
+	//int32_t offset=(data[1] << 24) | (data[2] << 16) | (data[3] << 8) | data[4];
 	QUEUE_STRUCT tmp;
 	if(data[0]>4)
 	{
@@ -1282,43 +1316,72 @@ uint8_t can_send(QUEUE_STRUCT send_struct)
 //485 发送
 uint8_t modbus_send(QUEUE_STRUCT send_struct)
 {
-	//写寄存器
-	if(send_struct.modbus_func == 0x10)
+	if(modbus_status==0)
 	{
-		HAL_GPIO_WritePin(GPIOG,GPIO_PIN_6,GPIO_PIN_SET);
-		send_cache[0]=send_struct.modbus_addr;
-		send_cache[1]=send_struct.modbus_func;
-		send_cache[2]=send_struct.modbus_addr_h;
-		send_cache[3]=send_struct.modbus_addr_l;
-		send_cache[4]=send_struct.modbus_data_len_h;
-		send_cache[5]=send_struct.modbus_data_len_l;
-		send_cache[6]=send_struct.modbus_data_byte;
-		send_cache[7]=send_struct.modbus_data_1;
-		send_cache[8]=send_struct.modbus_data_2;
-		send_cache[9]=send_struct.modbus_data_3;
-		send_cache[10]=send_struct.modbus_data_4;
-		send_struct.modbus_crc=usMBCRC16(send_cache,11);
-		send_cache[11]=(uint8_t)(send_struct.modbus_crc & 0xFF);
-		send_cache[12]=(uint8_t)(send_struct.modbus_crc >> 8);
-		HAL_UART_Transmit_DMA(&huart2,(uint8_t*)send_cache,13);
-	  rece_count=8;
+		if(modbus_list_tail!=NULL && modbus_list_tail->if_over==0)
+		{
+			memcpy(&(modbus_list_tail->modbus_element),&send_struct,sizeof(QUEUE_STRUCT));
+			modbus_list_tail->if_over=1;
+			modbus_list_tail=modbus_list_tail->next;
+		}
+		else{
+			return MODBUS_LIST_ERROR;
+		}
+		//写寄存器
+		if(send_struct.modbus_func == 0x10)
+		{
+			HAL_GPIO_WritePin(GPIOG,GPIO_PIN_6,GPIO_PIN_SET);
+			send_cache[0]=send_struct.modbus_addr;
+			send_cache[1]=send_struct.modbus_func;
+			send_cache[2]=send_struct.modbus_addr_h;
+			send_cache[3]=send_struct.modbus_addr_l;
+			send_cache[4]=send_struct.modbus_data_len_h;
+			send_cache[5]=send_struct.modbus_data_len_l;
+			send_cache[6]=send_struct.modbus_data_byte;
+			send_cache[7]=send_struct.modbus_data_1;
+			send_cache[8]=send_struct.modbus_data_2;
+			send_cache[9]=send_struct.modbus_data_3;
+			send_cache[10]=send_struct.modbus_data_4;
+			send_struct.modbus_crc=usMBCRC16(send_cache,11);
+			send_cache[11]=(uint8_t)(send_struct.modbus_crc & 0xFF);
+			send_cache[12]=(uint8_t)(send_struct.modbus_crc >> 8);
+			
+			HAL_UART_Transmit_DMA(&huart2,(uint8_t*)send_cache,13);
+			rece_count=8;
+			modbus_status=1;
+		}
+		//读寄存器
+		if(send_struct.modbus_func==0x03)
+		{
+			HAL_GPIO_WritePin(GPIOG,GPIO_PIN_6,GPIO_PIN_SET);
+			send_cache[0]=send_struct.modbus_addr;
+			send_cache[1]=send_struct.modbus_func;
+			send_cache[2]=send_struct.modbus_addr_h;
+			send_cache[3]=send_struct.modbus_addr_l;
+			send_cache[4]=send_struct.modbus_data_len_h;
+			send_cache[5]=send_struct.modbus_data_len_l;
+			send_struct.modbus_crc=usMBCRC16(send_cache,6);
+			send_cache[6]=(uint8_t)(send_struct.modbus_crc & 0xFF);
+			send_cache[7]=(uint8_t)(send_struct.modbus_crc >> 8);
+			HAL_UART_Transmit_DMA(&huart2,(uint8_t*)send_cache,8);
+			rece_count=9;
+			modbus_status=1;
+		}
 	}
-	//读寄存器
-	if(send_struct.modbus_func==0x03)
+	else
 	{
-		HAL_GPIO_WritePin(GPIOG,GPIO_PIN_6,GPIO_PIN_SET);
-		send_cache[0]=send_struct.modbus_addr;
-		send_cache[1]=send_struct.modbus_func;
-		send_cache[2]=send_struct.modbus_addr_h;
-		send_cache[3]=send_struct.modbus_addr_l;
-		send_cache[4]=send_struct.modbus_data_len_h;
-		send_cache[5]=send_struct.modbus_data_len_l;
-		send_struct.modbus_crc=usMBCRC16(send_cache,6);
-		send_cache[6]=(uint8_t)(send_struct.modbus_crc & 0xFF);
-		send_cache[7]=(uint8_t)(send_struct.modbus_crc >> 8);
-		HAL_UART_Transmit_DMA(&huart2,(uint8_t*)send_cache,8);
-	  rece_count=9;
-		;
+		//modbus数据压入链表
+		if(modbus_list_tail!=NULL && modbus_list_tail->if_over==0)
+		{
+			memcpy(&(modbus_list_tail->modbus_element),&send_struct,sizeof(QUEUE_STRUCT));
+			modbus_list_tail->if_over=1;
+			modbus_list_tail=modbus_list_tail->next;
+			return MODBUS_BUSY;
+		}
+		else
+		{
+			return MODBUS_LIST_ERROR;
+		}
 	}
 	return 0;
 }
@@ -1453,6 +1516,20 @@ int main(void)
 	HAL_DMA_Init(&hdma_usart2_tx);
 	HAL_DMA_DeInit(&hdma_usart2_rx);
 	HAL_DMA_Init(&hdma_usart2_rx);
+	modbus_list_head=modbus_list_gen(256);
+	
+	HAL_TIM_Base_Start_IT(&htim12);
+	
+	
+	if(modbus_list_head!=NULL)
+	{
+		modbus_list_tail=modbus_list_head;
+	}
+	else
+	{
+		printf("%s\n","modbus list error");
+	}
+	
 	printf("%s\n","start free rtos");
 	
   /* USER CODE END 2 */

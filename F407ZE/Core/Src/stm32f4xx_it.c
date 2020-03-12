@@ -53,6 +53,7 @@ BaseType_t b_tk_posture_monitor=pdTRUE;
 BaseType_t b_tk_commu_monitor=pdTRUE;
 BaseType_t b_tk_send_order=pdTRUE;
 BaseType_t b_tk_master_order=pdTRUE;
+BaseType_t b_tk_rece_result=pdTRUE;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -101,7 +102,10 @@ extern TaskHandle_t posture_monitorHandle;
 extern TaskHandle_t commu_mornitorHandle;
 extern TaskHandle_t send_orderHandle;
 extern TaskHandle_t master_orderHandle;
+extern TaskHandle_t rece_resultHandle;
 
+
+extern uint16_t modbus_period;
 /* USER CODE END EV */
 
 /******************************************************************************/
@@ -276,7 +280,11 @@ void EXTI4_IRQHandler(void)
 void DMA1_Stream5_IRQHandler(void)
 {
   /* USER CODE BEGIN DMA1_Stream5_IRQn 0 */
-
+	if(rece_resultHandle!=NULL)
+	{
+		xTaskNotifyFromISR(rece_resultHandle,0x0001,eSetBits,&b_tk_rece_result);
+		portYIELD_FROM_ISR( b_tk_rece_result );
+	}
   /* USER CODE END DMA1_Stream5_IRQn 0 */
   HAL_DMA_IRQHandler(&hdma_usart2_rx);
   /* USER CODE BEGIN DMA1_Stream5_IRQn 1 */
@@ -505,11 +513,11 @@ void TIM1_CC_IRQHandler(void)
 void TIM2_IRQHandler(void)
 {
   /* USER CODE BEGIN TIM2_IRQn 0 */
-
+	
   /* USER CODE END TIM2_IRQn 0 */
   HAL_TIM_IRQHandler(&htim2);
   /* USER CODE BEGIN TIM2_IRQn 1 */
-
+	
   /* USER CODE END TIM2_IRQn 1 */
 }
 
@@ -629,12 +637,18 @@ void EXTI15_10_IRQHandler(void)
 void TIM8_BRK_TIM12_IRQHandler(void)
 {
   /* USER CODE BEGIN TIM8_BRK_TIM12_IRQn 0 */
-
+	if(__HAL_TIM_GET_FLAG(&htim12,TIM_FLAG_UPDATE)==SET)
+	{
+		HAL_GPIO_TogglePin(GPIOE,GPIO_PIN_3);
+		HAL_TIM_Base_Stop(&htim12);
+		modbus_period+=100;
+		TIM12->ARR=modbus_period;
+	}
   /* USER CODE END TIM8_BRK_TIM12_IRQn 0 */
   HAL_TIM_IRQHandler(&htim8);
   HAL_TIM_IRQHandler(&htim12);
   /* USER CODE BEGIN TIM8_BRK_TIM12_IRQn 1 */
-
+	HAL_TIM_Base_Start_IT(&htim12);
   /* USER CODE END TIM8_BRK_TIM12_IRQn 1 */
 }
 

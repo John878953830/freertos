@@ -138,6 +138,9 @@ osStaticThreadDef_t master_orderControlBlock;
 osThreadId_t limit_swHandle;
 uint32_t limit_swBuffer[ 256 ];
 osStaticThreadDef_t limit_swControlBlock;
+osThreadId_t rece_resultHandle;
+uint32_t rece_resultBuffer[ 512 ];
+osStaticThreadDef_t rece_resultControlBlock;
 osMessageQueueId_t send_queueHandle;
 uint8_t send_queueBuffer[ 256 * sizeof( QUEUE_STRUCT ) ];
 osStaticMessageQDef_t send_queueControlBlock;
@@ -196,6 +199,7 @@ void start_tk_zero_monitor(void *argument);
 void start_tk_co_order(void *argument);
 void start_tk_master_order(void *argument);
 void start_tk_limit_sw(void *argument);
+void start_tk_rece_result(void *argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -397,6 +401,17 @@ osKernelInitialize();
   };
   limit_swHandle = osThreadNew(start_tk_limit_sw, NULL, &limit_sw_attributes);
 
+  /* definition and creation of rece_result */
+  const osThreadAttr_t rece_result_attributes = {
+    .name = "rece_result",
+    .stack_mem = &rece_resultBuffer[0],
+    .stack_size = sizeof(rece_resultBuffer),
+    .cb_mem = &rece_resultControlBlock,
+    .cb_size = sizeof(rece_resultControlBlock),
+    .priority = (osPriority_t) osPriorityAboveNormal3,
+  };
+  rece_resultHandle = osThreadNew(start_tk_rece_result, NULL, &rece_result_attributes);
+
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
 	//启动软件定时器
@@ -440,6 +455,7 @@ void StartDefaultTask(void *argument)
 	    printf("%s\n",tklog);
 	    vTaskGetRunTimeStats((char *)&tklog);
 	    printf("%s\n",tklog);
+			
 			;
 		}
     osDelay(1);
@@ -914,6 +930,35 @@ void start_tk_limit_sw(void *argument)
     osDelay(1);
   }
   /* USER CODE END start_tk_limit_sw */
+}
+
+/* USER CODE BEGIN Header_start_tk_rece_result */
+/**
+* @brief Function implementing the rece_result thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_start_tk_rece_result */
+void start_tk_rece_result(void *argument)
+{
+  /* USER CODE BEGIN start_tk_rece_result */
+	uint32_t notify_use=0;
+  /* Infinite loop */
+  for(;;)
+  {
+		xTaskNotifyWait( 0x00,               /* Don't clear any bits on entry. */
+                         0xffffffff,          /* Clear all bits on exit. */
+                         &notify_use, /* Receives the notification value. */
+                         portMAX_DELAY );
+		#ifdef DEBUG_OUTPUT
+		printf("%s\n","start tk rece result");
+		#endif
+		//485 结果确认，查找并比对链表中目标地址，启动电机
+		
+		modbus_status=0;
+    osDelay(1);
+  }
+  /* USER CODE END start_tk_rece_result */
 }
 
 /* Private application code --------------------------------------------------*/
