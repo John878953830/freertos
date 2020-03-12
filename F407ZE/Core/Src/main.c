@@ -39,6 +39,7 @@ uint32_t timer_period=1000;
 xTimerHandle broadcast_timer;
 
 uint16_t iic_cache=0;
+uint8_t send_cache[8];
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -1210,7 +1211,7 @@ uint8_t modbus_send(QUEUE_STRUCT send_struct)
 	if(send_struct.modbus_func == 0x03 || send_struct.modbus_func == 0x06)
 	{
 		taskENTER_CRITICAL();
-		uint8_t send_cache[8];
+		
 		send_cache[0]=1;
 		send_cache[1]=6;
 		send_cache[2]=0;
@@ -1222,9 +1223,9 @@ uint8_t modbus_send(QUEUE_STRUCT send_struct)
 		send_cache[7]=(uint8_t)(send_struct.modbus_crc >> 8);
 		
 		HAL_GPIO_WritePin(GPIOG,GPIO_PIN_6,GPIO_PIN_SET);
-		//HAL_UART_Transmit_DMA(&huart2,(uint8_t*)send_cache,8);
+		HAL_UART_Transmit_DMA(&huart2,(uint8_t*)send_cache,8);
 		
-		HAL_UART_Transmit_IT(&huart2,(uint8_t*)send_cache,8);
+		//HAL_UART_Transmit_IT(&huart2,(uint8_t*)send_cache,8);
 		/*
 		int i=0;
 		for(i=0;i<8;i++)
@@ -1244,11 +1245,7 @@ uint8_t modbus_send(QUEUE_STRUCT send_struct)
 	return 0;
 }
 
-//IIC 发送
-uint8_t iic_send(uint8_t* data)
-{
-	return 0;
-}
+
 
 //电机目标设置
 uint8_t positionSet(uint8_t motorId, int32_t * position)
