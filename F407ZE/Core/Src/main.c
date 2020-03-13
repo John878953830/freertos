@@ -1331,6 +1331,7 @@ uint8_t modbus_send(QUEUE_STRUCT send_struct)
 		if(send_struct.modbus_func == 0x10)
 		{
 			HAL_GPIO_WritePin(GPIOG,GPIO_PIN_6,GPIO_PIN_SET);
+			GPIO_PinState tmpread=HAL_GPIO_ReadPin(GPIOG,GPIO_PIN_6);
 			send_cache[0]=send_struct.modbus_addr;
 			send_cache[1]=send_struct.modbus_func;
 			send_cache[2]=send_struct.modbus_addr_h;
@@ -1528,7 +1529,8 @@ int main(void)
 	{
 		printf("%s\n","modbus list error");
 	}
-	
+	//Ä¬ÈÏÖÃÓÚ·¢ËÍ×´Ì¬
+	HAL_GPIO_WritePin(GPIOG,GPIO_PIN_6,GPIO_PIN_SET);
 	printf("%s\n","start free rtos");
 	
   /* USER CODE END 2 */
