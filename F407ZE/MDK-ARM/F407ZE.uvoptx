@@ -167,6 +167,22 @@
           <ExecCommand></ExecCommand>
           <Expression>\\F407ZE\../Core/Src/main.c\968</Expression>
         </Bp>
+        <Bp>
+          <Number>1</Number>
+          <Type>0</Type>
+          <LineNumber>1311</LineNumber>
+          <EnabledFlag>1</EnabledFlag>
+          <Address>134240618</Address>
+          <ByteObject>0</ByteObject>
+          <HtxType>0</HtxType>
+          <ManyObjects>0</ManyObjects>
+          <SizeOfObject>0</SizeOfObject>
+          <BreakByAccess>0</BreakByAccess>
+          <BreakIfRCount>1</BreakIfRCount>
+          <Filename>../Core/Src/main.c</Filename>
+          <ExecCommand></ExecCommand>
+          <Expression>\\F407ZE\../Core/Src/main.c\1311</Expression>
+        </Bp>
       </Breakpoint>
       <WatchWindow1>
         <Ww>
@@ -183,6 +199,16 @@
           <count>2</count>
           <WinNumber>1</WinNumber>
           <ItemText>modbus_list_head</ItemText>
+        </Ww>
+        <Ww>
+          <count>3</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>TxHeader</ItemText>
+        </Ww>
+        <Ww>
+          <count>4</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>send_struct</ItemText>
         </Ww>
       </WatchWindow1>
       <MemoryWindow1>
@@ -232,6 +258,10 @@
       <pSingCmds></pSingCmds>
       <pMultCmds></pMultCmds>
       <SystemViewers>
+        <Entry>
+          <Name>System Viewer\CAN1</Name>
+          <WinId>35904</WinId>
+        </Entry>
         <Entry>
           <Name>System Viewer\USART2</Name>
           <WinId>35905</WinId>
