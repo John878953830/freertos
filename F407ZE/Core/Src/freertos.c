@@ -139,7 +139,7 @@ osThreadId_t limit_swHandle;
 uint32_t limit_swBuffer[ 256 ];
 osStaticThreadDef_t limit_swControlBlock;
 osThreadId_t rece_resultHandle;
-uint32_t rece_resultBuffer[ 512 ];
+uint32_t rece_resultBuffer[ 128 ];
 osStaticThreadDef_t rece_resultControlBlock;
 osMessageQueueId_t send_queueHandle;
 uint8_t send_queueBuffer[ 256 * sizeof( QUEUE_STRUCT ) ];
@@ -455,8 +455,6 @@ void StartDefaultTask(void *argument)
 	    printf("%s\n",tklog);
 	    vTaskGetRunTimeStats((char *)&tklog);
 	    printf("%s\n",tklog);
-			uint8_t c0=0;
-	    float u=3000/c0;
 			;
 		}
     osDelay(1);
@@ -943,20 +941,9 @@ void start_tk_limit_sw(void *argument)
 void start_tk_rece_result(void *argument)
 {
   /* USER CODE BEGIN start_tk_rece_result */
-	uint32_t notify_use=0;
   /* Infinite loop */
   for(;;)
   {
-		xTaskNotifyWait( 0x00,               /* Don't clear any bits on entry. */
-                         0xffffffff,          /* Clear all bits on exit. */
-                         &notify_use, /* Receives the notification value. */
-                         portMAX_DELAY );
-		#ifdef DEBUG_OUTPUT
-		printf("%s\n","start tk rece result");
-		#endif
-		//485 结果确认，查找并比对链表中目标地址，启动电机
-		
-		modbus_status=0;
     osDelay(1);
   }
   /* USER CODE END start_tk_rece_result */
