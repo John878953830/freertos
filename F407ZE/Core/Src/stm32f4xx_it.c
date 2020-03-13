@@ -639,16 +639,16 @@ void TIM8_BRK_TIM12_IRQHandler(void)
   /* USER CODE BEGIN TIM8_BRK_TIM12_IRQn 0 */
 	if(__HAL_TIM_GET_FLAG(&htim12,TIM_FLAG_UPDATE)==SET)
 	{
-		HAL_GPIO_TogglePin(GPIOE,GPIO_PIN_3);
-		HAL_TIM_Base_Stop(&htim12);
-		modbus_period+=100;
-		TIM12->ARR=modbus_period;
+		//HAL_GPIO_TogglePin(GPIOE,GPIO_PIN_3);
+		//HAL_TIM_Base_Stop(&htim12);
+		//modbus_period+=100;
+		//TIM12->ARR=modbus_period;
 	}
   /* USER CODE END TIM8_BRK_TIM12_IRQn 0 */
   HAL_TIM_IRQHandler(&htim8);
   HAL_TIM_IRQHandler(&htim12);
   /* USER CODE BEGIN TIM8_BRK_TIM12_IRQn 1 */
-	HAL_TIM_Base_Start_IT(&htim12);
+	//HAL_TIM_Base_Start_IT(&htim12);
   /* USER CODE END TIM8_BRK_TIM12_IRQn 1 */
 }
 

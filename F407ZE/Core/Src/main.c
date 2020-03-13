@@ -1345,7 +1345,6 @@ uint8_t modbus_send(QUEUE_STRUCT send_struct)
 			send_struct.modbus_crc=usMBCRC16(send_cache,11);
 			send_cache[11]=(uint8_t)(send_struct.modbus_crc & 0xFF);
 			send_cache[12]=(uint8_t)(send_struct.modbus_crc >> 8);
-			
 			HAL_UART_Transmit_DMA(&huart2,(uint8_t*)send_cache,13);
 			rece_count=8;
 			modbus_status=1;
@@ -1518,7 +1517,7 @@ int main(void)
 	HAL_DMA_Init(&hdma_usart2_rx);
 	modbus_list_head=modbus_list_gen(256);
 	
-	HAL_TIM_Base_Start_IT(&htim12);
+	//HAL_TIM_Base_Start_IT(&htim12);
 	
 	
 	if(modbus_list_head!=NULL)

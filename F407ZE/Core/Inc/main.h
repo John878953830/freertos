@@ -66,6 +66,14 @@ extern uint32_t timer_period;
 extern xTimerHandle broadcast_timer;
 //IIC长度缓存
 extern uint16_t iic_cache;
+//串口DMA句柄
+extern DMA_HandleTypeDef hdma_usart2_tx;
+extern DMA_HandleTypeDef hdma_usart2_rx;
+//modbus cache
+extern uint8_t send_cache[16];
+extern uint8_t rece_cache[16];
+extern uint8_t rece_count; 
+extern uint8_t modbus_status;
 /* USER CODE END EC */
 
 /* Exported macro ------------------------------------------------------------*/
@@ -122,6 +130,8 @@ extern uint16_t iic_cache;
 #define ERROR_COMMAND_28_FAIL   0x22
 #define ERROR_COMMAND_29_FAIL   0x23
 #define ERROR_EEPROM_FAIL       0x24
+#define MODBUS_BUSY             0x25
+#define MODBUS_LIST_ERROR       0x26
 
 //帧结构掩码
 #define MASK_PRIORITY           (uint32_t)(0x07 << 26)
@@ -140,8 +150,11 @@ extern uint16_t iic_cache;
 #define GRATING_POWER_PIN       GPIO_PIN_3
 
 #define IIC_ADDRESS             0xA0
-
 #define EEPROM_CONFIG_LENGTH    0xF0
+
+//电机指令地址
+#define P412_H                  (uint16_t)1824
+#define P412_L                  (uint16_t)1825
 /* USER CODE END EM */
 
 /* Exported functions prototypes ---------------------------------------------*/
@@ -189,7 +202,7 @@ uint8_t iic_rw(uint8_t rw_flag, uint8_t addr,uint8_t* data,uint8_t length);
 typedef struct list_struct{
 	uint8_t command_id;                         //CAN 命令ID
 	uint8_t command_status;                     //命令状态， 0： 未执行， 1： 执行中  2：执行完成
-	struct LIST_STRUCT * next;
+	struct list_struct* next;
 }LIST;
 typedef struct can_struct{
 	uint32_t exid;                              //扩展ID
@@ -209,13 +222,23 @@ typedef struct queue_struct{
 	uint8_t can_version;                        //can 版本号
 	uint8_t modbus_addr;                        //485 模块地址
 	uint8_t modbus_func;                        //485 功能码
-	uint8_t modbus_data_addr_h;                  //485 数据地址
-	uint8_t modbus_data_addr_l; 
-	uint8_t modbus_data_h;                       //485 数据
-	uint8_t modbus_data_l;   
+	uint8_t modbus_addr_h;                      //485 数据地址高字节
+	uint8_t modbus_addr_l;
+	uint8_t modbus_data_len_h;                    //数据长度
+	uint8_t modbus_data_len_l;
+	uint8_t modbus_data_byte;
+	uint8_t modbus_data_1;                      //485 数据最低字节
+	uint8_t modbus_data_2; 
+	uint8_t modbus_data_3;             
+	uint8_t modbus_data_4;   
 	uint16_t modbus_crc;                        //485 CRC
 	CAN_RxHeaderTypeDef   RxHeader;             //CAN 接收报头数据
 }QUEUE_STRUCT;
+typedef struct modbus_list{
+	QUEUE_STRUCT modbus_element;
+	uint8_t if_over;                            //标志本节点是否有效
+	struct modbus_list* next;
+}MODBUS_LIST;
 typedef struct command_struct{
 	uint8_t command_id;                         //当前执行的命令ID， 初始化为0
 	CAN_STRUCT command_id_history[20];          //执行的命令的历史数据，该变量备用
@@ -342,6 +365,8 @@ extern MOTOR_STRUCT motor_array[4];
 uint8_t can_send(QUEUE_STRUCT send_struct);
 uint8_t modbus_send(QUEUE_STRUCT send_struct);
 extern int(*command_to_function[27])(uint8_t*,uint32_t);
+extern MODBUS_LIST* modbus_list_head;
+extern MODBUS_LIST* modbus_list_tail;
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus
