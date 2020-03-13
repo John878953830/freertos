@@ -419,6 +419,7 @@ osKernelInitialize();
 	timer_start();
 	can_start();
 	
+	
   /* USER CODE END RTOS_THREADS */
 
 }
@@ -454,7 +455,8 @@ void StartDefaultTask(void *argument)
 	    printf("%s\n",tklog);
 	    vTaskGetRunTimeStats((char *)&tklog);
 	    printf("%s\n",tklog);
-			
+			uint8_t c0=0;
+	    float u=3000/c0;
 			;
 		}
     osDelay(1);
