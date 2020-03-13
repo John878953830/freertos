@@ -211,9 +211,6 @@ unsigned long getRunTimeCounterValue(void);
 /* Functions needed when configGENERATE_RUN_TIME_STATS is on */
 __weak void configureTimerForRunTimeStats(void)
 {
-	//ulHighFrequencyTimerTicks=0;
-	return;
-
 }
 
 __weak unsigned long getRunTimeCounterValue(void)

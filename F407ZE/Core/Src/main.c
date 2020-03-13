@@ -1512,11 +1512,13 @@ int main(void)
 	
 	//初始化信号量
 	lock_init();
+	
 	HAL_DMA_DeInit(&hdma_usart2_tx);
 	HAL_DMA_Init(&hdma_usart2_tx);
 	HAL_DMA_DeInit(&hdma_usart2_rx);
 	HAL_DMA_Init(&hdma_usart2_rx);
-	modbus_list_head=modbus_list_gen(256);
+	
+	modbus_list_head=modbus_list_gen(128);
 	
 	//HAL_TIM_Base_Start_IT(&htim12);
 	
