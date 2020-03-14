@@ -54,3 +54,4 @@ f407ze\i2c.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/queue.h
 f407ze\i2c.o: D:\Keil_v5\ARM\ARMCC\Bin\..\include\string.h
 f407ze\i2c.o: ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.h
 f407ze\i2c.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/timers.h
+f407ze\i2c.o: ../Core/Inc/tim.h

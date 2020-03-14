@@ -102,7 +102,7 @@ extern TaskHandle_t posture_monitorHandle;
 extern TaskHandle_t commu_mornitorHandle;
 extern TaskHandle_t send_orderHandle;
 extern TaskHandle_t master_orderHandle;
-extern TaskHandle_t rece_resultHandle;
+extern TaskHandle_t result_processHandle;
 
 
 extern uint16_t modbus_period;
@@ -280,11 +280,7 @@ void EXTI4_IRQHandler(void)
 void DMA1_Stream5_IRQHandler(void)
 {
   /* USER CODE BEGIN DMA1_Stream5_IRQn 0 */
-	if(rece_resultHandle!=NULL)
-	{
-		xTaskNotifyFromISR(rece_resultHandle,0x0001,eSetBits,&b_tk_rece_result);
-		portYIELD_FROM_ISR( b_tk_rece_result );
-	}
+
   /* USER CODE END DMA1_Stream5_IRQn 0 */
   HAL_DMA_IRQHandler(&hdma_usart2_rx);
   /* USER CODE BEGIN DMA1_Stream5_IRQn 1 */
@@ -298,8 +294,17 @@ void DMA1_Stream5_IRQHandler(void)
 void DMA1_Stream6_IRQHandler(void)
 {
   /* USER CODE BEGIN DMA1_Stream6_IRQn 0 */
-	HAL_GPIO_WritePin(GPIOG,GPIO_PIN_6,GPIO_PIN_RESET);
-	HAL_UART_Receive_DMA(&huart2,(uint8_t*)rece_cache,rece_count);
+
+	if(result_processHandle !=NULL)
+	{
+		#ifdef DEBUG_OUTPUT
+		printf("%s\n","dma transmit over");
+		#endif
+		xTaskNotifyFromISR(result_processHandle,0x0001,eSetBits,&b_tk_rece_result);
+		//HAL_UART_AbortTransmit(&huart2);
+		portYIELD_FROM_ISR( b_tk_rece_result );
+	}
+	HAL_UART_Receive_DMA(&huart2,rece_cache,rece_count);
   /* USER CODE END DMA1_Stream6_IRQn 0 */
   HAL_DMA_IRQHandler(&hdma_usart2_tx);
   /* USER CODE BEGIN DMA1_Stream6_IRQn 1 */
@@ -637,18 +642,30 @@ void EXTI15_10_IRQHandler(void)
 void TIM8_BRK_TIM12_IRQHandler(void)
 {
   /* USER CODE BEGIN TIM8_BRK_TIM12_IRQn 0 */
-	if(__HAL_TIM_GET_FLAG(&htim12,TIM_FLAG_UPDATE)==SET)
+	if(__HAL_TIM_GET_FLAG(&htim12, TIM_FLAG_UPDATE) != RESET)
 	{
 		//HAL_GPIO_TogglePin(GPIOE,GPIO_PIN_3);
 		//HAL_TIM_Base_Stop(&htim12);
 		//modbus_period+=100;
 		//TIM12->ARR=modbus_period;
+		HAL_GPIO_WritePin(GPIOG,GPIO_PIN_6,GPIO_PIN_RESET);
+		//GPIOG->ODR&=(~(1<<6));
+		if(result_processHandle!=NULL)
+		{
+			if(modbus_time_flag==1)
+			{
+				xTaskNotifyFromISR(result_processHandle,0x0011,eSetBits,&b_tk_rece_result);
+				portYIELD_FROM_ISR( b_tk_rece_result );
+			}
+		}
 	}
   /* USER CODE END TIM8_BRK_TIM12_IRQn 0 */
   HAL_TIM_IRQHandler(&htim8);
   HAL_TIM_IRQHandler(&htim12);
   /* USER CODE BEGIN TIM8_BRK_TIM12_IRQn 1 */
 	//HAL_TIM_Base_Start_IT(&htim12);
+	
+	HAL_TIM_Base_Stop(&htim12);
   /* USER CODE END TIM8_BRK_TIM12_IRQn 1 */
 }
 

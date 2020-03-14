@@ -41,6 +41,7 @@ extern CAN_RxHeaderTypeDef   RxHeader;
 
 extern CAN_HandleTypeDef hcan1;
 extern I2C_HandleTypeDef hi2c1;
+
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -138,9 +139,9 @@ osStaticThreadDef_t master_orderControlBlock;
 osThreadId_t limit_swHandle;
 uint32_t limit_swBuffer[ 256 ];
 osStaticThreadDef_t limit_swControlBlock;
-osThreadId_t rece_resultHandle;
-uint32_t rece_resultBuffer[ 128 ];
-osStaticThreadDef_t rece_resultControlBlock;
+osThreadId_t result_processHandle;
+uint32_t result_processBuffer[ 128 ];
+osStaticThreadDef_t result_processControlBlock;
 osMessageQueueId_t send_queueHandle;
 uint8_t send_queueBuffer[ 256 * sizeof( QUEUE_STRUCT ) ];
 osStaticMessageQDef_t send_queueControlBlock;
@@ -199,7 +200,7 @@ void start_tk_zero_monitor(void *argument);
 void start_tk_co_order(void *argument);
 void start_tk_master_order(void *argument);
 void start_tk_limit_sw(void *argument);
-void start_tk_rece_result(void *argument);
+void start_tk_result_process(void *argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -400,16 +401,16 @@ osKernelInitialize();
   };
   limit_swHandle = osThreadNew(start_tk_limit_sw, NULL, &limit_sw_attributes);
 
-  /* definition and creation of rece_result */
-  const osThreadAttr_t rece_result_attributes = {
-    .name = "rece_result",
-    .stack_mem = &rece_resultBuffer[0],
-    .stack_size = sizeof(rece_resultBuffer),
-    .cb_mem = &rece_resultControlBlock,
-    .cb_size = sizeof(rece_resultControlBlock),
+  /* definition and creation of result_process */
+  const osThreadAttr_t result_process_attributes = {
+    .name = "result_process",
+    .stack_mem = &result_processBuffer[0],
+    .stack_size = sizeof(result_processBuffer),
+    .cb_mem = &result_processControlBlock,
+    .cb_size = sizeof(result_processControlBlock),
     .priority = (osPriority_t) osPriorityAboveNormal3,
   };
-  rece_resultHandle = osThreadNew(start_tk_rece_result, NULL, &rece_result_attributes);
+  result_processHandle = osThreadNew(start_tk_result_process, NULL, &result_process_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -931,22 +932,51 @@ void start_tk_limit_sw(void *argument)
   /* USER CODE END start_tk_limit_sw */
 }
 
-/* USER CODE BEGIN Header_start_tk_rece_result */
+/* USER CODE BEGIN Header_start_tk_result_process */
 /**
-* @brief Function implementing the rece_result thread.
+* @brief Function implementing the result_process thread.
 * @param argument: Not used
 * @retval None
 */
-/* USER CODE END Header_start_tk_rece_result */
-void start_tk_rece_result(void *argument)
+/* USER CODE END Header_start_tk_result_process */
+void start_tk_result_process(void *argument)
 {
-  /* USER CODE BEGIN start_tk_rece_result */
+  /* USER CODE BEGIN start_tk_result_process */
+	uint32_t notify_use=0;
   /* Infinite loop */
   for(;;)
   {
+		xTaskNotifyWait( 0x00,               /* Don't clear any bits on entry. */
+                         0xffffffff,          /* Clear all bits on exit. */
+                         &notify_use, /* Receives the notification value. */
+                         portMAX_DELAY );
+		if(notify_use!=0)
+		{
+			if(notify_use==0x0001)
+			{
+				//传输完成， 开启定时器， 3.5T后变换电平
+				modbus_time_flag=1;
+				__HAL_TIM_CLEAR_FLAG(&htim12,TIM_FLAG_UPDATE);
+				HAL_TIM_Base_Start_IT(&htim12);
+				;
+			}
+			if(notify_use==0x0002)
+			{
+				//dma 接收完成
+				;
+			}
+			if(notify_use==0x0011)
+			{
+				//第一段定时时间到
+				
+				
+				modbus_time_flag=2;
+			}
+			notify_use=0;
+		}
     osDelay(1);
   }
-  /* USER CODE END start_tk_rece_result */
+  /* USER CODE END start_tk_result_process */
 }
 
 /* Private application code --------------------------------------------------*/

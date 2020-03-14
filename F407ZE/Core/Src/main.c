@@ -48,6 +48,7 @@ uint8_t modbus_status=0;        //modbus 状态参量， 0： 空闲 1：传输中
 uint8_t modbus_read_status;     //modbus 读取指令完成标志， 0： 空闲 1：读取进行中 2：读取完成
 uint8_t modbus_act_status;      //modbus 电机动作完成标志， 0：空闲， 1：动作指令交互中 2： 动作指令交互完成
 uint8_t modbus_time_status;     //modbus 超时标志， 0：空闲， 1：交互超时 2：交互完成
+uint8_t modbus_time_flag=0;       //modbus  定时时间标志  1： 第一次3.5T定时  1：第二次3.5T定时
 
 MODBUS_LIST* modbus_list_head=NULL;  //head 指向寻找到的第一个不为空的节点
 MODBUS_LIST* modbus_list_tail=NULL;  //tail 指向不为空的节点的下一个节点
@@ -606,8 +607,8 @@ int command_8(uint8_t* data,uint32_t para)
 		tmp.property=1;                            //485 send
 		tmp.modbus_addr=data[0];
 		tmp.modbus_func=0x10;                      //写多个寄存器
-		tmp.modbus_addr_h=(uint8_t)(P412_H>>8);
-		tmp.modbus_addr_l=(uint8_t)(P412_H&0xFF);                   //电机485地址
+		tmp.modbus_addr_h=(uint8_t)(1008>>8);
+		tmp.modbus_addr_l=(uint8_t)(1008&0xFF);                   //电机485地址
 		//tmp.modbus_addr_h=0x03;
 		//tmp.modbus_addr_l=0xF2;
 		tmp.modbus_data_len_h=0x00;
@@ -677,8 +678,8 @@ int command_9(uint8_t* data,uint32_t para)
 		tmp.property=1;                            //485 send
 		tmp.modbus_addr=data[0];
 		tmp.modbus_func=0x03;                      //读多个寄存器
-		tmp.modbus_addr_h=(uint8_t)(P412_H>>8);
-		tmp.modbus_addr_l=(uint8_t)(P412_H&0xFF);  //电机485地址
+		tmp.modbus_addr_h=(uint8_t)(4004>>8);
+		tmp.modbus_addr_l=(uint8_t)(4004&0xFF);  //电机485地址
 		//tmp.modbus_addr_h=0x03;
 		//tmp.modbus_addr_l=0xF2;
 		tmp.modbus_data_len_h=0x00;
@@ -914,6 +915,8 @@ void timer_start()
 	
 	//开启任务统计定时器14
 	HAL_TIM_Base_Start_IT(&htim14);
+	
+	//HAL_TIM_Base_Start_IT(&htim12);
 	return;
 }
 
@@ -1332,6 +1335,7 @@ uint8_t modbus_send(QUEUE_STRUCT send_struct)
 		{
 			HAL_GPIO_WritePin(GPIOG,GPIO_PIN_6,GPIO_PIN_SET);
 			GPIO_PinState tmpread=HAL_GPIO_ReadPin(GPIOG,GPIO_PIN_6);
+			taskENTER_CRITICAL();
 			send_cache[0]=send_struct.modbus_addr;
 			send_cache[1]=send_struct.modbus_func;
 			send_cache[2]=send_struct.modbus_addr_h;
@@ -1349,11 +1353,13 @@ uint8_t modbus_send(QUEUE_STRUCT send_struct)
 			HAL_UART_Transmit_DMA(&huart2,(uint8_t*)send_cache,13);
 			rece_count=8;
 			modbus_status=1;
+			taskEXIT_CRITICAL();
 		}
 		//读寄存器
 		if(send_struct.modbus_func==0x03)
 		{
 			HAL_GPIO_WritePin(GPIOG,GPIO_PIN_6,GPIO_PIN_SET);
+			taskENTER_CRITICAL();
 			send_cache[0]=send_struct.modbus_addr;
 			send_cache[1]=send_struct.modbus_func;
 			send_cache[2]=send_struct.modbus_addr_h;
@@ -1366,6 +1372,7 @@ uint8_t modbus_send(QUEUE_STRUCT send_struct)
 			HAL_UART_Transmit_DMA(&huart2,(uint8_t*)send_cache,8);
 			rece_count=9;
 			modbus_status=1;
+			taskEXIT_CRITICAL();
 		}
 	}
 	else
@@ -1517,6 +1524,9 @@ int main(void)
 	HAL_DMA_Init(&hdma_usart2_tx);
 	HAL_DMA_DeInit(&hdma_usart2_rx);
 	HAL_DMA_Init(&hdma_usart2_rx);
+	
+	HAL_TIM_Base_DeInit(&htim12);
+	HAL_TIM_Base_Init(&htim12);
 	
 	modbus_list_head=modbus_list_gen(128);
 	

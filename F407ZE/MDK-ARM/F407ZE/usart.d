@@ -53,3 +53,5 @@ f407ze\usart.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/queue.h
 f407ze\usart.o: D:\Keil_v5\ARM\ARMCC\Bin\..\include\string.h
 f407ze\usart.o: ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.h
 f407ze\usart.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/timers.h
+f407ze\usart.o: ../Core/Inc/tim.h
+f407ze\usart.o: ../Core/Inc/main.h
