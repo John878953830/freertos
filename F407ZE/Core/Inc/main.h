@@ -369,7 +369,9 @@ typedef struct gpio_table{
 extern MOTOR_STRUCT motor_array[4];
 uint8_t can_send(QUEUE_STRUCT send_struct);
 uint8_t modbus_send(QUEUE_STRUCT send_struct);
+uint8_t modbus_send_sub(QUEUE_STRUCT send_struct);
 extern int(*command_to_function[27])(uint8_t*,uint32_t);
+extern uint16_t usMBCRC16( uint8_t * pucFrame, uint16_t usLen );
 extern MODBUS_LIST* modbus_list_head;
 extern MODBUS_LIST* modbus_list_tail;
 /* USER CODE END Private defines */

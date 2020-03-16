@@ -280,7 +280,15 @@ void EXTI4_IRQHandler(void)
 void DMA1_Stream5_IRQHandler(void)
 {
   /* USER CODE BEGIN DMA1_Stream5_IRQn 0 */
-
+	if(result_processHandle !=NULL)
+	{
+		#ifdef DEBUG_OUTPUT
+		printf("%s\n","dma transmit over");
+		#endif
+		xTaskNotifyFromISR(result_processHandle,0x0002,eSetBits,&b_tk_rece_result);
+		//HAL_UART_AbortTransmit(&huart2);
+		portYIELD_FROM_ISR( b_tk_rece_result );
+	}
   /* USER CODE END DMA1_Stream5_IRQn 0 */
   HAL_DMA_IRQHandler(&hdma_usart2_rx);
   /* USER CODE BEGIN DMA1_Stream5_IRQn 1 */
@@ -655,6 +663,11 @@ void TIM8_BRK_TIM12_IRQHandler(void)
 			if(modbus_time_flag==1)
 			{
 				xTaskNotifyFromISR(result_processHandle,0x0011,eSetBits,&b_tk_rece_result);
+				portYIELD_FROM_ISR( b_tk_rece_result );
+			}
+			if(modbus_time_flag==2)
+			{
+				xTaskNotifyFromISR(result_processHandle,0x0012,eSetBits,&b_tk_rece_result);
 				portYIELD_FROM_ISR( b_tk_rece_result );
 			}
 		}

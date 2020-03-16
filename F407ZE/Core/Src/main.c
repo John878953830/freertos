@@ -149,6 +149,63 @@ uint16_t usMBCRC16( uint8_t * pucFrame, uint16_t usLen )
     }
     return ( uint16_t )( ucCRCHi << 8 | ucCRCLo );
 }
+
+
+//命令序列
+QUEUE_STRUCT command_seq[4]=
+{
+	{
+		.property=1,                          //485 send
+		.modbus_addr=0,                       //电机号需要根据命令中的电机号赋值
+		.modbus_func=0x03,                    //读多个寄存器
+		.modbus_addr_h=(uint8_t)(4004>>8),    //读当前脉冲位置
+		.modbus_addr_l=(uint8_t)(4004&0xFF),  
+		.modbus_data_len_h=0x00,
+		.modbus_data_len_l=0x02,
+	},
+	{
+		.property=1,                            //485 send
+		.modbus_addr=0,                       //电机号需要根据命令中的电机号赋值
+		.modbus_func=0x10,                    //写多个寄存器
+		.modbus_addr_h=(uint8_t)(3202>>8),
+		.modbus_addr_l=(uint8_t)(3202&0xFF),        //写目标位置
+		.modbus_data_len_h=0x00,
+		.modbus_data_len_l=0x02,
+		.modbus_data_byte=0x04,
+		.modbus_data_1=0,                      //先赋值为命令中的数值，当前位置读取成功后修改值
+		.modbus_data_2=0,                      //先赋值为命令中的数值，当前位置读取成功后修改值
+		.modbus_data_3=0,                      //先赋值为命令中的数值，当前位置读取成功后修改值
+		.modbus_data_4=0,                      //先赋值为命令中的数值，当前位置读取成功后修改值
+	},
+	{
+		.property=1,                            //485 send
+		.modbus_addr=0,                       //电机号需要根据命令中的电机号赋值
+		.modbus_func=0x10,                    //写多个寄存器
+		.modbus_addr_h=(uint8_t)(2040>>8),
+		.modbus_addr_l=(uint8_t)(2040&0xFF),        //写使能寄存器
+		.modbus_data_len_h=0x00,
+		.modbus_data_len_l=0x02,
+		.modbus_data_byte=0x04,
+		.modbus_data_1=0xFF,                      //使能寄存器全部写为FF
+		.modbus_data_2=0xFF,                      
+		.modbus_data_3=0xFF,                      
+		.modbus_data_4=0xFF,                      
+	},
+	{
+		.property=1,                            //485 send
+		.modbus_addr=0,                       //电机号需要根据命令中的电机号赋值
+		.modbus_func=0x10,                    //写多个寄存器
+		.modbus_addr_h=(uint8_t)(2040>>8),
+		.modbus_addr_l=(uint8_t)(2040&0xFF),        //写使能寄存器
+		.modbus_data_len_h=0x00,
+		.modbus_data_len_l=0x02,
+		.modbus_data_byte=0x04,
+		.modbus_data_1=0x00,                      //使能寄存器全部写为00
+		.modbus_data_2=0x00,                      
+		.modbus_data_3=0x00,                      
+		.modbus_data_4=0x00,
+	},
+};
 //0号指令，停止电机
 int command_0(uint8_t* data,uint32_t para)
 {
@@ -604,6 +661,7 @@ int command_8(uint8_t* data,uint32_t para)
 	else
 	{
 		//填充485发送结构体
+		/*
 		tmp.property=1;                            //485 send
 		tmp.modbus_addr=data[0];
 		tmp.modbus_func=0x10;                      //写多个寄存器
@@ -618,19 +676,88 @@ int command_8(uint8_t* data,uint32_t para)
 		tmp.modbus_data_2=data[4];
 		tmp.modbus_data_3=data[1];
 		tmp.modbus_data_4=data[2];
-		portBASE_TYPE status = xQueueSendToBack(send_queueHandle, &tmp, 0);
-		if(status!=pdPASS)
+		*/
+		//填充序列
+		command_seq[0].modbus_addr=data[0];           //地址赋值为电机号
+		command_seq[1].modbus_addr=data[0];
+		command_seq[2].modbus_addr=data[0];
+		command_seq[3].modbus_addr=data[0];
+		
+		//填充动作目标
+		command_seq[1].modbus_data_1=data[3];
+		command_seq[1].modbus_data_2=data[4];
+		command_seq[1].modbus_data_3=data[1];
+		command_seq[1].modbus_data_4=data[2];
+		
+		
+		//动作序列压入队列
+		//获取队列中的空闲位置数量
+		uint32_t space_left=uxQueueSpacesAvailable(send_queueHandle);
+		if(space_left<4)
 		{
-			#ifdef DEBUG_OUTPUT
-			printf("%s\n","queue overflow");
-			#endif
+			//发送队列已满，直接返回错误,未完成
+			;
 		}
 		else
 		{
-			#ifdef DEBUG_OUTPUT
-			printf("%s\n","send command 8 error to queue already");
-			#endif
+			//压入发送队列
+			portBASE_TYPE status = xQueueSendToBack(send_queueHandle, &command_seq[0], 0);
+			if(status!=pdPASS)
+			{
+				#ifdef DEBUG_OUTPUT
+				printf("%s\n","queue overflow");
+				#endif
+			}
+			else
+			{
+				#ifdef DEBUG_OUTPUT
+				printf("%s\n","send command 8 error to queue already");
+				#endif
+			}
+
+			status = xQueueSendToBack(send_queueHandle, &command_seq[1], 0);
+			if(status!=pdPASS)
+			{
+				#ifdef DEBUG_OUTPUT
+				printf("%s\n","queue overflow");
+				#endif
+			}
+			else
+			{
+				#ifdef DEBUG_OUTPUT
+				printf("%s\n","send command 8 error to queue already");
+				#endif
+			}
+			
+			status = xQueueSendToBack(send_queueHandle, &command_seq[2], 0);
+			if(status!=pdPASS)
+			{
+				#ifdef DEBUG_OUTPUT
+				printf("%s\n","queue overflow");
+				#endif
+			}
+			else
+			{
+				#ifdef DEBUG_OUTPUT
+				printf("%s\n","send command 8 error to queue already");
+				#endif
+			}
+			
+			status = xQueueSendToBack(send_queueHandle, &command_seq[3], 0);
+			if(status!=pdPASS)
+			{
+				#ifdef DEBUG_OUTPUT
+				printf("%s\n","queue overflow");
+				#endif
+			}
+			else
+			{
+				#ifdef DEBUG_OUTPUT
+				printf("%s\n","send command 8 error to queue already");
+				#endif
+			}
 		}
+		
 		
 	}
 	return 0;
@@ -1393,6 +1520,53 @@ uint8_t modbus_send(QUEUE_STRUCT send_struct)
 	return 0;
 }
 
+//485组回调函数
+uint8_t modbus_send_sub(QUEUE_STRUCT send_struct)
+{
+	//写寄存器
+	if(send_struct.modbus_func == 0x10)
+	{
+		HAL_GPIO_WritePin(GPIOG,GPIO_PIN_6,GPIO_PIN_SET);
+		GPIO_PinState tmpread=HAL_GPIO_ReadPin(GPIOG,GPIO_PIN_6);
+		taskENTER_CRITICAL();
+		send_cache[0]=send_struct.modbus_addr;
+		send_cache[1]=send_struct.modbus_func;
+		send_cache[2]=send_struct.modbus_addr_h;
+		send_cache[3]=send_struct.modbus_addr_l;
+		send_cache[4]=send_struct.modbus_data_len_h;
+		send_cache[5]=send_struct.modbus_data_len_l;
+		send_cache[6]=send_struct.modbus_data_byte;
+		send_cache[7]=send_struct.modbus_data_1;
+		send_cache[8]=send_struct.modbus_data_2;
+		send_cache[9]=send_struct.modbus_data_3;
+		send_cache[10]=send_struct.modbus_data_4;
+		send_struct.modbus_crc=usMBCRC16(send_cache,11);
+		send_cache[11]=(uint8_t)(send_struct.modbus_crc & 0xFF);
+		send_cache[12]=(uint8_t)(send_struct.modbus_crc >> 8);
+		HAL_UART_Transmit_DMA(&huart2,(uint8_t*)send_cache,13);
+		rece_count=8;
+		taskEXIT_CRITICAL();
+	}
+	//读寄存器
+	if(send_struct.modbus_func==0x03)
+	{
+		HAL_GPIO_WritePin(GPIOG,GPIO_PIN_6,GPIO_PIN_SET);
+		taskENTER_CRITICAL();
+		send_cache[0]=send_struct.modbus_addr;
+		send_cache[1]=send_struct.modbus_func;
+		send_cache[2]=send_struct.modbus_addr_h;
+		send_cache[3]=send_struct.modbus_addr_l;
+		send_cache[4]=send_struct.modbus_data_len_h;
+		send_cache[5]=send_struct.modbus_data_len_l;
+		send_struct.modbus_crc=usMBCRC16(send_cache,6);
+		send_cache[6]=(uint8_t)(send_struct.modbus_crc & 0xFF);
+		send_cache[7]=(uint8_t)(send_struct.modbus_crc >> 8);
+		HAL_UART_Transmit_DMA(&huart2,(uint8_t*)send_cache,8);
+		rece_count=9;
+		taskEXIT_CRITICAL();
+	}
+	return 0;
+}
 
 
 //电机目标设置
