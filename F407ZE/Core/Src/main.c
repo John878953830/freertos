@@ -629,6 +629,54 @@ int command_8(uint8_t* data,uint32_t para)
 	QUEUE_STRUCT tmp;
 	if(data[0]>4)
 	{
+		if(data[0]==0x11 || data[0]==0x12)
+		{
+			if(data[0]==0x11)
+			{
+				//启动电机，电机号2
+				QUEUE_STRUCT enable_motor;
+	
+				enable_motor.property=1;                            //485 send
+				enable_motor.modbus_addr=2;
+				enable_motor.modbus_func=0x10;                      //写多个寄存器
+				enable_motor.modbus_addr_h=(uint8_t)(1008>>8);
+				enable_motor.modbus_addr_l=(uint8_t)(1008&0xFF);                   //电机485地址
+				enable_motor.modbus_data_len_h=0x00;
+				enable_motor.modbus_data_len_l=0x02;
+				enable_motor.modbus_data_byte=0x04;
+				enable_motor.modbus_data_1=0x00;
+				enable_motor.modbus_data_2=0x01;
+				enable_motor.modbus_data_3=0x00;
+				enable_motor.modbus_data_4=0x00;
+				
+				modbus_send_sub(enable_motor);
+				;
+			}
+			if(data[0]==0x12)
+			{
+				//停止电机，电机号2
+				QUEUE_STRUCT enable_motor;
+	
+				enable_motor.property=1;                            //485 send
+				enable_motor.modbus_addr=2;
+				enable_motor.modbus_func=0x10;                      //写多个寄存器
+				enable_motor.modbus_addr_h=(uint8_t)(1008>>8);
+				enable_motor.modbus_addr_l=(uint8_t)(1008&0xFF);                   //电机485地址
+				enable_motor.modbus_data_len_h=0x00;
+				enable_motor.modbus_data_len_l=0x02;
+				enable_motor.modbus_data_byte=0x04;
+				enable_motor.modbus_data_1=0x00;
+				enable_motor.modbus_data_2=0x00;
+				enable_motor.modbus_data_3=0x00;
+				enable_motor.modbus_data_4=0x00;
+				
+				modbus_send_sub(enable_motor);
+				;
+			}
+			;
+		}
+		else{
+			
 		//索引错误
 		if(if_return==1)
 		{
@@ -656,7 +704,9 @@ int command_8(uint8_t* data,uint32_t para)
 				#endif
 			}
 		}
+	}
 		return ERROR_COMMAND_8_FAIL;
+	
 	}
 	else
 	{
