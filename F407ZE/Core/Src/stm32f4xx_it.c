@@ -656,20 +656,12 @@ void TIM8_BRK_TIM12_IRQHandler(void)
 		//HAL_TIM_Base_Stop(&htim12);
 		//modbus_period+=100;
 		//TIM12->ARR=modbus_period;
-		HAL_GPIO_WritePin(GPIOG,GPIO_PIN_6,GPIO_PIN_RESET);
+		//HAL_GPIO_WritePin(GPIOG,GPIO_PIN_6,GPIO_PIN_RESET);
 		//GPIOG->ODR&=(~(1<<6));
 		if(result_processHandle!=NULL)
 		{
-			if(modbus_time_flag==1)
-			{
-				xTaskNotifyFromISR(result_processHandle,0x0011,eSetBits,&b_tk_rece_result);
-				portYIELD_FROM_ISR( b_tk_rece_result );
-			}
-			if(modbus_time_flag==2)
-			{
-				xTaskNotifyFromISR(result_processHandle,0x0012,eSetBits,&b_tk_rece_result);
-				portYIELD_FROM_ISR( b_tk_rece_result );
-			}
+			xTaskNotifyFromISR(result_processHandle,0x0021,eSetBits,&b_tk_rece_result);
+			portYIELD_FROM_ISR( b_tk_rece_result );
 		}
 	}
   /* USER CODE END TIM8_BRK_TIM12_IRQn 0 */

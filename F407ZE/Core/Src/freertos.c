@@ -1024,56 +1024,55 @@ void start_tk_result_process(void *argument)
 		{
 			if(notify_use==0x0001)
 			{
-				//传输完成， 开启定时器， 3.5T后变换电平
-				modbus_time_flag=1;
-				__HAL_TIM_CLEAR_FLAG(&htim12,TIM_FLAG_UPDATE);
-				HAL_TIM_Base_Start_IT(&htim12);
-				;
+				
 			}
 			if(notify_use==0x0002)
 			{
 				//dma 接收完成
+				HAL_TIM_Base_Stop(&htim12);//停止定时
+				HAL_Delay(5);
 				//CRC数据校验
 				uint8_t crch=0;
 				uint8_t crcl=0;
 				uint16_t crc_tmp=usMBCRC16(rece_cache,rece_count - 2);
 				crcl=(uint8_t)(crc_tmp & 0xFF);
 				crch=(uint8_t)(crc_tmp >> 8);
-				
-				//if(crcl==rece_cache[rece_count-2] && crch==rece_cache[rece_count-1])
+				if(crcl==rece_cache[rece_count-2] && crch==rece_cache[rece_count-1])
 				{
+					while(modbus_time_flag!=0)
+					{
+						;
+					}
 					//开启定时
-					modbus_time_flag=2;
-					__HAL_TIM_CLEAR_FLAG(&htim12,TIM_FLAG_UPDATE);
-				  HAL_TIM_Base_Start_IT(&htim12);
+					//发送下一帧
+					
+					if(modbus_list_head!=NULL && modbus_list_head->if_over==1)
+					{
+						
+					}
+					else
+					{
+						//命令执行完成
+					}
 				}
-				//else
+				else
 				{
-					//收到的数据不对，重发或者报错，待完成
+					//收到的数据不对，重发或者报错，待完成\
+					
 					;
 				}
 			}
-			if(notify_use==0x0011)
+			if(notify_use==0x0021)
 			{
-				//第一段定时时间到
-				modbus_time_flag=2;
-				HAL_UART_Receive_DMA(&huart2,(uint8_t*)rece_cache,rece_count);
-			}
-			if(notify_use==0x0012)
-			{
-				//发送下一帧
-				modbus_status=0;
+				//接收超时，重发
+				while(modbus_time_flag!=0)
+				{
+					;
+				}
+				HAL_GPIO_WritePin(GPIOG,GPIO_PIN_6,GPIO_PIN_SET);
+				HAL_Delay(5);
+				modbus_send_sub(modbus_list_head->modbus_element);
 				modbus_time_flag=0;
-				if(modbus_list_head!=NULL && modbus_list_head->if_over==1)
-				{
-					modbus_list_head->if_over=0;
-				}
-				if(modbus_list_head->next!=NULL)
-				{
-					modbus_list_head=modbus_list_head->next;
-					modbus_send_sub(modbus_list_head->modbus_element);
-				}
-				;
 			}
 			notify_use=0;
 		}

@@ -3,7 +3,7 @@
 <title>Static Call Graph - [F407ZE\F407ZE.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image F407ZE\F407ZE.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060422: Last Updated: Mon Mar 16 15:53:21 2020
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060422: Last Updated: Wed Mar 18 14:43:34 2020
 <BR><P>
 <H3>Maximum Stack Usage =       1208 bytes + Unknown(Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -542,8 +542,8 @@ Global Symbols
 <P><STRONG><a name="[36]"></a>DMA1_Stream6_IRQHandler</STRONG> (Thumb, 78 bytes, Stack size 16 bytes, stm32f4xx_it.o(i.DMA1_Stream6_IRQHandler))
 <BR><BR>[Stack]<UL><LI>Max Depth = 76<LI>Call Chain = DMA1_Stream6_IRQHandler &rArr; HAL_UART_Receive_DMA &rArr; HAL_DMA_Start_IT &rArr; DMA_SetConfig
 </UL>
-<BR>[Calls]<UL><LI><a href="#[a5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_Receive_DMA
-<LI><a href="#[a3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xTaskGenericNotifyFromISR
+<BR>[Calls]<UL><LI><a href="#[a3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xTaskGenericNotifyFromISR
+<LI><a href="#[a5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_Receive_DMA
 <LI><a href="#[a4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_DMA_IRQHandler
 <LI><a href="#[a0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__2printf
 </UL>
@@ -854,6 +854,7 @@ Global Symbols
 <BR>[Calls]<UL><LI><a href="#[b9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_GetTick
 </UL>
 <BR>[Called By]<UL><LI><a href="#[15d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;iic_rw
+<LI><a href="#[8c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;start_tk_result_process
 <LI><a href="#[8b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;start_tk_limit_sw
 </UL>
 
@@ -906,8 +907,8 @@ Global Symbols
 <LI><a href="#[76]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 <LI><a href="#[1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_1
 <LI><a href="#[0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_0
+<LI><a href="#[8c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;start_tk_result_process
 <LI><a href="#[8b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;start_tk_limit_sw
-<LI><a href="#[50]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;TIM8_BRK_TIM12_IRQHandler
 </UL>
 
 <P><STRONG><a name="[b9]"></a>HAL_GetTick</STRONG> (Thumb, 6 bytes, Stack size 0 bytes, stm32f4xx_hal.o(i.HAL_GetTick))
@@ -1233,11 +1234,11 @@ Global Symbols
 <P><STRONG><a name="[ea]"></a>HAL_TIM_Base_Start_IT</STRONG> (Thumb, 34 bytes, Stack size 0 bytes, stm32f4xx_hal_tim.o(i.HAL_TIM_Base_Start_IT))
 <BR><BR>[Called By]<UL><LI><a href="#[12d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;timer_start
 <LI><a href="#[e6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_InitTick
-<LI><a href="#[8c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;start_tk_result_process
 </UL>
 
 <P><STRONG><a name="[14c]"></a>HAL_TIM_Base_Stop</STRONG> (Thumb, 44 bytes, Stack size 0 bytes, stm32f4xx_hal_tim.o(i.HAL_TIM_Base_Stop))
-<BR><BR>[Called By]<UL><LI><a href="#[50]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;TIM8_BRK_TIM12_IRQHandler
+<BR><BR>[Called By]<UL><LI><a href="#[8c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;start_tk_result_process
+<LI><a href="#[50]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;TIM8_BRK_TIM12_IRQHandler
 </UL>
 
 <P><STRONG><a name="[f3]"></a>HAL_TIM_ConfigClockSource</STRONG> (Thumb, 214 bytes, Stack size 16 bytes, stm32f4xx_hal_tim.o(i.HAL_TIM_ConfigClockSource))
@@ -1410,8 +1411,7 @@ Global Symbols
 </UL>
 <BR>[Calls]<UL><LI><a href="#[c7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_DMA_Start_IT
 </UL>
-<BR>[Called By]<UL><LI><a href="#[8c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;start_tk_result_process
-<LI><a href="#[36]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;DMA1_Stream6_IRQHandler
+<BR>[Called By]<UL><LI><a href="#[36]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;DMA1_Stream6_IRQHandler
 </UL>
 
 <P><STRONG><a name="[14e]"></a>HAL_UART_RxCpltCallback</STRONG> (Thumb, 2 bytes, Stack size 0 bytes, stm32f4xx_hal_uart.o(i.HAL_UART_RxCpltCallback))
@@ -1852,13 +1852,12 @@ Global Symbols
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> startup_stm32f407xx.o(RESET)
 </UL>
-<P><STRONG><a name="[50]"></a>TIM8_BRK_TIM12_IRQHandler</STRONG> (Thumb, 140 bytes, Stack size 32 bytes, stm32f4xx_it.o(i.TIM8_BRK_TIM12_IRQHandler))
-<BR><BR>[Stack]<UL><LI>Max Depth = 72<LI>Call Chain = TIM8_BRK_TIM12_IRQHandler &rArr; xTaskGenericNotifyFromISR &rArr; vPortValidateInterruptPriority
+<P><STRONG><a name="[50]"></a>TIM8_BRK_TIM12_IRQHandler</STRONG> (Thumb, 80 bytes, Stack size 8 bytes, stm32f4xx_it.o(i.TIM8_BRK_TIM12_IRQHandler))
+<BR><BR>[Stack]<UL><LI>Max Depth = 48<LI>Call Chain = TIM8_BRK_TIM12_IRQHandler &rArr; xTaskGenericNotifyFromISR &rArr; vPortValidateInterruptPriority
 </UL>
-<BR>[Calls]<UL><LI><a href="#[130]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_GPIO_WritePin
+<BR>[Calls]<UL><LI><a href="#[14c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_TIM_Base_Stop
 <LI><a href="#[a3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xTaskGenericNotifyFromISR
 <LI><a href="#[f8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_TIM_IRQHandler
-<LI><a href="#[14c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_TIM_Base_Stop
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> startup_stm32f407xx.o(RESET)
 </UL>
@@ -2438,15 +2437,16 @@ Global Symbols
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> freertos.o(i.MX_FREERTOS_Init)
 </UL>
-<P><STRONG><a name="[8c]"></a>start_tk_result_process</STRONG> (Thumb, 194 bytes, Stack size 56 bytes, freertos.o(i.start_tk_result_process))
-<BR><BR>[Stack]<UL><LI>Max Depth = 148<LI>Call Chain = start_tk_result_process &rArr; modbus_send_sub &rArr; HAL_UART_Transmit_DMA &rArr; HAL_DMA_Start_IT &rArr; DMA_SetConfig
+<P><STRONG><a name="[8c]"></a>start_tk_result_process</STRONG> (Thumb, 168 bytes, Stack size 48 bytes, freertos.o(i.start_tk_result_process))
+<BR><BR>[Stack]<UL><LI>Max Depth = 140<LI>Call Chain = start_tk_result_process &rArr; modbus_send_sub &rArr; HAL_UART_Transmit_DMA &rArr; HAL_DMA_Start_IT &rArr; DMA_SetConfig
 </UL>
-<BR>[Calls]<UL><LI><a href="#[ea]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_TIM_Base_Start_IT
+<BR>[Calls]<UL><LI><a href="#[130]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_GPIO_WritePin
+<LI><a href="#[c9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_Delay
 <LI><a href="#[16a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;usMBCRC16
 <LI><a href="#[15f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;modbus_send_sub
 <LI><a href="#[146]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xTaskNotifyWait
 <LI><a href="#[149]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osDelay
-<LI><a href="#[a5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_Receive_DMA
+<LI><a href="#[14c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_TIM_Base_Stop
 <LI><a href="#[129]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memcpy4
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> freertos.o(i.MX_FREERTOS_Init)
