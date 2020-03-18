@@ -53,6 +53,7 @@ BaseType_t b_tk_posture_monitor=pdTRUE;
 BaseType_t b_tk_commu_monitor=pdTRUE;
 BaseType_t b_tk_send_order=pdTRUE;
 BaseType_t b_tk_master_order=pdTRUE;
+BaseType_t b_tk_rece_result=pdTRUE;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -82,14 +83,16 @@ extern TIM_HandleTypeDef htim11;
 extern TIM_HandleTypeDef htim12;
 extern TIM_HandleTypeDef htim13;
 extern TIM_HandleTypeDef htim14;
+extern DMA_HandleTypeDef hdma_usart2_tx;
+extern DMA_HandleTypeDef hdma_usart2_rx;
 extern UART_HandleTypeDef huart4;
-extern UART_HandleTypeDef huart1;
 extern UART_HandleTypeDef huart2;
 extern UART_HandleTypeDef huart3;
 extern UART_HandleTypeDef huart6;
 extern TIM_HandleTypeDef htim6;
 
 /* USER CODE BEGIN EV */
+extern QueueHandle_t rece_queueHandle;
 extern TaskHandle_t defaultTaskHandle;
 extern TaskHandle_t sensor_monitorHandle;
 extern TaskHandle_t pid_outputHandle;
@@ -99,6 +102,10 @@ extern TaskHandle_t posture_monitorHandle;
 extern TaskHandle_t commu_mornitorHandle;
 extern TaskHandle_t send_orderHandle;
 extern TaskHandle_t master_orderHandle;
+extern TaskHandle_t result_processHandle;
+
+
+extern uint16_t modbus_period;
 /* USER CODE END EV */
 
 /******************************************************************************/
@@ -268,6 +275,52 @@ void EXTI4_IRQHandler(void)
 }
 
 /**
+  * @brief This function handles DMA1 stream5 global interrupt.
+  */
+void DMA1_Stream5_IRQHandler(void)
+{
+  /* USER CODE BEGIN DMA1_Stream5_IRQn 0 */
+	if(result_processHandle !=NULL)
+	{
+		#ifdef DEBUG_OUTPUT
+		printf("%s\n","dma transmit over");
+		#endif
+		xTaskNotifyFromISR(result_processHandle,0x0002,eSetBits,&b_tk_rece_result);
+		//HAL_UART_AbortTransmit(&huart2);
+		portYIELD_FROM_ISR( b_tk_rece_result );
+	}
+  /* USER CODE END DMA1_Stream5_IRQn 0 */
+  HAL_DMA_IRQHandler(&hdma_usart2_rx);
+  /* USER CODE BEGIN DMA1_Stream5_IRQn 1 */
+
+  /* USER CODE END DMA1_Stream5_IRQn 1 */
+}
+
+/**
+  * @brief This function handles DMA1 stream6 global interrupt.
+  */
+void DMA1_Stream6_IRQHandler(void)
+{
+  /* USER CODE BEGIN DMA1_Stream6_IRQn 0 */
+
+	if(result_processHandle !=NULL)
+	{
+		#ifdef DEBUG_OUTPUT
+		printf("%s\n","dma transmit over");
+		#endif
+		xTaskNotifyFromISR(result_processHandle,0x0001,eSetBits,&b_tk_rece_result);
+		//HAL_UART_AbortTransmit(&huart2);
+		portYIELD_FROM_ISR( b_tk_rece_result );
+	}
+	HAL_UART_Receive_DMA(&huart2,rece_cache,rece_count);
+  /* USER CODE END DMA1_Stream6_IRQn 0 */
+  HAL_DMA_IRQHandler(&hdma_usart2_tx);
+  /* USER CODE BEGIN DMA1_Stream6_IRQn 1 */
+
+  /* USER CODE END DMA1_Stream6_IRQn 1 */
+}
+
+/**
   * @brief This function handles CAN1 TX interrupts.
   */
 void CAN1_TX_IRQHandler(void)
@@ -289,7 +342,47 @@ void CAN1_RX0_IRQHandler(void)
   /* USER CODE BEGIN CAN1_RX0_IRQn 0 */
 	if(master_orderHandle!=NULL)
 	{
-		xTaskNotifyFromISR(master_orderHandle,0x0001,eSetBits,&b_tk_master_order);
+		QUEUE_STRUCT can_rece;
+		if (HAL_CAN_GetRxMessage(&hcan1, CAN_RX_FIFO0, &(can_rece.RxHeader), can_rece.data) != HAL_OK)
+		{
+			/* Reception Error */
+			Error_Handler();
+		}
+		if(rece_queueHandle!=NULL)
+		{
+			portBASE_TYPE status;
+			uint32_t fifo_level=0;
+			fifo_level=HAL_CAN_GetRxFifoFillLevel(&hcan1,CAN_RX_FIFO0);
+			#ifdef DEBUG_OUTPUT
+			printf("%s%d\n","rx fifo level is",fifo_level);
+			#endif
+			//while(fifo_level>0)
+			{
+				status = xQueueSendToBackFromISR(rece_queueHandle, &can_rece, &b_tk_master_order);
+				if(status!=pdPASS)
+				{
+					#ifdef DEBUG_OUTPUT
+					printf("%s\n","queue overflow");
+					#endif
+					//break;
+				}
+				else
+				{
+					#ifdef DEBUG_OUTPUT
+					printf("%s\n","send message to queue already");
+					#endif
+					//fifo_level--;
+				}
+			}
+			
+		}
+		else
+		{
+			#ifdef DEBUG_OUTPUT
+			printf("%s\n","send master order queue error");
+			#endif
+		}
+		//xTaskNotifyFromISR(master_orderHandle,0x0001,eSetBits,&b_tk_master_order);
 		portYIELD_FROM_ISR( b_tk_master_order );
 	}
 
@@ -433,11 +526,11 @@ void TIM1_CC_IRQHandler(void)
 void TIM2_IRQHandler(void)
 {
   /* USER CODE BEGIN TIM2_IRQn 0 */
-
+	
   /* USER CODE END TIM2_IRQn 0 */
   HAL_TIM_IRQHandler(&htim2);
   /* USER CODE BEGIN TIM2_IRQn 1 */
-
+	
   /* USER CODE END TIM2_IRQn 1 */
 }
 
@@ -498,26 +591,19 @@ void I2C1_ER_IRQHandler(void)
 }
 
 /**
-  * @brief This function handles USART1 global interrupt.
-  */
-void USART1_IRQHandler(void)
-{
-  /* USER CODE BEGIN USART1_IRQn 0 */
-
-  /* USER CODE END USART1_IRQn 0 */
-  HAL_UART_IRQHandler(&huart1);
-  /* USER CODE BEGIN USART1_IRQn 1 */
-
-  /* USER CODE END USART1_IRQn 1 */
-}
-
-/**
   * @brief This function handles USART2 global interrupt.
   */
 void USART2_IRQHandler(void)
 {
   /* USER CODE BEGIN USART2_IRQn 0 */
-
+  if(__HAL_UART_GET_FLAG(&huart2,UART_FLAG_TXE)==SET)
+	{
+		//´®¿Ú·¢ËÍÖÐ¶Ï
+		#ifdef DEBUG_OUTPUT
+		printf("%s\n","modbus send already");
+		#endif
+	}
+	//__HAL_UART_CLEAR_NEFLAG(USART2);
   /* USER CODE END USART2_IRQn 0 */
   HAL_UART_IRQHandler(&huart2);
   /* USER CODE BEGIN USART2_IRQn 1 */
@@ -564,12 +650,27 @@ void EXTI15_10_IRQHandler(void)
 void TIM8_BRK_TIM12_IRQHandler(void)
 {
   /* USER CODE BEGIN TIM8_BRK_TIM12_IRQn 0 */
-
+	if(__HAL_TIM_GET_FLAG(&htim12, TIM_FLAG_UPDATE) != RESET)
+	{
+		//HAL_GPIO_TogglePin(GPIOE,GPIO_PIN_3);
+		//HAL_TIM_Base_Stop(&htim12);
+		//modbus_period+=100;
+		//TIM12->ARR=modbus_period;
+		//HAL_GPIO_WritePin(GPIOG,GPIO_PIN_6,GPIO_PIN_RESET);
+		//GPIOG->ODR&=(~(1<<6));
+		if(result_processHandle!=NULL)
+		{
+			xTaskNotifyFromISR(result_processHandle,0x0021,eSetBits,&b_tk_rece_result);
+			portYIELD_FROM_ISR( b_tk_rece_result );
+		}
+	}
   /* USER CODE END TIM8_BRK_TIM12_IRQn 0 */
   HAL_TIM_IRQHandler(&htim8);
   HAL_TIM_IRQHandler(&htim12);
   /* USER CODE BEGIN TIM8_BRK_TIM12_IRQn 1 */
-
+	//HAL_TIM_Base_Start_IT(&htim12);
+	
+	HAL_TIM_Base_Stop(&htim12);
   /* USER CODE END TIM8_BRK_TIM12_IRQn 1 */
 }
 
@@ -680,7 +781,7 @@ void TIM7_IRQHandler(void)
 	if(defaultTaskHandle !=NULL)
 	{
 		xTaskNotifyFromISR(defaultTaskHandle,0x0001,eSetBits,&b_tk_default);
-		//xTaskNotifyFromISR(send_orderHandle,0x0001,eSetBits,&b_tk_send_order);
+		//xTaskNotifyFromISR(send_orderHandle,0x0009,eSetBits,&b_tk_send_order);
 		portYIELD_FROM_ISR(b_tk_default);
 	}
   /* USER CODE END TIM7_IRQn 0 */

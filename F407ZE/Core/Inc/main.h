@@ -38,6 +38,10 @@ extern "C" {
 #include "stdio.h"
 #include "usart.h"
 #include "semphr.h"
+#include "string.h"
+#include "cmsis_os2.h"
+#include "timers.h"
+#include "tim.h"
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
@@ -51,17 +55,38 @@ extern "C" {
 extern uint8_t tklog[500];
 extern uint32_t ulHighFrequencyTimerTicks;
 extern uint32_t queuespace;
+//发送队列句柄
+extern osMessageQueueId_t send_queueHandle;
 //数组定义
 //limitsw引脚--->电机映射
 extern const uint8_t limitsw_to_motorid[17][2];
-
+//命令到电机号映射
+extern const uint8_t command_to_motor[60];
+//定时器定时时间
+extern uint32_t timer_period;
+extern xTimerHandle broadcast_timer;
+//IIC长度缓存
+extern uint16_t iic_cache;
+//串口DMA句柄
+extern DMA_HandleTypeDef hdma_usart2_tx;
+extern DMA_HandleTypeDef hdma_usart2_rx;
+//modbus cache
+extern uint8_t send_cache[16];
+extern uint8_t rece_cache[16];
+extern uint8_t rece_count; 
+extern uint8_t modbus_status;
+extern uint8_t modbus_read_status;     //modbus 读取指令完成标志， 0： 空闲 1：读取进行中 2：读取完成
+extern uint8_t modbus_act_status;      //modbus 电机动作完成标志， 0：空闲， 1：动作指令交互中 2： 动作指令交互完成
+extern uint8_t modbus_time_status;     //modbus 超时标志， 0：空闲， 1：交互超时 2：交互完成，3：交互中
+extern uint8_t modbus_time_flag;       //modbus  定时时间标志  1： 第一次3.5T定时  1：第二次3.5T定时
 /* USER CODE END EC */
 
 /* Exported macro ------------------------------------------------------------*/
 /* USER CODE BEGIN EM */
 //调试设置
 #define DEBUG_OUTPUT 0
-
+//命令参数映射
+#define CAN_COMMAND_NUMBER      20
 
 
 //输出gpio映射
@@ -78,22 +103,116 @@ extern const uint8_t limitsw_to_motorid[17][2];
 #define ERROR_MOTOR_ID_ERROR    0x03
 #define ERROR_CAN_SEND_FAIL     0x04
 #define ERROR_CAN_START_FAIL    0x05
+
+#define ERROR_COMMAND_0_FAIL    0x06
+#define ERROR_COMMAND_1_FAIL    0x07
+#define ERROR_COMMAND_2_FAIL    0x08
+#define ERROR_COMMAND_3_FAIL    0x09
+#define ERROR_COMMAND_4_FAIL    0x0A
+#define ERROR_COMMAND_5_FAIL    0x0B
+#define ERROR_COMMAND_6_FAIL    0x0C
+#define ERROR_COMMAND_7_FAIL    0x0D
+#define ERROR_COMMAND_8_FAIL    0x0E
+#define ERROR_COMMAND_9_FAIL    0x0F
+#define ERROR_COMMAND_10_FAIL   0x10
+#define ERROR_COMMAND_11_FAIL   0x11
+#define ERROR_COMMAND_12_FAIL   0x12
+#define ERROR_COMMAND_13_FAIL   0x13
+#define ERROR_COMMAND_14_FAIL   0x14
+#define ERROR_COMMAND_15_FAIL   0x15
+#define ERROR_COMMAND_16_FAIL   0x16
+#define ERROR_COMMAND_17_FAIL   0x17
+#define ERROR_COMMAND_18_FAIL   0x18
+#define ERROR_COMMAND_19_FAIL   0x19
+#define ERROR_COMMAND_20_FAIL   0x1A
+#define ERROR_COMMAND_21_FAIL   0x1B
+#define ERROR_COMMAND_22_FAIL   0x1C
+#define ERROR_COMMAND_23_FAIL   0x1D
+#define ERROR_COMMAND_24_FAIL   0x1E
+#define ERROR_COMMAND_25_FAIL   0x1F
+#define ERROR_COMMAND_26_FAIL   0x20
+#define ERROR_COMMAND_27_FAIL   0x21
+#define ERROR_COMMAND_28_FAIL   0x22
+#define ERROR_COMMAND_29_FAIL   0x23
+#define ERROR_EEPROM_FAIL       0x24
+#define MODBUS_BUSY             0x25
+#define MODBUS_LIST_ERROR       0x26
+
+//帧结构掩码
+#define MASK_PRIORITY           (uint32_t)(0x07 << 26)
+#define MASK_COMMAND            (uint32_t)(0x7F << 9)
+#define MASK_IF_LAST            (uint32_t)(0x01 << 8)
+#define MASK_IF_RETURN          (uint32_t)(0x01 << 7)
+#define MASK_IF_ACK             (uint32_t)(0x01 << 6)
+#define MASK_VERSION            (uint32_t)(0x07 << 0)
+#define MASK_TARGET             (uint32_t)(0x1F << 16)
 //电机个数和传感器个数设置
 #define MAX_MOTOR_NUMBER        3
 #define POSTURE_NUM             6
+
+//光栅GPIO电源开关
+#define GRATING_POWER_SW        GPIOE
+#define GRATING_POWER_PIN       GPIO_PIN_3
+
+#define IIC_ADDRESS             0xA0
+#define EEPROM_CONFIG_LENGTH    0xF0
+
+//电机指令地址
+#define P412_H                  (uint16_t)1824
+#define P412_L                  (uint16_t)1825
 /* USER CODE END EM */
 
 /* Exported functions prototypes ---------------------------------------------*/
 void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
+typedef int (*command)(uint8_t*, uint32_t);
+//命令回调函数, 26组，7组预留命令
+int command_0(uint8_t* data,uint32_t para);
+int command_1(uint8_t* data,uint32_t para);
+int command_2(uint8_t* data,uint32_t para);
+int command_3(uint8_t* data,uint32_t para);
+int command_4(uint8_t* data,uint32_t para);
+int command_5(uint8_t* data,uint32_t para);
+int command_6(uint8_t* data,uint32_t para);
+int command_7(uint8_t* data,uint32_t para);
+int command_8(uint8_t* data,uint32_t para);
+int command_9(uint8_t* data,uint32_t para);
+int command_10(uint8_t* data,uint32_t para);
+int command_11(uint8_t* data,uint32_t para);
+int command_12(uint8_t* data,uint32_t para);
+int command_13(uint8_t* data,uint32_t para);
+int command_14(uint8_t* data,uint32_t para);
+int command_15(uint8_t* data,uint32_t para);
+int command_16(uint8_t* data,uint32_t para);
+int command_17(uint8_t* data,uint32_t para);
+int command_18(uint8_t* data,uint32_t para);
+int command_19(uint8_t* data,uint32_t para);
+int command_20(uint8_t* data,uint32_t para);
+int command_21(uint8_t* data,uint32_t para);
+int command_22(uint8_t* data,uint32_t para);
+int command_23(uint8_t* data,uint32_t para);
+int command_24(uint8_t* data,uint32_t para);
+int command_25(uint8_t* data,uint32_t para);
+int command_26(uint8_t* data,uint32_t para);
+
 void timer_start(void);
 uint8_t can_start(void);
 uint8_t switchGet(uint8_t motor_id);
+uint8_t iic_rw(uint8_t rw_flag, uint8_t addr,uint8_t* data,uint8_t length);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
 /* USER CODE BEGIN Private defines */
+typedef struct list_struct{
+	uint8_t command_id;                         //CAN 命令ID
+	uint8_t command_status;                     //命令状态， 0： 未执行， 1： 执行中  2：执行完成
+	struct list_struct* next;
+}LIST;
+typedef struct can_struct{
+	uint32_t exid;                              //扩展ID
+	uint8_t  data[8];                           //数据域
+}CAN_STRUCT;
 typedef struct queue_struct{
 	uint8_t property;                           //0: can 1: 485
 	uint8_t data[8];                            //数据数组
@@ -106,17 +225,36 @@ typedef struct queue_struct{
 	uint8_t can_if_return;                      //can 是否需要返回值
 	uint8_t can_if_ack;                         //can 是否需要ack确认
 	uint8_t can_version;                        //can 版本号
-	uint8_t modbus_addr;                        //485 功能
+	uint8_t modbus_addr;                        //485 模块地址
 	uint8_t modbus_func;                        //485 功能码
-	uint16_t modbus_data_addr;                  //485 数据地址
-	uint16_t modbus_data;                       //485 数据
+	uint8_t modbus_addr_h;                      //485 数据地址高字节
+	uint8_t modbus_addr_l;
+	uint8_t modbus_data_len_h;                    //数据长度
+	uint8_t modbus_data_len_l;
+	uint8_t modbus_data_byte;
+	uint8_t modbus_data_1;                      //485 数据最低字节
+	uint8_t modbus_data_2; 
+	uint8_t modbus_data_3;             
+	uint8_t modbus_data_4;   
 	uint16_t modbus_crc;                        //485 CRC
+	CAN_RxHeaderTypeDef   RxHeader;             //CAN 接收报头数据
 }QUEUE_STRUCT;
+typedef struct modbus_list{
+	QUEUE_STRUCT modbus_element;
+	uint8_t if_over;                            //标志本节点是否有效
+	struct modbus_list* next;
+}MODBUS_LIST;
 typedef struct command_struct{
 	uint8_t command_id;                         //当前执行的命令ID， 初始化为0
-	uint8_t command_id_history[20];             //执行的命令的历史数据，该变量备用
+	CAN_STRUCT command_id_history[20];          //执行的命令的历史数据，该变量备用
 	uint8_t command_process_mark;               //0: 并行执行， 命令ID标识为并行执行时，默认并行执行  1： 串行执行， 命令ID标识为串行执行时，此标志置位， 该变量备用
+	uint8_t priority;                           //命令优先级
+	uint8_t if_ack;                             //是否需要ACK
+	uint8_t if_return;                          //是否需要执行完回复
+	uint8_t if_last;                            //是否需要拼接
+	uint8_t can_version;                        //版本号
 	uint16_t command_status;                    //当前执行的命令的状态， 0：未执行， 1： 执行中 2： 执行完成 其他： 错误码
+	
 }COMMAND_STRUCT;
 typedef struct speed{
 	int32_t current_speed;                      //当前速度，测速函数在测得当前速度后将速度存入此变量
@@ -153,7 +291,15 @@ typedef struct position{
 	int32_t position_max;                       //最大位置
 	int32_t position_min;                       //最小位置
 	int32_t current_position;                   //当前位置，位置获取函数在获取位置后，将位置存入此变量
-	int32_t target_position;                    //目标位置，存储CAN指令中的目标位置
+	int32_t target_position;                    //目标位置，存储CAN指令中的目标位置，仅用于调试单步指令
+	int32_t tp1;                                //配置文件位置,根据命令文件映射不同的位置，最多支持8个位置
+	int32_t tp2;
+	int32_t tp3;
+	int32_t tp4;
+	int32_t tp5;
+	int32_t tp6;
+	int32_t tp7;
+	int32_t tp8;
 }POSITION;
 typedef struct dimension{
 	int32_t dim_x;                              //电机所推动终端的X方向维度
@@ -185,7 +331,7 @@ typedef struct grating_struct{
 typedef struct gpio_action{
 	GPIO_TypeDef*  gpio_port;                    //GPIO 动作输出组
 	uint16_t       pin_number;                   //GPIO 引脚号
-	uint8_t        break_status;                 //0: 抱闸未放开  1： 抱闸已放开
+	uint8_t        break_status;                 //0: 抱闸未放开  1： 抱闸已放开，只对特定电机的特定组有意义
 }GPIO_ACTION;
 typedef struct motor_struct{
 	uint8_t id;                                  //电机ID
@@ -201,6 +347,7 @@ typedef struct motor_struct{
 	DIM dim_value;                               //维度结构体
 	GPIO_ACTION gpio_output[5];                     //gpio 输出组， 0： 电机使能 1： PWM输出， 2： 方向输出 3： 姿态电源继电器输出
 	GPIO_ACTION gpio_input[1];                      //gpio 输入组， 0：电机抱闸输入确认信号
+	uint32_t register_move;                         //电机运动寄存器的485地址
 }MOTOR_STRUCT;
 
 typedef struct angle_struct{
@@ -222,6 +369,11 @@ typedef struct gpio_table{
 extern MOTOR_STRUCT motor_array[4];
 uint8_t can_send(QUEUE_STRUCT send_struct);
 uint8_t modbus_send(QUEUE_STRUCT send_struct);
+uint8_t modbus_send_sub(QUEUE_STRUCT send_struct);
+extern int(*command_to_function[27])(uint8_t*,uint32_t);
+extern uint16_t usMBCRC16( uint8_t * pucFrame, uint16_t usLen );
+extern MODBUS_LIST* modbus_list_head;
+extern MODBUS_LIST* modbus_list_tail;
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

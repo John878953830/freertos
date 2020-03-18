@@ -38,11 +38,63 @@
 /* USER CODE BEGIN PD */
 extern uint8_t RxData[8];
 extern CAN_RxHeaderTypeDef   RxHeader;
+
+extern CAN_HandleTypeDef hcan1;
+extern I2C_HandleTypeDef hi2c1;
+
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
+extern xTimerHandle broadcast_timer;
+static void prvAutoReloadTimerCallback( TimerHandle_t xTimer )
+{
+	//广播
+	//发送消息测试，包括CAN MODBUS
+	//dummy data
+	QUEUE_STRUCT queue_id;
+	portBASE_TYPE status;
+	queue_id.property=0;             //can send
+	queue_id.can_priority=0x05;      //can priority
+	queue_id.can_source=0x03;        //can source
+	queue_id.can_target=0x00;        //can target
+	queue_id.can_command=0x43;       //can command
+	queue_id.can_if_last=0x00;       //can if last
+	queue_id.can_if_return=0x00;     //can if return
+	queue_id.can_if_ack=0x00;        //can if ack
+	queue_id.can_version=0x07;       //can version
+	queue_id.data[0]=0x57;
+	queue_id.data[1]=0x39;
+	queue_id.data[2]=0xF6;
+	queue_id.data[3]=0x90;
+	queue_id.data[4]=0x13;
+	queue_id.data[5]=0x52;
+	queue_id.data[6]=0x30;
+	queue_id.data[7]=0x33;
+	queue_id.length=8;
+	queuespace= uxQueueSpacesAvailable( send_queueHandle );
+	uint8_t tmp=can_send(queue_id);
+	status = xQueueSendToBack(send_queueHandle, &queue_id, 0);
+	if(status!=pdPASS)
+	{
+		#ifdef DEBUG_OUTPUT
+		printf("%s\n","queue overflow");
+		#endif
+	}
+	else
+	{
+		#ifdef DEBUG_OUTPUT
+		printf("%s\n","send message to queue already");
+		#endif
+	}
+}
 
+void start_soft_timer(void)
+{
+	broadcast_timer = xTimerCreate( "AutoReload",timer_period,pdTRUE,0,prvAutoReloadTimerCallback );
+	xTimerStart(broadcast_timer,0);
+	;
+}
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
@@ -87,21 +139,52 @@ osStaticThreadDef_t master_orderControlBlock;
 osThreadId_t limit_swHandle;
 uint32_t limit_swBuffer[ 256 ];
 osStaticThreadDef_t limit_swControlBlock;
+osThreadId_t result_processHandle;
+uint32_t result_processBuffer[ 128 ];
+osStaticThreadDef_t result_processControlBlock;
 osMessageQueueId_t send_queueHandle;
 uint8_t send_queueBuffer[ 256 * sizeof( QUEUE_STRUCT ) ];
 osStaticMessageQDef_t send_queueControlBlock;
+osMessageQueueId_t rece_queueHandle;
+uint8_t rece_queueBuffer[ 256 * sizeof( QUEUE_STRUCT ) ];
+osStaticMessageQDef_t rece_queueControlBlock;
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
+
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 {
+	//QUEUE_STRUCT can_rece;
   /* Get RX message */
-  if (HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &RxHeader, RxData) != HAL_OK)
-  {
-    /* Reception Error */
-    Error_Handler();
-  }
-	//xTaskNotifyGive(master_orderHandle );
+  
+
+	/*
+	if(rece_queueHandle!=NULL)
+	{
+		portBASE_TYPE status;
+		status = xQueueSendToBack(rece_queueHandle, &can_rece, 0);
+		if(status!=pdPASS)
+		{
+			#ifdef DEBUG_OUTPUT
+			printf("%s\n","queue overflow");
+			#endif
+		}
+		else
+		{
+			#ifdef DEBUG_OUTPUT
+			printf("%s\n","send message to queue already");
+			#endif
+		}
+	}
+	else
+	{
+		#ifdef DEBUG_OUTPUT
+		printf("%s\n","send master order queue error");
+		#endif
+	}
+	*/
+	//xTaskNotifyGive( master_orderHandle );
+	
 }
 /* USER CODE END FunctionPrototypes */
 
@@ -117,6 +200,7 @@ void start_tk_zero_monitor(void *argument);
 void start_tk_co_order(void *argument);
 void start_tk_master_order(void *argument);
 void start_tk_limit_sw(void *argument);
+void start_tk_result_process(void *argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -128,7 +212,6 @@ unsigned long getRunTimeCounterValue(void);
 /* Functions needed when configGENERATE_RUN_TIME_STATS is on */
 __weak void configureTimerForRunTimeStats(void)
 {
-
 }
 
 __weak unsigned long getRunTimeCounterValue(void)
@@ -170,6 +253,16 @@ osKernelInitialize();
     .mq_size = sizeof(send_queueBuffer)
   };
   send_queueHandle = osMessageQueueNew (256, sizeof(QUEUE_STRUCT), &send_queue_attributes);
+
+  /* definition and creation of rece_queue */
+  const osMessageQueueAttr_t rece_queue_attributes = {
+    .name = "rece_queue",
+    .cb_mem = &rece_queueControlBlock,
+    .cb_size = sizeof(rece_queueControlBlock),
+    .mq_mem = &rece_queueBuffer,
+    .mq_size = sizeof(rece_queueBuffer)
+  };
+  rece_queueHandle = osMessageQueueNew (256, sizeof(QUEUE_STRUCT), &rece_queue_attributes);
 
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */
@@ -308,11 +401,96 @@ osKernelInitialize();
   };
   limit_swHandle = osThreadNew(start_tk_limit_sw, NULL, &limit_sw_attributes);
 
+  /* definition and creation of result_process */
+  const osThreadAttr_t result_process_attributes = {
+    .name = "result_process",
+    .stack_mem = &result_processBuffer[0],
+    .stack_size = sizeof(result_processBuffer),
+    .cb_mem = &result_processControlBlock,
+    .cb_size = sizeof(result_processControlBlock),
+    .priority = (osPriority_t) osPriorityAboveNormal3,
+  };
+  result_processHandle = osThreadNew(start_tk_result_process, NULL, &result_process_attributes);
+
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
+	//启动软件定时器
+	start_soft_timer();
 	//定时器初始化
 	timer_start();
 	can_start();
+	
+	//使能电机
+	QUEUE_STRUCT enable_motor;
+	
+	/*
+	enable_motor.property=1;                            //485 send
+	enable_motor.modbus_addr=2;
+	enable_motor.modbus_func=0x10;                      //写多个寄存器
+	enable_motor.modbus_addr_h=(uint8_t)(1008>>8);
+	enable_motor.modbus_addr_l=(uint8_t)(1008&0xFF);                   //电机485地址
+	//tmp.modbus_addr_h=0x03;
+	//tmp.modbus_addr_l=0xF2;
+	enable_motor.modbus_data_len_h=0x00;
+	enable_motor.modbus_data_len_l=0x02;
+	enable_motor.modbus_data_byte=0x04;
+	enable_motor.modbus_data_1=0x00;
+	enable_motor.modbus_data_2=0x01;
+	enable_motor.modbus_data_3=0x00;
+	enable_motor.modbus_data_4=0x00;
+	
+	modbus_send(enable_motor);
+	HAL_Delay(50);
+	*/
+	//
+	
+	/*
+	enable_motor.property=1;                            //485 send
+		enable_motor.modbus_addr=2;                       //电机号需要根据命令中的电机号赋值
+		enable_motor.modbus_func=0x10;                    //写多个寄存器
+		enable_motor.modbus_addr_h=(uint8_t)(3202>>8);
+		enable_motor.modbus_addr_l=(uint8_t)(3202&0xFF);        //写目标位置
+		enable_motor.modbus_data_len_h=0x00;
+		enable_motor.modbus_data_len_l=0x02;
+		enable_motor.modbus_data_byte=0x04;
+		enable_motor.modbus_data_1=0;                      //先赋值为命令中的数值，当前位置读取成功后修改值
+		enable_motor.modbus_data_2=0;                      //先赋值为命令中的数值，当前位置读取成功后修改值
+		enable_motor.modbus_data_3=0;                      //先赋值为命令中的数值，当前位置读取成功后修改值
+		enable_motor.modbus_data_4=0;                      //先赋值为命令中的数值，当前位置读取成功后修改值
+		
+		modbus_send(enable_motor);         //写位置
+		
+		HAL_Delay(50);
+		*/
+		/*
+		enable_motor.property=1;                            //485 send
+		enable_motor.modbus_addr=2;                       //电机号需要根据命令中的电机号赋值
+		enable_motor.modbus_func=0x10;                    //写多个寄存器
+		enable_motor.modbus_addr_h=(uint8_t)(2040>>8);
+		enable_motor.modbus_addr_l=(uint8_t)(2040&0xFF);        //写使能寄存器
+		enable_motor.modbus_data_len_h=0x00;
+		enable_motor.modbus_data_len_l=0x02;
+		enable_motor.modbus_data_byte=0x04;
+		enable_motor.modbus_data_1=0xFF;                     //使能寄存器全部写为FF
+		enable_motor.modbus_data_2=0xFF;                      
+		enable_motor.modbus_data_3=0xFF;                     
+		enable_motor.modbus_data_4=0xFF;
+modbus_send(enable_motor);         //写位置
+HAL_Delay(100);
+enable_motor.property=1;                            //485 send
+		enable_motor.modbus_addr=2;                       //电机号需要根据命令中的电机号赋值
+		enable_motor.modbus_func=0x10;                    //写多个寄存器
+		enable_motor.modbus_addr_h=(uint8_t)(2040>>8);
+		enable_motor.modbus_addr_l=(uint8_t)(2040&0xFF);        //写使能寄存器
+		enable_motor.modbus_data_len_h=0x00;
+		enable_motor.modbus_data_len_l=0x02;
+		enable_motor.modbus_data_byte=0x04;
+		enable_motor.modbus_data_1=0x00;                     //使能寄存器全部写为FF
+		enable_motor.modbus_data_2=0x00;                      
+		enable_motor.modbus_data_3=0x00;                     
+		enable_motor.modbus_data_4=0x00;
+modbus_send(enable_motor);         //写位置
+*/
   /* USER CODE END RTOS_THREADS */
 
 }
@@ -328,8 +506,8 @@ void StartDefaultTask(void *argument)
 {
   /* USER CODE BEGIN StartDefaultTask */
 	uint32_t notify_use=0;
-	QUEUE_STRUCT queue_id;
-	portBASE_TYPE status;
+	//QUEUE_STRUCT queue_id;
+	//portBASE_TYPE status;
   /* Infinite loop */
   for(;;)
   {
@@ -348,44 +526,6 @@ void StartDefaultTask(void *argument)
 	    printf("%s\n",tklog);
 	    vTaskGetRunTimeStats((char *)&tklog);
 	    printf("%s\n",tklog);
-			
-			//发送消息测试，包括CAN MODBUS
-			//dummy data
-			queue_id.property=0;             //can send
-			queue_id.can_priority=0x05;      //can priority
-			queue_id.can_source=0x03;        //can source
-			queue_id.can_target=0x00;        //can target
-			queue_id.can_command=0x43;       //can command
-			queue_id.can_if_last=0x00;       //can if last
-			queue_id.can_if_return=0x00;     //can if return
-			queue_id.can_if_ack=0x00;        //can if ack
-			queue_id.can_version=0x07;       //can version
-			queue_id.data[0]=0x57;
-			queue_id.data[1]=0x39;
-			queue_id.data[2]=0xF6;
-			queue_id.data[3]=0x90;
-			queue_id.data[4]=0x13;
-			queue_id.data[5]=0x52;
-			queue_id.data[6]=0x30;
-			queue_id.data[7]=0x33;
-			queue_id.length=8;
-			queuespace= uxQueueSpacesAvailable( send_queueHandle );
-			uint8_t tmp=can_send(queue_id);
-			status = xQueueSendToBack(send_queueHandle, &queue_id, 0);
-			if(status!=pdPASS)
-			{
-				#ifdef DEBUG_OUTPUT
-				printf("%s\n","queue overflow");
-				#endif
-			}
-			else
-			{
-				#ifdef DEBUG_OUTPUT
-				printf("%s\n","send message to queue already");
-				#endif
-				//通知发送任务发送
-				xTaskNotifyGive( send_orderHandle );
-			}
 			;
 		}
     osDelay(1);
@@ -436,12 +576,11 @@ void start_tk_send_order(void *argument)
   /* USER CODE BEGIN start_tk_send_order */
 	QUEUE_STRUCT id;
   portBASE_TYPE status;
-	uint32_t notify_use=0;
   /* Infinite loop */
   for(;;)
   {
     #ifdef DEBUG_OUTPUT
-			printf("%s\n","start tk send order");
+		printf("%s\n","start tk send order");
 		#endif	
 
 		//等待发送队列有消息
@@ -458,28 +597,13 @@ void start_tk_send_order(void *argument)
 			}
 			if(id.property==1)
 			{
+				#ifdef DEBUG_OUTPUT
+				printf("%s, id : %d\n","queue receive  modbus send order",id.can_command);
+				#endif
 				modbus_send(id);
 			}
 		}
-		
-		//接收中断通知进行发送结果判断，CAN发送中断 + RS485中断
-		xTaskNotifyWait( 0x00,               /* Don't clear any bits on entry. */
-                         0xffffffff,          /* Clear all bits on exit. */
-                         &notify_use, /* Receives the notification value. */
-                         portMAX_DELAY );
-		
-		if(notify_use!=0)
-		{
-			#ifdef DEBUG_OUTPUT
-			printf("%s\n","send order task receive notify form isr");
-			#endif
-		}
-		
 		/* Block to wait for prvTask2() to notify this task. */
-    //ulTaskNotifyTake( pdTRUE, portMAX_DELAY );
-		
-		notify_use=0;
-		
     osDelay(1);
   }
   /* USER CODE END start_tk_send_order */
@@ -687,23 +811,149 @@ void start_tk_master_order(void *argument)
 {
   /* USER CODE BEGIN start_tk_master_order */
 	uint32_t notify_use=0;
+	QUEUE_STRUCT id;
+  portBASE_TYPE status;
   /* Infinite loop */
   for(;;)
   {
-		xTaskNotifyWait( 0x00,               /* Don't clear any bits on entry. */
-                         0xffffffff,          /* Clear all bits on exit. */
-                         &notify_use, /* Receives the notification value. */
-                         portMAX_DELAY );
-		if(notify_use!=0)
-		{
+		//xTaskNotifyWait( 0x00,               /* Don't clear any bits on entry. */
+    //                     0xffffffff,          /* Clear all bits on exit. */
+    //                     &notify_use, /* Receives the notification value. */
+    //                     portMAX_DELAY );
+		//if(notify_use!=0)
+		//{
 			#ifdef DEBUG_OUTPUT
 			printf("%s\n","start tk master order");
 			#endif
-			
-			
+			QUEUE_STRUCT tmp;
+			//queue space 
+			//等待发送队列有消息
+			status = xQueueReceive(rece_queueHandle, &id, portMAX_DELAY);
+			if(status==pdPASS)
+			{
+				//解析ID
+				id.property=(id.RxHeader.ExtId & MASK_PRIORITY)>>26;
+				if(id.property==0)
+				{
+					//收到的CAN消息有误，不动作
+					;
+				}else{
+					//解析收到的数据，解码并压入发送队列，发送485指令命令电机动作
+					uint8_t tmp_command_id=(id.RxHeader.ExtId & MASK_COMMAND)>>9;
+					uint8_t tmp_priority=(id.RxHeader.ExtId & MASK_PRIORITY)>>26;
+					uint8_t tmp_if_ack=(id.RxHeader.ExtId & MASK_IF_ACK) >> 6;
+					uint8_t tmp_if_return=(id.RxHeader.ExtId & MASK_IF_RETURN) >> 7;
+					uint8_t tmp_if_last=(id.RxHeader.ExtId & MASK_IF_LAST) >> 8;
+					uint8_t tmp_can_version=(id.RxHeader.ExtId & MASK_VERSION) >> 0;
+					uint8_t tmp_target=(id.RxHeader.ExtId & MASK_TARGET) >> 16;
+					
+					//判断ACK是否需要立即回复发送方
+					if(tmp_if_ack==1)
+					{
+						//tmp填充为cansend
+						tmp.property=0;                     //can send 
+						tmp.can_priority=0x01;              //can priority, ACK帧
+						tmp.can_source=0x03;                //can source， 本模块为3号模块
+						tmp.can_target=0x00;                //can target， 00：主控
+						tmp.can_command=tmp_command_id;     //can command
+						tmp.can_if_last=0x00;               //can if last, 0: 最后一帧
+						tmp.can_if_return=0x00;             //can if return， 0：保留
+						tmp.can_if_ack=0x00;                //can if ack， 0：无需ACK
+						tmp.can_version=0x01;               //can version，1：暂定为1
+						
+						tmp.length=id.RxHeader.DLC;         //ack帧需要返回数据,所有数据原路返回
+						memcpy(tmp.data,id.data,id.RxHeader.DLC);
+						
+						status = xQueueSendToBack(send_queueHandle, &tmp, 0);
+						if(status!=pdPASS)
+						{
+							#ifdef DEBUG_OUTPUT
+							printf("%s\n","queue overflow");
+							#endif
+						}
+						else
+						{
+							#ifdef DEBUG_OUTPUT
+							printf("%s\n","send message to queue already");
+							#endif
+						}
+					}
+					
+					if(tmp_command_id>CAN_COMMAND_NUMBER)
+					{
+						//命令ID错误
+						#ifdef DEBUG_OUTPUT
+						printf("%s\n","command id error");
+						#endif
+					}
+					else
+					{
+						if(tmp_target==31)
+						{
+							//广播ID， 只有一组急停指令
+							uint8_t data=0;
+							uint8_t para=tmp_if_return;
+							command_to_function[tmp_command_id](&data,para);
+						}
+						else
+						{
+							if(
+							tmp_command_id==0  || 
+						  tmp_command_id==2  ||
+						  tmp_command_id==4  ||
+						  tmp_command_id==5  ||
+						  tmp_command_id==6  ||
+						  tmp_command_id==10 ||
+						  tmp_command_id==15 ||
+						  tmp_command_id==16 ||
+						  tmp_command_id==17 ||
+						  tmp_command_id==18 ||
+						  tmp_command_id==19)
+							{
+								uint8_t data=0;
+								uint8_t para=tmp_if_return;
+								command_to_function[tmp_command_id](&data,para);
+							}
+							if(tmp_command_id==1  ||
+								 tmp_command_id==3  ||
+							   tmp_command_id==7  ||
+							   tmp_command_id==8  ||
+							   tmp_command_id==9  ||
+							   tmp_command_id==11 ||
+							   tmp_command_id==12 ||
+							   tmp_command_id==13 ||
+							   tmp_command_id==14 )
+							{
+								uint8_t data[8];
+								memcpy(data,id.data,id.RxHeader.DLC);
+								/*
+								data[0]=id.data[0];
+								data[1]=id.data[1];
+								data[2]=id.data[2];
+								data[3]=id.data[3];
+								data[4]=id.data[4];
+								data[5]=id.data[5];
+								data[6]=id.data[6];
+								data[7]=id.data[7];
+								*/
+								uint32_t para=id.RxHeader.DLC;
+								para|=(tmp_if_return << 4);   //bit 4表示是否返回return帧
+								para|=(tmp_if_last << 5);     //bit 5表示是否是最后一帧
+								command_to_function[tmp_command_id](data,para);
+							}
+						}
+					//根据命令电机映射表找到要动作的电机，并将参数压入电机中的命令结构
+					//uint8_t motor_id=command_to_motor[tmp_command_id];
+					}
+				}
+			}
+			else
+			{
+				;
+			}
 			notify_use=0;
 			;
-		}
+		//}
     osDelay(1);
   }
   /* USER CODE END start_tk_master_order */
@@ -750,6 +1000,85 @@ void start_tk_limit_sw(void *argument)
     osDelay(1);
   }
   /* USER CODE END start_tk_limit_sw */
+}
+
+/* USER CODE BEGIN Header_start_tk_result_process */
+/**
+* @brief Function implementing the result_process thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_start_tk_result_process */
+void start_tk_result_process(void *argument)
+{
+  /* USER CODE BEGIN start_tk_result_process */
+	uint32_t notify_use=0;
+  /* Infinite loop */
+  for(;;)
+  {
+		xTaskNotifyWait( 0x00,               /* Don't clear any bits on entry. */
+                         0xffffffff,          /* Clear all bits on exit. */
+                         &notify_use, /* Receives the notification value. */
+                         portMAX_DELAY );
+		if(notify_use!=0)
+		{
+			if(notify_use==0x0001)
+			{
+				
+			}
+			if(notify_use==0x0002)
+			{
+				//dma 接收完成
+				HAL_TIM_Base_Stop(&htim12);//停止定时
+				HAL_Delay(5);
+				//CRC数据校验
+				uint8_t crch=0;
+				uint8_t crcl=0;
+				uint16_t crc_tmp=usMBCRC16(rece_cache,rece_count - 2);
+				crcl=(uint8_t)(crc_tmp & 0xFF);
+				crch=(uint8_t)(crc_tmp >> 8);
+				if(crcl==rece_cache[rece_count-2] && crch==rece_cache[rece_count-1])
+				{
+					while(modbus_time_flag!=0)
+					{
+						;
+					}
+					//开启定时
+					//发送下一帧
+					
+					if(modbus_list_head!=NULL && modbus_list_head->if_over==1)
+					{
+						
+					}
+					else
+					{
+						//命令执行完成
+					}
+				}
+				else
+				{
+					//收到的数据不对，重发或者报错，待完成\
+					
+					;
+				}
+			}
+			if(notify_use==0x0021)
+			{
+				//接收超时，重发
+				while(modbus_time_flag!=0)
+				{
+					;
+				}
+				HAL_GPIO_WritePin(GPIOG,GPIO_PIN_6,GPIO_PIN_SET);
+				HAL_Delay(5);
+				modbus_send_sub(modbus_list_head->modbus_element);
+				modbus_time_flag=0;
+			}
+			notify_use=0;
+		}
+    osDelay(1);
+  }
+  /* USER CODE END start_tk_result_process */
 }
 
 /* Private application code --------------------------------------------------*/

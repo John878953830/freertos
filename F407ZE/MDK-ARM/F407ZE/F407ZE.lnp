@@ -4,6 +4,7 @@
 "f407ze\gpio.o"
 "f407ze\can.o"
 "f407ze\crc.o"
+"f407ze\dma.o"
 "f407ze\freertos.o"
 "f407ze\i2c.o"
 "f407ze\sys.o"
