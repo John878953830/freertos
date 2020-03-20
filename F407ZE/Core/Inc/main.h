@@ -155,7 +155,7 @@ extern uint8_t modbus_time_flag;       //modbus  ∂® ± ±º‰±Í÷æ  1£∫ µ⁄“ª¥Œ3.5T∂® 
 #define GRATING_POWER_PIN       GPIO_PIN_3
 
 #define IIC_ADDRESS             0xA0
-#define EEPROM_CONFIG_LENGTH    0xF0
+#define EEPROM_CONFIG_LENGTH    0x0A
 
 //µÁª˙÷∏¡Óµÿ÷∑
 #define P412_H                  (uint16_t)1824

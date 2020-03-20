@@ -52,6 +52,7 @@ static void prvAutoReloadTimerCallback( TimerHandle_t xTimer )
 	//广播
 	//发送消息测试，包括CAN MODBUS
 	//dummy data
+	/*
 	QUEUE_STRUCT queue_id;
 	portBASE_TYPE status;
 	queue_id.property=0;             //can send
@@ -87,6 +88,7 @@ static void prvAutoReloadTimerCallback( TimerHandle_t xTimer )
 		printf("%s\n","send message to queue already");
 		#endif
 	}
+	*/
 }
 
 void start_soft_timer(void)

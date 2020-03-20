@@ -359,46 +359,69 @@ int command_2(uint8_t* data,uint32_t para)
 	uint16_t len = EEPROM_CONFIG_LENGTH;
 	uint16_t len_already=0;
 	QUEUE_STRUCT tmp;
-	if(if_return==1)
+	while(len>8)
 	{
-		while(len>8)
-		{
-			//取得EEPROM数据循环发送
-			while(iic_rw(0,len_already,tmp.data,8)!=0)
-			{
-				vTaskDelay(1);
-			}
-			//can send
-			tmp.property=0;
-			tmp.can_command=0x02;
-			tmp.can_if_ack=0x01;
-			tmp.can_source=0x03;
-			tmp.can_target=0x00;
-			tmp.can_priority=0x03;
-			tmp.can_if_return=0x00;
-			tmp.can_if_last=0x01;
-			tmp.length=8;
-			BaseType_t status_q = xQueueSendToBack(send_queueHandle, &tmp, 0);
-			if(status_q!=pdPASS)
-			{
-				#ifdef DEBUG_OUTPUT
-				printf("%s\n","queue overflow");
-				#endif
-			}
-			else
-			{
-				#ifdef DEBUG_OUTPUT
-				printf("%s\n","send command 2 success to queue already");
-				#endif
-			}
-			len-=8;
-			len_already+=8;
-		}
-		//取得EEPROM数据发送
-		while(iic_rw(0,len_already,tmp.data,len)!=0)
+		//取得EEPROM数据循环发送
+		while(iic_rw(0,len_already,tmp.data,8)!=0)
 		{
 			vTaskDelay(1);
 		}
+		//can send
+		tmp.property=0;
+		tmp.can_command=0x02;
+		tmp.can_if_ack=0x01;
+		tmp.can_source=0x03;
+		tmp.can_target=0x00;
+		tmp.can_priority=0x05;
+		tmp.can_if_return=0x00;
+		tmp.can_if_last=0x01;
+		tmp.length=8;
+		BaseType_t status_q = xQueueSendToBack(send_queueHandle, &tmp, 0);
+		if(status_q!=pdPASS)
+		{
+			#ifdef DEBUG_OUTPUT
+			printf("%s\n","queue overflow");
+			#endif
+		}
+		else
+		{
+			#ifdef DEBUG_OUTPUT
+			printf("%s\n","send command 2 success to queue already");
+			#endif
+		}
+		len-=8;
+		len_already+=8;
+	}
+	//取得EEPROM数据发送
+	while(iic_rw(0,len_already,tmp.data,len)!=0)
+	{
+		vTaskDelay(1);
+	}
+	//can send
+	tmp.property=0;
+	tmp.can_command=0x02;
+	tmp.can_if_ack=0x01;
+	tmp.can_source=0x03;
+	tmp.can_target=0x00;
+	tmp.can_priority=0x05;
+	tmp.can_if_return=0x00;
+	tmp.can_if_last=0x00;
+	tmp.length=len;
+	BaseType_t status_q = xQueueSendToBack(send_queueHandle, &tmp, 0);
+	if(status_q!=pdPASS)
+	{
+		#ifdef DEBUG_OUTPUT
+		printf("%s\n","queue overflow");
+		#endif
+	}
+	else
+	{
+		#ifdef DEBUG_OUTPUT
+		printf("%s\n","send command 2 success to queue already");
+		#endif
+	}
+	if(if_return==1)
+	{
 		//can send
 		tmp.property=0;
 		tmp.can_command=0x02;
@@ -1115,7 +1138,7 @@ uint8_t can_start(void)
   hcan1.Init.SyncJumpWidth = CAN_SJW_1TQ;
   hcan1.Init.TimeSeg1 = CAN_BS1_3TQ;
   hcan1.Init.TimeSeg2 = CAN_BS2_3TQ;
-  hcan1.Init.Prescaler = 6;
+  hcan1.Init.Prescaler = 12;
 
   if (HAL_CAN_Init(&hcan1) != HAL_OK)
   {
