@@ -1787,12 +1787,13 @@ int main(void)
   MX_TIM12_Init();
   MX_TIM13_Init();
   MX_TIM14_Init();
+	MX_DMA_Init();
   MX_UART4_Init();
   MX_USART1_UART_Init();
   MX_USART2_UART_Init();
   MX_USART3_UART_Init();
   MX_USART6_UART_Init();
-  MX_DMA_Init();
+  
   /* USER CODE BEGIN 2 */
 	
 	//初始化信号量
@@ -1802,6 +1803,7 @@ int main(void)
 	HAL_DMA_Init(&hdma_usart2_tx);
 	HAL_DMA_DeInit(&hdma_usart2_rx);
 	HAL_DMA_Init(&hdma_usart2_rx);
+	
 	
 	HAL_TIM_Base_DeInit(&htim12);
 	HAL_TIM_Base_Init(&htim12);

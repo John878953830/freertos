@@ -1032,10 +1032,13 @@ void start_tk_result_process(void *argument)
 				//传输完成,开启接收模式
 				__NOP();
 				HAL_GPIO_WritePin(GPIOG,GPIO_PIN_6,GPIO_PIN_RESET);
+				//HAL_DMA_Abort(&hdma_usart2_tx);
 				HAL_UART_Receive_DMA(&huart2,(uint8_t*)rece_cache,rece_count);
 				//开启接收超时定时器
+				
 				while(HAL_TIM_Base_Start_IT(&htim12)!=HAL_OK)
 				{
+					__NOP();
 					;
 				}
 			}
@@ -1044,6 +1047,9 @@ void start_tk_result_process(void *argument)
 				//dma 接收完成
 				//CRC数据校验
 				//HAL_TIM_Base_Stop(&htim12);
+				//HAL_DMA_DeInit(&hdma_usart2_rx);
+	      //HAL_DMA_Init(&hdma_usart2_rx);
+				//__HAL_UART_CLEAR_OREFLAG(&huart2);
 				uint8_t crch=0;
 				uint8_t crcl=0;
 				uint16_t crc_tmp=usMBCRC16(rece_cache,rece_count - 2);
