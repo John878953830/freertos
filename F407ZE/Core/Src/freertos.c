@@ -850,7 +850,7 @@ void start_tk_master_order(void *argument)
 					uint8_t tmp_target=(id.RxHeader.ExtId & MASK_TARGET) >> 16;
 					
 					//判断ACK是否需要立即回复发送方
-					if(tmp_if_ack==1)
+					if(tmp_if_ack==1 && tmp_priority!=1)
 					{
 						//tmp填充为cansend
 						tmp.property=0;                     //can send 
@@ -881,71 +881,74 @@ void start_tk_master_order(void *argument)
 						}
 					}
 					
-					if(tmp_command_id>CAN_COMMAND_NUMBER)
+					if(tmp_priority!=1)
 					{
-						//命令ID错误
-						#ifdef DEBUG_OUTPUT
-						printf("%s\n","command id error");
-						#endif
-					}
-					else
-					{
-						if(tmp_target==31)
+						if(tmp_command_id>CAN_COMMAND_NUMBER)
 						{
-							//广播ID， 只有一组急停指令
-							uint8_t data=0;
-							uint8_t para=tmp_if_return;
-							command_to_function[tmp_command_id](&data,para);
+							//命令ID错误
+							#ifdef DEBUG_OUTPUT
+							printf("%s\n","command id error");
+							#endif
 						}
 						else
 						{
-							if(
-							tmp_command_id==0  || 
-						  tmp_command_id==2  ||
-						  tmp_command_id==4  ||
-						  tmp_command_id==5  ||
-						  tmp_command_id==6  ||
-						  tmp_command_id==10 ||
-						  tmp_command_id==15 ||
-						  tmp_command_id==16 ||
-						  tmp_command_id==17 ||
-						  tmp_command_id==18 ||
-						  tmp_command_id==19)
+							if(tmp_target==31)
 							{
+								//广播ID， 只有一组急停指令
 								uint8_t data=0;
 								uint8_t para=tmp_if_return;
 								command_to_function[tmp_command_id](&data,para);
 							}
-							if(tmp_command_id==1  ||
-								 tmp_command_id==3  ||
-							   tmp_command_id==7  ||
-							   tmp_command_id==8  ||
-							   tmp_command_id==9  ||
-							   tmp_command_id==11 ||
-							   tmp_command_id==12 ||
-							   tmp_command_id==13 ||
-							   tmp_command_id==14 )
+							else
 							{
-								uint8_t data[8];
-								memcpy(data,id.data,id.RxHeader.DLC);
-								/*
-								data[0]=id.data[0];
-								data[1]=id.data[1];
-								data[2]=id.data[2];
-								data[3]=id.data[3];
-								data[4]=id.data[4];
-								data[5]=id.data[5];
-								data[6]=id.data[6];
-								data[7]=id.data[7];
-								*/
-								uint32_t para=id.RxHeader.DLC;
-								para|=(tmp_if_return << 4);   //bit 4表示是否返回return帧
-								para|=(tmp_if_last << 5);     //bit 5表示是否是最后一帧
-								command_to_function[tmp_command_id](data,para);
+								if(
+								tmp_command_id==0  || 
+								tmp_command_id==2  ||
+								tmp_command_id==4  ||
+								tmp_command_id==5  ||
+								tmp_command_id==6  ||
+								tmp_command_id==10 ||
+								tmp_command_id==15 ||
+								tmp_command_id==16 ||
+								tmp_command_id==17 ||
+								tmp_command_id==18 ||
+								tmp_command_id==19)
+								{
+									uint8_t data=0;
+									uint8_t para=tmp_if_return;
+									command_to_function[tmp_command_id](&data,para);
+								}
+								if(tmp_command_id==1  ||
+									 tmp_command_id==3  ||
+									 tmp_command_id==7  ||
+									 tmp_command_id==8  ||
+									 tmp_command_id==9  ||
+									 tmp_command_id==11 ||
+									 tmp_command_id==12 ||
+									 tmp_command_id==13 ||
+									 tmp_command_id==14 )
+								{
+									uint8_t data[8];
+									memcpy(data,id.data,id.RxHeader.DLC);
+									/*
+									data[0]=id.data[0];
+									data[1]=id.data[1];
+									data[2]=id.data[2];
+									data[3]=id.data[3];
+									data[4]=id.data[4];
+									data[5]=id.data[5];
+									data[6]=id.data[6];
+									data[7]=id.data[7];
+									*/
+									uint32_t para=id.RxHeader.DLC;
+									para|=(tmp_if_return << 4);   //bit 4表示是否返回return帧
+									para|=(tmp_if_last << 5);     //bit 5表示是否是最后一帧
+									command_to_function[tmp_command_id](data,para);
+								}
 							}
+						//根据命令电机映射表找到要动作的电机，并将参数压入电机中的命令结构
+						//uint8_t motor_id=command_to_motor[tmp_command_id];
 						}
-					//根据命令电机映射表找到要动作的电机，并将参数压入电机中的命令结构
-					//uint8_t motor_id=command_to_motor[tmp_command_id];
 					}
 				}
 			}
@@ -1026,56 +1029,60 @@ void start_tk_result_process(void *argument)
 		{
 			if(notify_use==0x0001)
 			{
-				//传输完成， 开启定时器， 3.5T后变换电平
-				modbus_time_flag=1;
-				__HAL_TIM_CLEAR_FLAG(&htim12,TIM_FLAG_UPDATE);
-				HAL_TIM_Base_Start_IT(&htim12);
-				;
+				//传输完成,开启接收模式
+				__NOP();
+				HAL_GPIO_WritePin(GPIOG,GPIO_PIN_6,GPIO_PIN_RESET);
+				HAL_UART_Receive_DMA(&huart2,(uint8_t*)rece_cache,rece_count);
+				//开启接收超时定时器
+				while(HAL_TIM_Base_Start_IT(&htim12)!=HAL_OK)
+				{
+					;
+				}
 			}
 			if(notify_use==0x0002)
 			{
 				//dma 接收完成
 				//CRC数据校验
+				//HAL_TIM_Base_Stop(&htim12);
 				uint8_t crch=0;
 				uint8_t crcl=0;
 				uint16_t crc_tmp=usMBCRC16(rece_cache,rece_count - 2);
 				crcl=(uint8_t)(crc_tmp & 0xFF);
 				crch=(uint8_t)(crc_tmp >> 8);
 				
-				//if(crcl==rece_cache[rece_count-2] && crch==rece_cache[rece_count-1])
+				if(crcl==rece_cache[rece_count-2] && crch==rece_cache[rece_count-1])
 				{
-					//开启定时
-					modbus_time_flag=2;
-					__HAL_TIM_CLEAR_FLAG(&htim12,TIM_FLAG_UPDATE);
-				  HAL_TIM_Base_Start_IT(&htim12);
+					//发送下一帧
+					if(modbus_list_head!=NULL && modbus_list_head->next!=NULL)
+					{
+						modbus_list_head->if_over=0;
+						modbus_list_head=modbus_list_head->next;
+						if(modbus_list_head->if_over==1)
+						{
+							modbus_send_sub(modbus_list_head->modbus_element);
+						}
+						else
+						{
+							//发送过程结束
+							modbus_status=0;
+							HAL_GPIO_WritePin(GPIOG,GPIO_PIN_6,GPIO_PIN_SET);
+						}
+					}
 				}
-				//else
+				else
 				{
-					//收到的数据不对，重发或者报错，待完成
+					//收到的数据不对,重发
+					modbus_send_sub(modbus_list_head->modbus_element);
 					;
 				}
 			}
-			if(notify_use==0x0011)
+			if(notify_use==0x0021)
 			{
-				//第一段定时时间到
-				modbus_time_flag=2;
-				HAL_UART_Receive_DMA(&huart2,(uint8_t*)rece_cache,rece_count);
-			}
-			if(notify_use==0x0012)
-			{
-				//发送下一帧
-				modbus_status=0;
-				modbus_time_flag=0;
-				if(modbus_list_head!=NULL && modbus_list_head->if_over==1)
-				{
-					modbus_list_head->if_over=0;
-				}
-				if(modbus_list_head->next!=NULL)
-				{
-					modbus_list_head=modbus_list_head->next;
-					modbus_send_sub(modbus_list_head->modbus_element);
-				}
-				;
+				//超时，重发
+				//清除UIE
+				__HAL_TIM_CLEAR_IT(&htim12,TIM_IT_UPDATE);
+				modbus_send_sub(modbus_list_head->modbus_element);
+				
 			}
 			notify_use=0;
 		}

@@ -280,14 +280,18 @@ void EXTI4_IRQHandler(void)
 void DMA1_Stream5_IRQHandler(void)
 {
   /* USER CODE BEGIN DMA1_Stream5_IRQn 0 */
-	if(result_processHandle !=NULL)
+	if(__HAL_DMA_GET_FLAG(&hdma_usart2_rx,DMA_FLAG_TCIF1_5)!=RESET)
 	{
-		#ifdef DEBUG_OUTPUT
-		printf("%s\n","dma transmit over");
-		#endif
-		xTaskNotifyFromISR(result_processHandle,0x0002,eSetBits,&b_tk_rece_result);
-		//HAL_UART_AbortTransmit(&huart2);
-		portYIELD_FROM_ISR( b_tk_rece_result );
+		if(result_processHandle !=NULL)
+		{
+			#ifdef DEBUG_OUTPUT
+			printf("%s\n","dma transmit over");
+			#endif
+			xTaskNotifyFromISR(result_processHandle,0x0002,eSetBits,&b_tk_rece_result);
+			portYIELD_FROM_ISR( b_tk_rece_result );
+		}
+		//停止定时器、
+		HAL_TIM_Base_Stop(&htim12);
 	}
   /* USER CODE END DMA1_Stream5_IRQn 0 */
   HAL_DMA_IRQHandler(&hdma_usart2_rx);
@@ -302,17 +306,21 @@ void DMA1_Stream5_IRQHandler(void)
 void DMA1_Stream6_IRQHandler(void)
 {
   /* USER CODE BEGIN DMA1_Stream6_IRQn 0 */
-
-	if(result_processHandle !=NULL)
+	if(__HAL_DMA_GET_FLAG(&hdma_usart2_tx,DMA_FLAG_TCIF2_6)!=RESET)
 	{
-		#ifdef DEBUG_OUTPUT
-		printf("%s\n","dma transmit over");
-		#endif
-		xTaskNotifyFromISR(result_processHandle,0x0001,eSetBits,&b_tk_rece_result);
-		//HAL_UART_AbortTransmit(&huart2);
-		portYIELD_FROM_ISR( b_tk_rece_result );
+		if(result_processHandle !=NULL)
+		{
+			#ifdef DEBUG_OUTPUT
+			printf("%s\n","dma transmit over");
+			#endif
+			xTaskNotifyFromISR(result_processHandle,0x0001,eSetBits,&b_tk_rece_result);
+			portYIELD_FROM_ISR( b_tk_rece_result );
+		}
+		//传输完成,开启接收模式
+		//HAL_GPIO_WritePin(GPIOG,GPIO_PIN_6,GPIO_PIN_RESET);
+		//HAL_UART_Receive_DMA(&huart2,(uint8_t*)rece_cache,rece_count);
+		//HAL_GPIO_WritePin(GPIOG,GPIO_PIN_6,GPIO_PIN_RESET);
 	}
-	HAL_UART_Receive_DMA(&huart2,rece_cache,rece_count);
   /* USER CODE END DMA1_Stream6_IRQn 0 */
   HAL_DMA_IRQHandler(&hdma_usart2_tx);
   /* USER CODE BEGIN DMA1_Stream6_IRQn 1 */
@@ -656,21 +664,13 @@ void TIM8_BRK_TIM12_IRQHandler(void)
 		//HAL_TIM_Base_Stop(&htim12);
 		//modbus_period+=100;
 		//TIM12->ARR=modbus_period;
-		HAL_GPIO_WritePin(GPIOG,GPIO_PIN_6,GPIO_PIN_RESET);
 		//GPIOG->ODR&=(~(1<<6));
 		if(result_processHandle!=NULL)
 		{
-			if(modbus_time_flag==1)
-			{
-				xTaskNotifyFromISR(result_processHandle,0x0011,eSetBits,&b_tk_rece_result);
-				portYIELD_FROM_ISR( b_tk_rece_result );
-			}
-			if(modbus_time_flag==2)
-			{
-				xTaskNotifyFromISR(result_processHandle,0x0012,eSetBits,&b_tk_rece_result);
-				portYIELD_FROM_ISR( b_tk_rece_result );
-			}
+			xTaskNotifyFromISR(result_processHandle,0x0021,eSetBits,&b_tk_rece_result);
+			portYIELD_FROM_ISR( b_tk_rece_result );
 		}
+		__HAL_TIM_CLEAR_FLAG(&htim12,TIM_FLAG_UPDATE);
 	}
   /* USER CODE END TIM8_BRK_TIM12_IRQn 0 */
   HAL_TIM_IRQHandler(&htim8);

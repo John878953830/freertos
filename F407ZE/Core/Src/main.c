@@ -228,8 +228,11 @@ int command_0(uint8_t* data,uint32_t para)
 				tmp.can_priority=0x03;         //ÃüÁî½áÊø·µ»ØÖ¡
 				tmp.can_if_last=0x00;
 				tmp.can_if_return=0x00;
-				tmp.length=1;
-				tmp.data[0]=ERROR_COMMAND_0_FAIL;
+				tmp.length=4;
+				tmp.data[0]=0x00;
+				tmp.data[1]=0x00;
+				tmp.data[2]=0x00;
+				tmp.data[3]=ERROR_COMMAND_0_FAIL;
 			  BaseType_t status_q = xQueueSendToBack(send_queueHandle, &tmp, 0);
 				if(status_q!=pdPASS)
 				{
@@ -259,8 +262,11 @@ int command_0(uint8_t* data,uint32_t para)
 		tmp.can_priority=0x03;         //ÃüÁî½áÊø·µ»ØÖ¡
 		tmp.can_if_last=0x00;
 		tmp.can_if_return=0x00;
-		tmp.length=1;
+		tmp.length=4;
 		tmp.data[0]=0x00;
+		tmp.data[1]=0x00;
+		tmp.data[2]=0x00;
+		tmp.data[3]=0x00;
 		BaseType_t status_q = xQueueSendToBack(send_queueHandle, &tmp, 0);
 		if(status_q!=pdPASS)
 		{
@@ -305,8 +311,11 @@ int command_1(uint8_t* data,uint32_t para)
 				tmp.can_priority=0x03;         //ÃüÁî½áÊø·µ»ØÖ¡
 				tmp.can_if_last=0x00;
 				tmp.can_if_return=0x00;
-				tmp.length=1;
-				tmp.data[0]=ERROR_COMMAND_1_FAIL;
+				tmp.length=4;
+				tmp.data[0]=0x00;
+				tmp.data[1]=0x00;
+				tmp.data[2]=0x00;
+				tmp.data[3]=ERROR_COMMAND_1_FAIL;
 				BaseType_t status_q = xQueueSendToBack(send_queueHandle, &tmp, 0);
 				if(status_q!=pdPASS)
 				{
@@ -334,8 +343,11 @@ int command_1(uint8_t* data,uint32_t para)
 			tmp.can_priority=0x03;         //ÃüÁî½áÊø·µ»ØÖ¡
 			tmp.can_if_last=0x00;
 			tmp.can_if_return=0x00;
-			tmp.length=1;
+			tmp.length=4;
 			tmp.data[0]=0x00;
+			tmp.data[1]=0x00;
+			tmp.data[2]=0x00;
+			tmp.data[3]=0x00;
 			BaseType_t status_q = xQueueSendToBack(send_queueHandle, &tmp, 0);
 			if(status_q!=pdPASS)
 			{
@@ -431,7 +443,11 @@ int command_2(uint8_t* data,uint32_t para)
 		tmp.can_priority=0x03;
 		tmp.can_if_return=0x00;
 		tmp.can_if_last=0x00;
-		tmp.length=len;
+		tmp.length=4;
+		tmp.data[0]=0x00;
+		tmp.data[1]=0x00;
+		tmp.data[2]=0x00;
+		tmp.data[3]=0x00;
 		BaseType_t status_q = xQueueSendToBack(send_queueHandle, &tmp, 0);
 		if(status_q!=pdPASS)
 		{
@@ -464,15 +480,18 @@ int command_3(uint8_t* data,uint32_t para)
 			{
 				//can send
 				tmp.property=0;
-				tmp.can_command=0x02;
+				tmp.can_command=0x03;
 				tmp.can_if_ack=0x01;
 				tmp.can_source=0x03;
 				tmp.can_target=0x00;
 				tmp.can_priority=0x03;
 				tmp.can_if_return=0x00;
 				tmp.can_if_last=0x00;
-				tmp.length=1;
-				tmp.data[0]=ERROR_COMMAND_3_FAIL;
+				tmp.length=4;
+				tmp.data[0]=0x00;
+				tmp.data[1]=0x00;
+				tmp.data[2]=0x00;
+				tmp.data[3]=ERROR_COMMAND_3_FAIL;
 				BaseType_t status_q = xQueueSendToBack(send_queueHandle, &tmp, 0);
 				if(status_q!=pdPASS)
 				{
@@ -507,15 +526,18 @@ int command_3(uint8_t* data,uint32_t para)
 			{
 				//can send
 				tmp.property=0;
-				tmp.can_command=0x02;
+				tmp.can_command=0x03;
 				tmp.can_if_ack=0x01;
 				tmp.can_source=0x03;
 				tmp.can_target=0x00;
 				tmp.can_priority=0x03;
 				tmp.can_if_return=0x00;
 				tmp.can_if_last=0x00;
-				tmp.length=1;
-				tmp.data[0]=ERROR_COMMAND_3_FAIL;
+				tmp.length=4;
+				tmp.data[0]=0x00;
+				tmp.data[1]=0x00;
+				tmp.data[2]=0x00;
+				tmp.data[3]=ERROR_COMMAND_3_FAIL;
 				BaseType_t status_q = xQueueSendToBack(send_queueHandle, &tmp, 0);
 				if(status_q!=pdPASS)
 				{
@@ -541,15 +563,18 @@ int command_3(uint8_t* data,uint32_t para)
 			{
 				//can send
 				tmp.property=0;
-				tmp.can_command=0x02;
+				tmp.can_command=0x03;
 				tmp.can_if_ack=0x01;
 				tmp.can_source=0x03;
 				tmp.can_target=0x00;
 				tmp.can_priority=0x03;
 				tmp.can_if_return=0x00;
 				tmp.can_if_last=0x00;
-				tmp.length=1;
+				tmp.length=4;
 				tmp.data[0]=0x00;
+				tmp.data[1]=0x00;
+				tmp.data[2]=0x00;
+				tmp.data[3]=0x00;
 				BaseType_t status_q = xQueueSendToBack(send_queueHandle, &tmp, 0);
 				if(status_q!=pdPASS)
 				{
@@ -597,8 +622,11 @@ int command_7(uint8_t* data,uint32_t para)
 			tmp.can_priority=0x03;         //ÃüÁî½áÊø·µ»ØÖ¡
 			tmp.can_if_last=0x00;
 			tmp.can_if_return=0x00;
-			tmp.length=1;
-			tmp.data[0]=ERROR_COMMAND_7_FAIL;
+			tmp.length=4;
+			tmp.data[0]=0x00;
+			tmp.data[1]=0x00;
+			tmp.data[2]=0x00;
+			tmp.data[3]=ERROR_COMMAND_7_FAIL;
 			portBASE_TYPE status = xQueueSendToBack(send_queueHandle, &tmp, 0);
 			if(status!=pdPASS)
 			{
@@ -626,8 +654,11 @@ int command_7(uint8_t* data,uint32_t para)
 		tmp.can_priority=0x03;         //ÃüÁî½áÊø·µ»ØÖ¡
 		tmp.can_if_last=0x00;
 		tmp.can_if_return=0x00;
-		tmp.length=1;
+		tmp.length=4;
 		tmp.data[0]=0x00;
+		tmp.data[1]=0x00;
+		tmp.data[2]=0x00;
+		tmp.data[3]=0x00;
 	  portBASE_TYPE	status = xQueueSendToBack(send_queueHandle, &tmp, 0);
 		if(status!=pdPASS)
 		{
@@ -660,7 +691,7 @@ int command_8(uint8_t* data,uint32_t para)
 				QUEUE_STRUCT enable_motor;
 	
 				enable_motor.property=1;                            //485 send
-				enable_motor.modbus_addr=2;
+				enable_motor.modbus_addr=1;
 				enable_motor.modbus_func=0x10;                      //Ð´¶à¸ö¼Ä´æÆ÷
 				enable_motor.modbus_addr_h=(uint8_t)(1008>>8);
 				enable_motor.modbus_addr_l=(uint8_t)(1008&0xFF);                   //µç»ú485µØÖ·
@@ -681,7 +712,7 @@ int command_8(uint8_t* data,uint32_t para)
 				QUEUE_STRUCT enable_motor;
 	
 				enable_motor.property=1;                            //485 send
-				enable_motor.modbus_addr=2;
+				enable_motor.modbus_addr=1;
 				enable_motor.modbus_func=0x10;                      //Ð´¶à¸ö¼Ä´æÆ÷
 				enable_motor.modbus_addr_h=(uint8_t)(1008>>8);
 				enable_motor.modbus_addr_l=(uint8_t)(1008&0xFF);                   //µç»ú485µØÖ·
@@ -1535,7 +1566,7 @@ uint8_t modbus_send(QUEUE_STRUCT send_struct)
 		{
 			HAL_GPIO_WritePin(GPIOG,GPIO_PIN_6,GPIO_PIN_SET);
 			GPIO_PinState tmpread=HAL_GPIO_ReadPin(GPIOG,GPIO_PIN_6);
-			taskENTER_CRITICAL();
+			//taskENTER_CRITICAL();
 			send_cache[0]=send_struct.modbus_addr;
 			send_cache[1]=send_struct.modbus_func;
 			send_cache[2]=send_struct.modbus_addr_h;
@@ -1553,13 +1584,13 @@ uint8_t modbus_send(QUEUE_STRUCT send_struct)
 			HAL_UART_Transmit_DMA(&huart2,(uint8_t*)send_cache,13);
 			rece_count=8;
 			modbus_status=1;
-			taskEXIT_CRITICAL();
+			//taskEXIT_CRITICAL();
 		}
 		//¶Á¼Ä´æÆ÷
 		if(send_struct.modbus_func==0x03)
 		{
 			HAL_GPIO_WritePin(GPIOG,GPIO_PIN_6,GPIO_PIN_SET);
-			taskENTER_CRITICAL();
+			//taskENTER_CRITICAL();
 			send_cache[0]=send_struct.modbus_addr;
 			send_cache[1]=send_struct.modbus_func;
 			send_cache[2]=send_struct.modbus_addr_h;
@@ -1572,7 +1603,7 @@ uint8_t modbus_send(QUEUE_STRUCT send_struct)
 			HAL_UART_Transmit_DMA(&huart2,(uint8_t*)send_cache,8);
 			rece_count=9;
 			modbus_status=1;
-			taskEXIT_CRITICAL();
+			//taskEXIT_CRITICAL();
 		}
 	}
 	else
@@ -1601,7 +1632,7 @@ uint8_t modbus_send_sub(QUEUE_STRUCT send_struct)
 	{
 		HAL_GPIO_WritePin(GPIOG,GPIO_PIN_6,GPIO_PIN_SET);
 		GPIO_PinState tmpread=HAL_GPIO_ReadPin(GPIOG,GPIO_PIN_6);
-		taskENTER_CRITICAL();
+		//taskENTER_CRITICAL();
 		send_cache[0]=send_struct.modbus_addr;
 		send_cache[1]=send_struct.modbus_func;
 		send_cache[2]=send_struct.modbus_addr_h;
@@ -1618,13 +1649,13 @@ uint8_t modbus_send_sub(QUEUE_STRUCT send_struct)
 		send_cache[12]=(uint8_t)(send_struct.modbus_crc >> 8);
 		HAL_UART_Transmit_DMA(&huart2,(uint8_t*)send_cache,13);
 		rece_count=8;
-		taskEXIT_CRITICAL();
+		//taskEXIT_CRITICAL();
 	}
 	//¶Á¼Ä´æÆ÷
 	if(send_struct.modbus_func==0x03)
 	{
 		HAL_GPIO_WritePin(GPIOG,GPIO_PIN_6,GPIO_PIN_SET);
-		taskENTER_CRITICAL();
+		//taskENTER_CRITICAL();
 		send_cache[0]=send_struct.modbus_addr;
 		send_cache[1]=send_struct.modbus_func;
 		send_cache[2]=send_struct.modbus_addr_h;
@@ -1636,7 +1667,7 @@ uint8_t modbus_send_sub(QUEUE_STRUCT send_struct)
 		send_cache[7]=(uint8_t)(send_struct.modbus_crc >> 8);
 		HAL_UART_Transmit_DMA(&huart2,(uint8_t*)send_cache,8);
 		rece_count=9;
-		taskEXIT_CRITICAL();
+		//taskEXIT_CRITICAL();
 	}
 	return 0;
 }
