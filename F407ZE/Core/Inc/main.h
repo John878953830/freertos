@@ -79,6 +79,9 @@ extern uint8_t modbus_read_status;     //modbus ¶ÁÈ¡Ö¸ÁîÍê³É±êÖ¾£¬ 0£º ¿ÕÏĞ 1£º¶
 extern uint8_t modbus_act_status;      //modbus µç»ú¶¯×÷Íê³É±êÖ¾£¬ 0£º¿ÕÏĞ£¬ 1£º¶¯×÷Ö¸Áî½»»¥ÖĞ 2£º ¶¯×÷Ö¸Áî½»»¥Íê³É
 extern uint8_t modbus_time_status;     //modbus ³¬Ê±±êÖ¾£¬ 0£º¿ÕÏĞ£¬ 1£º½»»¥³¬Ê± 2£º½»»¥Íê³É
 extern uint8_t modbus_time_flag;       //modbus  ¶¨Ê±Ê±¼ä±êÖ¾  1£º µÚÒ»´Î3.5T¶¨Ê±  1£ºµÚ¶ş´Î3.5T¶¨Ê±
+
+extern uint8_t us_send;
+extern uint8_t us_rece;
 /* USER CODE END EC */
 
 /* Exported macro ------------------------------------------------------------*/

@@ -50,6 +50,9 @@ uint8_t modbus_act_status;      //modbus µç»ú¶¯×÷Íê³É±êÖ¾£¬ 0£º¿ÕÏĞ£¬ 1£º¶¯×÷Ö¸Á
 uint8_t modbus_time_status;     //modbus ³¬Ê±±êÖ¾£¬ 0£º¿ÕÏĞ£¬ 1£º½»»¥³¬Ê± 2£º½»»¥Íê³É
 uint8_t modbus_time_flag=0;       //modbus  ¶¨Ê±Ê±¼ä±êÖ¾  1£º µÚÒ»´Î3.5T¶¨Ê±  1£ºµÚ¶ş´Î3.5T¶¨Ê±
 
+uint8_t us_send=0;
+uint8_t us_rece=0;
+
 MODBUS_LIST* modbus_list_head=NULL;  //head Ö¸ÏòÑ°ÕÒµ½µÄµÚÒ»¸ö²»Îª¿ÕµÄ½Úµã
 MODBUS_LIST* modbus_list_tail=NULL;  //tail Ö¸Ïò²»Îª¿ÕµÄ½ÚµãµÄÏÂÒ»¸ö½Úµã
 uint16_t modbus_period=89;
