@@ -41,7 +41,7 @@ xTimerHandle broadcast_timer;
 
 uint16_t iic_cache=0;
 //modbus cache
-uint8_t send_cache[16];
+uint8_t modbus_send_cache[16];
 uint8_t rece_cache[16];
 uint8_t rece_count=0;
 uint8_t modbus_status=0;        //modbus ×´Ì¬²ÎÁ¿£¬ 0£º ¿ÕÏÐ 1£º´«ÊäÖÐ
@@ -50,8 +50,6 @@ uint8_t modbus_act_status;      //modbus µç»ú¶¯×÷Íê³É±êÖ¾£¬ 0£º¿ÕÏÐ£¬ 1£º¶¯×÷Ö¸Á
 uint8_t modbus_time_status;     //modbus ³¬Ê±±êÖ¾£¬ 0£º¿ÕÏÐ£¬ 1£º½»»¥³¬Ê± 2£º½»»¥Íê³É
 uint8_t modbus_time_flag=0;       //modbus  ¶¨Ê±Ê±¼ä±êÖ¾  1£º µÚÒ»´Î3.5T¶¨Ê±  1£ºµÚ¶þ´Î3.5T¶¨Ê±
 
-uint8_t us_send=0;
-uint8_t us_rece=0;
 
 MODBUS_LIST* modbus_list_head=NULL;  //head Ö¸ÏòÑ°ÕÒµ½µÄµÚÒ»¸ö²»Îª¿ÕµÄ½Úµã
 MODBUS_LIST* modbus_list_tail=NULL;  //tail Ö¸Ïò²»Îª¿ÕµÄ½ÚµãµÄÏÂÒ»¸ö½Úµã
@@ -1568,23 +1566,25 @@ uint8_t modbus_send(QUEUE_STRUCT send_struct)
 		if(send_struct.modbus_func == 0x10)
 		{
 			HAL_GPIO_WritePin(GPIOG,GPIO_PIN_6,GPIO_PIN_SET);
+			__NOP();
+		  __NOP();
 			GPIO_PinState tmpread=HAL_GPIO_ReadPin(GPIOG,GPIO_PIN_6);
 			taskENTER_CRITICAL();
-			send_cache[0]=send_struct.modbus_addr;
-			send_cache[1]=send_struct.modbus_func;
-			send_cache[2]=send_struct.modbus_addr_h;
-			send_cache[3]=send_struct.modbus_addr_l;
-			send_cache[4]=send_struct.modbus_data_len_h;
-			send_cache[5]=send_struct.modbus_data_len_l;
-			send_cache[6]=send_struct.modbus_data_byte;
-			send_cache[7]=send_struct.modbus_data_1;
-			send_cache[8]=send_struct.modbus_data_2;
-			send_cache[9]=send_struct.modbus_data_3;
-			send_cache[10]=send_struct.modbus_data_4;
-			send_struct.modbus_crc=usMBCRC16(send_cache,11);
-			send_cache[11]=(uint8_t)(send_struct.modbus_crc & 0xFF);
-			send_cache[12]=(uint8_t)(send_struct.modbus_crc >> 8);
-			HAL_UART_Transmit_DMA(&huart2,(uint8_t*)send_cache,13);
+			modbus_send_cache[0]=send_struct.modbus_addr;
+			modbus_send_cache[1]=send_struct.modbus_func;
+			modbus_send_cache[2]=send_struct.modbus_addr_h;
+			modbus_send_cache[3]=send_struct.modbus_addr_l;
+			modbus_send_cache[4]=send_struct.modbus_data_len_h;
+			modbus_send_cache[5]=send_struct.modbus_data_len_l;
+			modbus_send_cache[6]=send_struct.modbus_data_byte;
+			modbus_send_cache[7]=send_struct.modbus_data_1;
+			modbus_send_cache[8]=send_struct.modbus_data_2;
+			modbus_send_cache[9]=send_struct.modbus_data_3;
+			modbus_send_cache[10]=send_struct.modbus_data_4;
+			send_struct.modbus_crc=usMBCRC16(modbus_send_cache,11);
+			modbus_send_cache[11]=(uint8_t)(send_struct.modbus_crc & 0xFF);
+			modbus_send_cache[12]=(uint8_t)(send_struct.modbus_crc >> 8);
+			HAL_UART_Transmit_DMA(&huart2,(uint8_t*)modbus_send_cache,13);
 			modbus_time_flag=1;
 			rece_count=8;
 			modbus_status=1;
@@ -1594,17 +1594,19 @@ uint8_t modbus_send(QUEUE_STRUCT send_struct)
 		if(send_struct.modbus_func==0x03)
 		{
 			HAL_GPIO_WritePin(GPIOG,GPIO_PIN_6,GPIO_PIN_SET);
+			__NOP();
+		  __NOP();
 			taskENTER_CRITICAL();
-			send_cache[0]=send_struct.modbus_addr;
-			send_cache[1]=send_struct.modbus_func;
-			send_cache[2]=send_struct.modbus_addr_h;
-			send_cache[3]=send_struct.modbus_addr_l;
-			send_cache[4]=send_struct.modbus_data_len_h;
-			send_cache[5]=send_struct.modbus_data_len_l;
-			send_struct.modbus_crc=usMBCRC16(send_cache,6);
-			send_cache[6]=(uint8_t)(send_struct.modbus_crc & 0xFF);
-			send_cache[7]=(uint8_t)(send_struct.modbus_crc >> 8);
-			HAL_UART_Transmit_DMA(&huart2,(uint8_t*)send_cache,8);
+			modbus_send_cache[0]=send_struct.modbus_addr;
+			modbus_send_cache[1]=send_struct.modbus_func;
+			modbus_send_cache[2]=send_struct.modbus_addr_h;
+			modbus_send_cache[3]=send_struct.modbus_addr_l;
+			modbus_send_cache[4]=send_struct.modbus_data_len_h;
+			modbus_send_cache[5]=send_struct.modbus_data_len_l;
+			send_struct.modbus_crc=usMBCRC16(modbus_send_cache,6);
+			modbus_send_cache[6]=(uint8_t)(send_struct.modbus_crc & 0xFF);
+			modbus_send_cache[7]=(uint8_t)(send_struct.modbus_crc >> 8);
+			HAL_UART_Transmit_DMA(&huart2,(uint8_t*)modbus_send_cache,8);
 			modbus_time_flag=1;
 			rece_count=9;
 			modbus_status=1;
@@ -1636,23 +1638,25 @@ uint8_t modbus_send_sub(QUEUE_STRUCT send_struct)
 	if(send_struct.modbus_func == 0x10)
 	{
 		HAL_GPIO_WritePin(GPIOG,GPIO_PIN_6,GPIO_PIN_SET);
+		__NOP();
+		__NOP();
 		GPIO_PinState tmpread=HAL_GPIO_ReadPin(GPIOG,GPIO_PIN_6);
 		taskENTER_CRITICAL();
-		send_cache[0]=send_struct.modbus_addr;
-		send_cache[1]=send_struct.modbus_func;
-		send_cache[2]=send_struct.modbus_addr_h;
-		send_cache[3]=send_struct.modbus_addr_l;
-		send_cache[4]=send_struct.modbus_data_len_h;
-		send_cache[5]=send_struct.modbus_data_len_l;
-		send_cache[6]=send_struct.modbus_data_byte;
-		send_cache[7]=send_struct.modbus_data_1;
-		send_cache[8]=send_struct.modbus_data_2;
-		send_cache[9]=send_struct.modbus_data_3;
-		send_cache[10]=send_struct.modbus_data_4;
-		send_struct.modbus_crc=usMBCRC16(send_cache,11);
-		send_cache[11]=(uint8_t)(send_struct.modbus_crc & 0xFF);
-		send_cache[12]=(uint8_t)(send_struct.modbus_crc >> 8);
-		HAL_UART_Transmit_DMA(&huart2,(uint8_t*)send_cache,13);
+		modbus_send_cache[0]=send_struct.modbus_addr;
+		modbus_send_cache[1]=send_struct.modbus_func;
+		modbus_send_cache[2]=send_struct.modbus_addr_h;
+		modbus_send_cache[3]=send_struct.modbus_addr_l;
+		modbus_send_cache[4]=send_struct.modbus_data_len_h;
+		modbus_send_cache[5]=send_struct.modbus_data_len_l;
+		modbus_send_cache[6]=send_struct.modbus_data_byte;
+		modbus_send_cache[7]=send_struct.modbus_data_1;
+		modbus_send_cache[8]=send_struct.modbus_data_2;
+		modbus_send_cache[9]=send_struct.modbus_data_3;
+		modbus_send_cache[10]=send_struct.modbus_data_4;
+		send_struct.modbus_crc=usMBCRC16(modbus_send_cache,11);
+		modbus_send_cache[11]=(uint8_t)(send_struct.modbus_crc & 0xFF);
+		modbus_send_cache[12]=(uint8_t)(send_struct.modbus_crc >> 8);
+		HAL_UART_Transmit_DMA(&huart2,(uint8_t*)modbus_send_cache,13);
 		modbus_time_flag=1;
 		rece_count=8;
 		taskEXIT_CRITICAL();
@@ -1660,18 +1664,21 @@ uint8_t modbus_send_sub(QUEUE_STRUCT send_struct)
 	//¶Á¼Ä´æÆ÷
 	if(send_struct.modbus_func==0x03)
 	{
+		
 		HAL_GPIO_WritePin(GPIOG,GPIO_PIN_6,GPIO_PIN_SET);
+		__NOP();
+		__NOP();
 		taskENTER_CRITICAL();
-		send_cache[0]=send_struct.modbus_addr;
-		send_cache[1]=send_struct.modbus_func;
-		send_cache[2]=send_struct.modbus_addr_h;
-		send_cache[3]=send_struct.modbus_addr_l;
-		send_cache[4]=send_struct.modbus_data_len_h;
-		send_cache[5]=send_struct.modbus_data_len_l;
-		send_struct.modbus_crc=usMBCRC16(send_cache,6);
-		send_cache[6]=(uint8_t)(send_struct.modbus_crc & 0xFF);
-		send_cache[7]=(uint8_t)(send_struct.modbus_crc >> 8);
-		HAL_UART_Transmit_DMA(&huart2,(uint8_t*)send_cache,8);
+		modbus_send_cache[0]=send_struct.modbus_addr;
+		modbus_send_cache[1]=send_struct.modbus_func;
+		modbus_send_cache[2]=send_struct.modbus_addr_h;
+		modbus_send_cache[3]=send_struct.modbus_addr_l;
+		modbus_send_cache[4]=send_struct.modbus_data_len_h;
+		modbus_send_cache[5]=send_struct.modbus_data_len_l;
+		send_struct.modbus_crc=usMBCRC16(modbus_send_cache,6);
+		modbus_send_cache[6]=(uint8_t)(send_struct.modbus_crc & 0xFF);
+		modbus_send_cache[7]=(uint8_t)(send_struct.modbus_crc >> 8);
+		HAL_UART_Transmit_DMA(&huart2,(uint8_t*)modbus_send_cache,8);
 		modbus_time_flag=1;
 		rece_count=9;
 		taskEXIT_CRITICAL();

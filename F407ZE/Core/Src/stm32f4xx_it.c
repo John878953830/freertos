@@ -578,37 +578,39 @@ void I2C1_ER_IRQHandler(void)
 void USART2_IRQHandler(void)
 {
   /* USER CODE BEGIN USART2_IRQn 0 */
-	if(__HAL_UART_GET_FLAG(&huart2,UART_FLAG_TC))
+	if(__HAL_UART_GET_FLAG(&huart2,UART_FLAG_TC)!=RESET && modbus_time_flag==1)
 	{
-		if(modbus_time_flag==1)
+		modbus_time_flag=0;
+		if(result_processHandle !=NULL)
+		{
+			#ifdef DEBUG_OUTPUT
+			printf("%s\n","dma transmit over");
+			#endif
+			xTaskNotifyFromISR(result_processHandle,0x0001,eSetBits,&b_tk_rece_result);
+			portYIELD_FROM_ISR( b_tk_rece_result );
+		}
+		HAL_UART_DMAStop(&huart2);
+		//__HAL_UART_CLEAR_FLAG(&huart2,UART_FLAG_TC);
+	}
+	if(__HAL_UART_GET_FLAG(&huart2,UART_FLAG_IDLE)!=RESET)
+	{
+		if(1)
 		{
 			if(result_processHandle !=NULL)
 			{
 				#ifdef DEBUG_OUTPUT
 				printf("%s\n","dma transmit over");
 				#endif
-				xTaskNotifyFromISR(result_processHandle,0x0001,eSetBits,&b_tk_rece_result);
-				us_send=0;
+				xTaskNotifyFromISR(result_processHandle,0x0002,eSetBits,&b_tk_rece_result);
 				portYIELD_FROM_ISR( b_tk_rece_result );
 			}
+			__HAL_UART_CLEAR_IDLEFLAG(&huart2);
+			modbus_time_flag=0;
 			HAL_UART_DMAStop(&huart2);
+			HAL_TIM_Base_Stop(&htim12);
+			
 		}
-	}
-  if(__HAL_UART_GET_FLAG(&huart2,UART_FLAG_IDLE)!=RESET)
-	{
-		if(result_processHandle !=NULL)
-		{
-			#ifdef DEBUG_OUTPUT
-			printf("%s\n","dma transmit over");
-			#endif
-			xTaskNotifyFromISR(result_processHandle,0x0002,eSetBits,&b_tk_rece_result);
-			us_rece=0;
-			portYIELD_FROM_ISR( b_tk_rece_result );
-		}
-		modbus_time_flag=0;
-		HAL_UART_DMAStop(&huart2);
-		HAL_TIM_Base_Stop(&htim12);
-		__HAL_UART_DISABLE_IT(&huart2,UART_FLAG_IDLE);
+		
 	}
 	//__HAL_UART_CLEAR_NEFLAG(USART2);
   /* USER CODE END USART2_IRQn 0 */

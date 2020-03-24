@@ -71,7 +71,7 @@ extern uint16_t iic_cache;
 extern DMA_HandleTypeDef hdma_usart2_tx;
 extern DMA_HandleTypeDef hdma_usart2_rx;
 //modbus cache
-extern uint8_t send_cache[16];
+extern uint8_t modbus_send_cache[16];
 extern uint8_t rece_cache[16];
 extern uint8_t rece_count; 
 extern uint8_t modbus_status;
@@ -80,8 +80,6 @@ extern uint8_t modbus_act_status;      //modbus 电机动作完成标志， 0：空闲， 1：
 extern uint8_t modbus_time_status;     //modbus 超时标志， 0：空闲， 1：交互超时 2：交互完成
 extern uint8_t modbus_time_flag;       //modbus  定时时间标志  1： 第一次3.5T定时  1：第二次3.5T定时
 
-extern uint8_t us_send;
-extern uint8_t us_rece;
 /* USER CODE END EC */
 
 /* Exported macro ------------------------------------------------------------*/

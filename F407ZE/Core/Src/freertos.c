@@ -1025,65 +1025,62 @@ void start_tk_result_process(void *argument)
                          0xffffffff,          /* Clear all bits on exit. */
                          &notify_use, /* Receives the notification value. */
                          portMAX_DELAY );
-		if(notify_use!=0)
+		if(notify_use==0x0001)
 		{
-			if(notify_use==0x0001)
+			//变换电平，转为接收模式
+			//while(modbus_time_flag!=0)
 			{
-				//传输完成,开启接收模式
-				HAL_GPIO_WritePin(GPIOG,GPIO_PIN_6,GPIO_PIN_RESET);
-				HAL_UART_Receive_DMA(&huart2,(uint8_t*)rece_cache,rece_count);
-				//开启接收超时定时器
-				HAL_TIM_Base_Start_IT(&htim12);
+				;
 			}
-			if(notify_use==0x0002)
+			HAL_GPIO_WritePin(GPIOG,GPIO_PIN_6,GPIO_PIN_RESET);
+			HAL_UART_Receive_DMA(&huart2,(uint8_t*)rece_cache,rece_count);
+			modbus_time_flag=2;
+			//启动接收超时定时器
+			__HAL_TIM_CLEAR_FLAG(&htim12,TIM_FLAG_UPDATE);
+			HAL_TIM_Base_Start_IT(&htim12);
+		}
+		if(notify_use==0x0002)
+		{
+			//dma 接收完成
+			//CRC数据校验
+			uint8_t crch=0;
+			uint8_t crcl=0;
+			uint16_t crc_tmp=usMBCRC16(rece_cache,rece_count - 2);
+			crcl=(uint8_t)(crc_tmp & 0xFF);
+			crch=(uint8_t)(crc_tmp >> 8);
+			
+			if(crcl==rece_cache[rece_count-2] && crch==rece_cache[rece_count-1])
 			{
-				//dma 接收完成
-				//CRC数据校验
-				//HAL_TIM_Base_Stop(&htim12);
-				//HAL_DMA_DeInit(&hdma_usart2_rx);
-	      //HAL_DMA_Init(&hdma_usart2_rx);
-				//__HAL_UART_CLEAR_OREFLAG(&huart2);
-				uint8_t crch=0;
-				uint8_t crcl=0;
-				uint16_t crc_tmp=usMBCRC16(rece_cache,rece_count - 2);
-				crcl=(uint8_t)(crc_tmp & 0xFF);
-				crch=(uint8_t)(crc_tmp >> 8);
-				
-				if(crcl==rece_cache[rece_count-2] && crch==rece_cache[rece_count-1])
+				//HAL_Delay(6);
+				if(modbus_list_head!=NULL && modbus_list_head->next!=NULL)
 				{
-					//发送下一帧
-					if(modbus_list_head!=NULL && modbus_list_head->next!=NULL)
+					modbus_list_head->if_over=0;
+					modbus_list_head=modbus_list_head->next;
+					if(modbus_list_head->if_over==1)
 					{
-						modbus_list_head->if_over=0;
-						modbus_list_head=modbus_list_head->next;
-						if(modbus_list_head->if_over==1)
-						{
-							modbus_send_sub(modbus_list_head->modbus_element);
-						}
-						else
-						{
-							//发送过程结束
-							modbus_status=0;
-							HAL_GPIO_WritePin(GPIOG,GPIO_PIN_6,GPIO_PIN_SET);
-						}
+						modbus_send_sub(modbus_list_head->modbus_element);
 					}
-				}
-				else
-				{
-					//收到的数据不对,重发
-					modbus_send_sub(modbus_list_head->modbus_element);
+					else
+					{
+						HAL_GPIO_WritePin(GPIOG,GPIO_PIN_6,GPIO_PIN_SET);
+						modbus_status=0;
+					}
 					;
 				}
 			}
-			if(notify_use==0x0021)
+			else
 			{
-				//超时，重发
-				//清除UIE
-				__HAL_TIM_CLEAR_IT(&htim12,TIM_IT_UPDATE);
+				//收到的数据不对
 				modbus_send_sub(modbus_list_head->modbus_element);
-				
+				;
 			}
-			notify_use=0;
+		}
+		if(notify_use==0x0021)
+		{
+			if(modbus_list_head!=NULL)
+			{
+				modbus_send_sub(modbus_list_head->modbus_element);
+			}
 		}
     osDelay(1);
   }
