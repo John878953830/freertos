@@ -1030,9 +1030,7 @@ void start_tk_result_process(void *argument)
 			if(notify_use==0x0001)
 			{
 				//传输完成,开启接收模式
-				__NOP();
 				HAL_GPIO_WritePin(GPIOG,GPIO_PIN_6,GPIO_PIN_RESET);
-				//HAL_DMA_Abort(&hdma_usart2_tx);
 				HAL_UART_Receive_DMA(&huart2,(uint8_t*)rece_cache,rece_count);
 				//开启接收超时定时器
 				HAL_TIM_Base_Start_IT(&htim12);
@@ -1082,7 +1080,7 @@ void start_tk_result_process(void *argument)
 				//超时，重发
 				//清除UIE
 				__HAL_TIM_CLEAR_IT(&htim12,TIM_IT_UPDATE);
-				//modbus_send_sub(modbus_list_head->modbus_element);
+				modbus_send_sub(modbus_list_head->modbus_element);
 				
 			}
 			notify_use=0;
