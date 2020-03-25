@@ -594,7 +594,7 @@ void USART2_IRQHandler(void)
 	}
 	if(__HAL_UART_GET_FLAG(&huart2,UART_FLAG_IDLE)!=RESET)
 	{
-		if(1)
+		if(modbus_time_flag!=0)
 		{
 			if(result_processHandle !=NULL)
 			{

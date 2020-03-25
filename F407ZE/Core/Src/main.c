@@ -704,7 +704,20 @@ int command_8(uint8_t* data,uint32_t para)
 				enable_motor.modbus_data_3=0x00;
 				enable_motor.modbus_data_4=0x00;
 				
-				modbus_send_sub(enable_motor);
+				//modbus_send_sub(enable_motor);
+				portBASE_TYPE	status = xQueueSendToBack(send_queueHandle, &enable_motor, 0);
+				if(status!=pdPASS)
+				{
+					#ifdef DEBUG_OUTPUT
+					printf("%s\n","queue overflow");
+					#endif
+				}
+				else
+				{
+					#ifdef DEBUG_OUTPUT
+					printf("%s\n","send command 7 succes to queue already");
+					#endif
+				}
 				;
 			}
 			if(data[0]==0x12)
@@ -725,7 +738,20 @@ int command_8(uint8_t* data,uint32_t para)
 				enable_motor.modbus_data_3=0x00;
 				enable_motor.modbus_data_4=0x00;
 				
-				modbus_send_sub(enable_motor);
+				//modbus_send_sub(enable_motor);
+				portBASE_TYPE	status = xQueueSendToBack(send_queueHandle, &enable_motor, 0);
+				if(status!=pdPASS)
+				{
+					#ifdef DEBUG_OUTPUT
+					printf("%s\n","queue overflow");
+					#endif
+				}
+				else
+				{
+					#ifdef DEBUG_OUTPUT
+					printf("%s\n","send command 7 succes to queue already");
+					#endif
+				}
 				;
 			}
 			;
@@ -1656,7 +1682,11 @@ uint8_t modbus_send_sub(QUEUE_STRUCT send_struct)
 		send_struct.modbus_crc=usMBCRC16(modbus_send_cache,11);
 		modbus_send_cache[11]=(uint8_t)(send_struct.modbus_crc & 0xFF);
 		modbus_send_cache[12]=(uint8_t)(send_struct.modbus_crc >> 8);
-		HAL_UART_Transmit_DMA(&huart2,(uint8_t*)modbus_send_cache,13);
+		if(HAL_UART_Transmit_DMA(&huart2,(uint8_t*)modbus_send_cache,13)==HAL_BUSY)
+		{
+			__NOP();
+			HAL_UART_Transmit_DMA(&huart2,(uint8_t*)modbus_send_cache,13);
+		}
 		modbus_time_flag=1;
 		rece_count=8;
 		taskEXIT_CRITICAL();
@@ -1678,7 +1708,11 @@ uint8_t modbus_send_sub(QUEUE_STRUCT send_struct)
 		send_struct.modbus_crc=usMBCRC16(modbus_send_cache,6);
 		modbus_send_cache[6]=(uint8_t)(send_struct.modbus_crc & 0xFF);
 		modbus_send_cache[7]=(uint8_t)(send_struct.modbus_crc >> 8);
-		HAL_UART_Transmit_DMA(&huart2,(uint8_t*)modbus_send_cache,8);
+		if(HAL_UART_Transmit_DMA(&huart2,(uint8_t*)modbus_send_cache,8)==HAL_BUSY)
+		{
+			__nop();
+			HAL_UART_Transmit_DMA(&huart2,(uint8_t*)modbus_send_cache,8);
+		}
 		modbus_time_flag=1;
 		rece_count=9;
 		taskEXIT_CRITICAL();

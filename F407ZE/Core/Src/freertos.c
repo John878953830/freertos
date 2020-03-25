@@ -1064,6 +1064,7 @@ void start_tk_result_process(void *argument)
 					{
 						HAL_GPIO_WritePin(GPIOG,GPIO_PIN_6,GPIO_PIN_SET);
 						modbus_status=0;
+						modbus_time_flag=0;
 					}
 					;
 				}
