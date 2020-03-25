@@ -153,6 +153,15 @@ osStaticMessageQDef_t rece_queueControlBlock;
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
+osThreadId_t result_processHandle_rece;
+uint32_t result_processBuffer_rece[ 128 ];
+osStaticThreadDef_t result_processControlBlock_rece;
+void start_tk_result_process_rece(void *argument);
+
+osThreadId_t result_processHandle_send;
+uint32_t result_processBuffer_send[ 128 ];
+osStaticThreadDef_t result_processControlBlock_send;
+void start_tk_result_process_send(void *argument);
 
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 {
@@ -415,6 +424,25 @@ osKernelInitialize();
   result_processHandle = osThreadNew(start_tk_result_process, NULL, &result_process_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
+	const osThreadAttr_t result_process_rece_attributes = {
+    .name = "result_process_rece",
+    .stack_mem = &result_processBuffer_rece[0],
+    .stack_size = sizeof(result_processBuffer_rece),
+    .cb_mem = &result_processControlBlock_rece,
+    .cb_size = sizeof(result_processControlBlock_rece),
+    .priority = (osPriority_t) osPriorityAboveNormal3,
+  };
+  result_processHandle_rece = osThreadNew(start_tk_result_process_rece, NULL, &result_process_rece_attributes);
+	
+	const osThreadAttr_t result_process_send_attributes = {
+    .name = "result_process_send",
+    .stack_mem = &result_processBuffer_send[0],
+    .stack_size = sizeof(result_processBuffer_send),
+    .cb_mem = &result_processControlBlock_send,
+    .cb_size = sizeof(result_processControlBlock_send),
+    .priority = (osPriority_t) osPriorityAboveNormal3,
+  };
+  result_processHandle_send = osThreadNew(start_tk_result_process_send, NULL, &result_process_send_attributes);
   /* add threads, ... */
 	//启动软件定时器
 	start_soft_timer();
@@ -1025,22 +1053,35 @@ void start_tk_result_process(void *argument)
                          0xffffffff,          /* Clear all bits on exit. */
                          &notify_use, /* Receives the notification value. */
                          portMAX_DELAY );
-		if(notify_use==0x0001)
+		if(notify_use==0x0021)
 		{
-			//变换电平，转为接收模式
-			//while(modbus_time_flag!=0)
+			if(modbus_list_head!=NULL)
 			{
-				;
+				modbus_send_sub(modbus_list_head->modbus_element);
 			}
-			HAL_GPIO_WritePin(GPIOG,GPIO_PIN_6,GPIO_PIN_RESET);
-			HAL_UART_Receive_DMA(&huart2,(uint8_t*)rece_cache,rece_count);
-			modbus_time_flag=2;
-			//启动接收超时定时器
-			__HAL_TIM_CLEAR_FLAG(&htim12,TIM_FLAG_UPDATE);
-			HAL_TIM_Base_Start_IT(&htim12);
 		}
+    osDelay(1);
+  }
+  /* USER CODE END start_tk_result_process */
+}
+
+/* Private application code --------------------------------------------------*/
+/* USER CODE BEGIN Application */
+ void start_tk_result_process_rece(void *argument)
+{
+  /* USER CODE BEGIN start_tk_result_process */
+	uint32_t notify_use=0;
+  /* Infinite loop */
+  for(;;)
+  {
+		xTaskNotifyWait( 0x00,               /* Don't clear any bits on entry. */
+                         0xffffffff,          /* Clear all bits on exit. */
+                         &notify_use, /* Receives the notification value. */
+                         portMAX_DELAY );
 		if(notify_use==0x0002)
 		{
+			//HAL_UART_DMAStop(&huart2);
+			//HAL_TIM_Base_Stop(&htim12);
 			//dma 接收完成
 			//CRC数据校验
 			uint8_t crch=0;
@@ -1051,7 +1092,6 @@ void start_tk_result_process(void *argument)
 			
 			if(crcl==rece_cache[rece_count-2] && crch==rece_cache[rece_count-1])
 			{
-				//HAL_Delay(6);
 				if(modbus_list_head!=NULL && modbus_list_head->next!=NULL)
 				{
 					modbus_list_head->if_over=0;
@@ -1072,25 +1112,43 @@ void start_tk_result_process(void *argument)
 			else
 			{
 				//收到的数据不对
+				__nop();
+				__nop();
 				modbus_send_sub(modbus_list_head->modbus_element);
 				;
-			}
-		}
-		if(notify_use==0x0021)
-		{
-			if(modbus_list_head!=NULL)
-			{
-				modbus_send_sub(modbus_list_head->modbus_element);
 			}
 		}
     osDelay(1);
   }
   /* USER CODE END start_tk_result_process */
-}
+}  
 
-/* Private application code --------------------------------------------------*/
-/* USER CODE BEGIN Application */
-     
+
+ void start_tk_result_process_send(void *argument)
+{
+  /* USER CODE BEGIN start_tk_result_process */
+	uint32_t notify_use=0;
+  /* Infinite loop */
+  for(;;)
+  {
+		xTaskNotifyWait( 0x00,               /* Don't clear any bits on entry. */
+                         0xffffffff,          /* Clear all bits on exit. */
+                         &notify_use, /* Receives the notification value. */
+                         portMAX_DELAY );
+		if(notify_use==0x0001)
+		{
+			//变换电平，转为接收模式
+			HAL_GPIO_WritePin(GPIOG,GPIO_PIN_6,GPIO_PIN_RESET);
+			HAL_UART_Receive_DMA(&huart2,(uint8_t*)rece_cache,rece_count);
+			modbus_time_flag=2;
+			//启动接收超时定时器
+			__HAL_TIM_CLEAR_FLAG(&htim12,TIM_FLAG_UPDATE);
+			HAL_TIM_Base_Start_IT(&htim12);
+		}
+    osDelay(1);
+  }
+  /* USER CODE END start_tk_result_process */
+}
 /* USER CODE END Application */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

@@ -103,8 +103,8 @@ extern TaskHandle_t commu_mornitorHandle;
 extern TaskHandle_t send_orderHandle;
 extern TaskHandle_t master_orderHandle;
 extern TaskHandle_t result_processHandle;
-
-
+extern TaskHandle_t result_processHandle_rece;
+extern TaskHandle_t result_processHandle_send;
 extern uint16_t modbus_period;
 /* USER CODE END EV */
 
@@ -581,38 +581,35 @@ void USART2_IRQHandler(void)
 	if(__HAL_UART_GET_FLAG(&huart2,UART_FLAG_TC)!=RESET && modbus_time_flag==1)
 	{
 		modbus_time_flag=0;
-		if(result_processHandle !=NULL)
+		if(result_processHandle_send !=NULL)
 		{
 			#ifdef DEBUG_OUTPUT
 			printf("%s\n","dma transmit over");
 			#endif
-			xTaskNotifyFromISR(result_processHandle,0x0001,eSetBits,&b_tk_rece_result);
+			xTaskNotifyFromISR(result_processHandle_send,0x0001,eSetBits,&b_tk_rece_result);
 			portYIELD_FROM_ISR( b_tk_rece_result );
 		}
 		HAL_UART_DMAStop(&huart2);
-		//__HAL_UART_CLEAR_FLAG(&huart2,UART_FLAG_TC);
 	}
 	if(__HAL_UART_GET_FLAG(&huart2,UART_FLAG_IDLE)!=RESET)
 	{
 		if(modbus_time_flag!=0)
 		{
-			if(result_processHandle !=NULL)
+			if(result_processHandle_rece !=NULL)
 			{
 				#ifdef DEBUG_OUTPUT
 				printf("%s\n","dma transmit over");
 				#endif
-				xTaskNotifyFromISR(result_processHandle,0x0002,eSetBits,&b_tk_rece_result);
+				xTaskNotifyFromISR(result_processHandle_rece,0x0002,eSetBits,&b_tk_rece_result);
 				portYIELD_FROM_ISR( b_tk_rece_result );
 			}
 			__HAL_UART_CLEAR_IDLEFLAG(&huart2);
 			modbus_time_flag=0;
 			HAL_UART_DMAStop(&huart2);
+			TIM12->CNT=0;
 			HAL_TIM_Base_Stop(&htim12);
-			
 		}
-		
 	}
-	//__HAL_UART_CLEAR_NEFLAG(USART2);
   /* USER CODE END USART2_IRQn 0 */
   HAL_UART_IRQHandler(&huart2);
   /* USER CODE BEGIN USART2_IRQn 1 */
@@ -661,17 +658,13 @@ void TIM8_BRK_TIM12_IRQHandler(void)
   /* USER CODE BEGIN TIM8_BRK_TIM12_IRQn 0 */
 	if(__HAL_TIM_GET_FLAG(&htim12, TIM_FLAG_UPDATE) != RESET)
 	{
-		//HAL_GPIO_TogglePin(GPIOE,GPIO_PIN_3);
-		//HAL_TIM_Base_Stop(&htim12);
-		//modbus_period+=100;
-		//TIM12->ARR=modbus_period;
-		//GPIOG->ODR&=(~(1<<6));
 		if(result_processHandle!=NULL)
 		{
 			xTaskNotifyFromISR(result_processHandle,0x0021,eSetBits,&b_tk_rece_result);
 			portYIELD_FROM_ISR( b_tk_rece_result );
 		}
 		__HAL_TIM_CLEAR_FLAG(&htim12,TIM_FLAG_UPDATE);
+		TIM12->CNT=0;
 	}
   /* USER CODE END TIM8_BRK_TIM12_IRQn 0 */
   HAL_TIM_IRQHandler(&htim8);

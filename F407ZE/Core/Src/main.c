@@ -1059,6 +1059,10 @@ SemaphoreHandle_t xSemaphoreSwitchGet = NULL;
 StaticSemaphore_t semaGratingGet;
 SemaphoreHandle_t xSemaphoreGratingGet = NULL;
 
+//modbus 信号量
+StaticSemaphore_t modbusSend;
+SemaphoreHandle_t xSemaphoreModbusSend = NULL;
+
 
 
 //电机数组
@@ -1173,7 +1177,7 @@ void timer_start()
 	
 	//开启任务统计定时器14
 	HAL_TIM_Base_Start_IT(&htim14);
-	
+	HAL_TIM_Base_Stop(&htim12);
 	//HAL_TIM_Base_Start_IT(&htim12);
 	return;
 }
@@ -1365,6 +1369,10 @@ uint8_t lock_init(void)
 	xSemaphoreGratingGet=xSemaphoreCreateBinaryStatic(&semaGratingGet);
 	configASSERT(xSemaphoreGratingGet);
 	
+	//modbus send信号量初始化
+	xSemaphoreModbusSend=xSemaphoreCreateBinaryStatic(&modbusSend);
+	configASSERT(xSemaphoreGratingGet);
+	
 	//给信号量赋值
 	if( xSemaphoreGive( xSemaphorePositionGet ) != pdTRUE )
 	{
@@ -1379,6 +1387,10 @@ uint8_t lock_init(void)
 			return ERROR_CANNOT_GIVE_SEM;
 	}
 	if( xSemaphoreGive( xSemaphoreGratingGet ) != pdTRUE )
+	{
+			return ERROR_CANNOT_GIVE_SEM;
+	}
+	if( xSemaphoreGive( xSemaphoreModbusSend ) != pdTRUE )
 	{
 			return ERROR_CANNOT_GIVE_SEM;
 	}
@@ -1595,7 +1607,6 @@ uint8_t modbus_send(QUEUE_STRUCT send_struct)
 			__NOP();
 		  __NOP();
 			GPIO_PinState tmpread=HAL_GPIO_ReadPin(GPIOG,GPIO_PIN_6);
-			taskENTER_CRITICAL();
 			modbus_send_cache[0]=send_struct.modbus_addr;
 			modbus_send_cache[1]=send_struct.modbus_func;
 			modbus_send_cache[2]=send_struct.modbus_addr_h;
@@ -1614,7 +1625,6 @@ uint8_t modbus_send(QUEUE_STRUCT send_struct)
 			modbus_time_flag=1;
 			rece_count=8;
 			modbus_status=1;
-			taskEXIT_CRITICAL();
 		}
 		//读寄存器
 		if(send_struct.modbus_func==0x03)
@@ -1622,7 +1632,6 @@ uint8_t modbus_send(QUEUE_STRUCT send_struct)
 			HAL_GPIO_WritePin(GPIOG,GPIO_PIN_6,GPIO_PIN_SET);
 			__NOP();
 		  __NOP();
-			taskENTER_CRITICAL();
 			modbus_send_cache[0]=send_struct.modbus_addr;
 			modbus_send_cache[1]=send_struct.modbus_func;
 			modbus_send_cache[2]=send_struct.modbus_addr_h;
@@ -1636,7 +1645,6 @@ uint8_t modbus_send(QUEUE_STRUCT send_struct)
 			modbus_time_flag=1;
 			rece_count=9;
 			modbus_status=1;
-			taskEXIT_CRITICAL();
 		}
 	}
 	else
@@ -1666,8 +1674,6 @@ uint8_t modbus_send_sub(QUEUE_STRUCT send_struct)
 		HAL_GPIO_WritePin(GPIOG,GPIO_PIN_6,GPIO_PIN_SET);
 		__NOP();
 		__NOP();
-		GPIO_PinState tmpread=HAL_GPIO_ReadPin(GPIOG,GPIO_PIN_6);
-		taskENTER_CRITICAL();
 		modbus_send_cache[0]=send_struct.modbus_addr;
 		modbus_send_cache[1]=send_struct.modbus_func;
 		modbus_send_cache[2]=send_struct.modbus_addr_h;
@@ -1689,7 +1695,6 @@ uint8_t modbus_send_sub(QUEUE_STRUCT send_struct)
 		}
 		modbus_time_flag=1;
 		rece_count=8;
-		taskEXIT_CRITICAL();
 	}
 	//读寄存器
 	if(send_struct.modbus_func==0x03)
@@ -1698,7 +1703,6 @@ uint8_t modbus_send_sub(QUEUE_STRUCT send_struct)
 		HAL_GPIO_WritePin(GPIOG,GPIO_PIN_6,GPIO_PIN_SET);
 		__NOP();
 		__NOP();
-		taskENTER_CRITICAL();
 		modbus_send_cache[0]=send_struct.modbus_addr;
 		modbus_send_cache[1]=send_struct.modbus_func;
 		modbus_send_cache[2]=send_struct.modbus_addr_h;
@@ -1715,7 +1719,6 @@ uint8_t modbus_send_sub(QUEUE_STRUCT send_struct)
 		}
 		modbus_time_flag=1;
 		rece_count=9;
-		taskEXIT_CRITICAL();
 	}
 	return 0;
 }
