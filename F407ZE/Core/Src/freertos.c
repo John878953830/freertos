@@ -91,10 +91,115 @@ static void prvAutoReloadTimerCallback( TimerHandle_t xTimer )
 	*/
 }
 
+extern xTimerHandle motor_status_timer;                    //电机状态定时器，读取错误码，温度，滞留脉冲数
+static void prvAutoReloadMotorStatusTimerCallback( TimerHandle_t xTimer )
+{
+	//读取电机状态的回调函数
+	uint8_t i=0;
+	//获取电机错误码
+	for(i=0;i<1;i++) //暂时只读取1号电机的参数，因缺少电缆
+	{
+		if(i==1)
+		{
+			break;
+		}
+		else{
+			QUEUE_STRUCT pos_get;
+			pos_get.property=1;                          //485 send
+			pos_get.modbus_addr=1;                       //电机号需要根据命令中的电机号赋值,暂时置位为1，因缺少线缆，i+1
+			pos_get.modbus_func=0x03;                    //读多个寄存器
+			pos_get.modbus_addr_h=(uint8_t)(ERROR_CODE_ADDR>>8);    //读电机错误码
+			pos_get.modbus_addr_l=(uint8_t)(ERROR_CODE_ADDR&0xFF);  
+			pos_get.modbus_data_len_h=0x00;
+			pos_get.modbus_data_len_l=0x02;
+			pos_get.modbus_property=4;                   //错误码
+			portBASE_TYPE	status = xQueueSendToBack(send_queueHandle, &pos_get, 0);
+			if(status!=pdPASS)
+			{
+				#ifdef DEBUG_OUTPUT
+				printf("%s\n","queue overflow");
+				#endif
+			}
+			else
+			{
+				#ifdef DEBUG_OUTPUT
+				printf("%s\n","send command 7 succes to queue already");
+				#endif
+			}
+		}
+	}
+	//获取电机温度
+	for(i=0;i<1;i++) //暂时只读取1号电机的参数，因缺少电缆
+	{
+		if(i==1)
+		{
+			break;
+		}
+		else{
+			QUEUE_STRUCT pos_get;
+			pos_get.property=1;                          //485 send
+			pos_get.modbus_addr=1;                       //电机号需要根据命令中的电机号赋值,暂时置位为1，因缺少线缆，i+1
+			pos_get.modbus_func=0x03;                    //读多个寄存器
+			pos_get.modbus_addr_h=(uint8_t)(TEMPERATURE_ADDR>>8);    //读电机温度
+			pos_get.modbus_addr_l=(uint8_t)(TEMPERATURE_ADDR&0xFF);  
+			pos_get.modbus_data_len_h=0x00;
+			pos_get.modbus_data_len_l=0x02;
+			pos_get.modbus_property=5;                   //温度
+			portBASE_TYPE	status = xQueueSendToBack(send_queueHandle, &pos_get, 0);
+			if(status!=pdPASS)
+			{
+				#ifdef DEBUG_OUTPUT
+				printf("%s\n","queue overflow");
+				#endif
+			}
+			else
+			{
+				#ifdef DEBUG_OUTPUT
+				printf("%s\n","send command 7 succes to queue already");
+				#endif
+			}
+		}
+	}
+	//获取滞留脉冲数
+	for(i=0;i<1;i++) //暂时只读取1号电机的参数，因缺少电缆
+	{
+		if(i==1)
+		{
+			break;
+		}
+		else{
+			QUEUE_STRUCT pos_get;
+			pos_get.property=1;                          //485 send
+			pos_get.modbus_addr=1;                       //电机号需要根据命令中的电机号赋值,暂时置位为1，因缺少线缆，i+1
+			pos_get.modbus_func=0x03;                    //读多个寄存器
+			pos_get.modbus_addr_h=(uint8_t)(REMAIN_PULSE>>8);    //读滞留脉冲数
+			pos_get.modbus_addr_l=(uint8_t)(REMAIN_PULSE&0xFF);  
+			pos_get.modbus_data_len_h=0x00;
+			pos_get.modbus_data_len_l=0x02;
+			pos_get.modbus_property=6;                   //滞留脉冲数
+			portBASE_TYPE	status = xQueueSendToBack(send_queueHandle, &pos_get, 0);
+			if(status!=pdPASS)
+			{
+				#ifdef DEBUG_OUTPUT
+				printf("%s\n","queue overflow");
+				#endif
+			}
+			else
+			{
+				#ifdef DEBUG_OUTPUT
+				printf("%s\n","send command 7 succes to queue already");
+				#endif
+			}
+		}
+	}
+}
+
 void start_soft_timer(void)
 {
 	broadcast_timer = xTimerCreate( "AutoReload",timer_period,pdTRUE,0,prvAutoReloadTimerCallback );
+	motor_status_timer=xTimerCreate( "AutoReloadStatusTimer",2000,pdTRUE,0,prvAutoReloadMotorStatusTimerCallback );
 	xTimerStart(broadcast_timer,0);
+	xTimerStart(motor_status_timer,0);
 	;
 }
 /* USER CODE END PM */
@@ -724,7 +829,103 @@ void start_tk_sensor_monitor(void *argument)
 			#ifdef DEBUG_OUTPUT
 			printf("%s\n","start tk sensor monitor");
 			#endif
-			
+			//获取电机位置
+			uint8_t i=0;
+			for(i=0;i<1;i++) //暂时只读取1号电机的参数，因缺少电缆
+			{
+				if(i==1)
+				{
+					break;
+				}
+				else{
+					QUEUE_STRUCT pos_get;
+					pos_get.property=1;                          //485 send
+		      pos_get.modbus_addr=1;                       //电机号需要根据命令中的电机号赋值,暂时置位为1，因缺少线缆
+		      pos_get.modbus_func=0x03;                    //读多个寄存器
+		      pos_get.modbus_addr_h=(uint8_t)(POSITION_CURRENT_ADDR>>8);    //读当前脉冲位置
+		      pos_get.modbus_addr_l=(uint8_t)(POSITION_CURRENT_ADDR&0xFF);  
+		      pos_get.modbus_data_len_h=0x00;
+		      pos_get.modbus_data_len_l=0x02;
+		      pos_get.modbus_property=1;                   //位置
+					portBASE_TYPE	status = xQueueSendToBack(send_queueHandle, &pos_get, 0);
+					if(status!=pdPASS)
+					{
+						#ifdef DEBUG_OUTPUT
+						printf("%s\n","queue overflow");
+						#endif
+					}
+					else
+					{
+						#ifdef DEBUG_OUTPUT
+						printf("%s\n","send command 7 succes to queue already");
+						#endif
+					}
+				}
+			}
+			//获取电机速度
+			for(i=0;i<1;i++) //暂时只读取1号电机的参数，因缺少电缆
+			{
+				if(i==1)
+				{
+					break;
+				}
+				else{
+					QUEUE_STRUCT speed_get;
+					speed_get.property=1;                          //485 send
+		      speed_get.modbus_addr=1;                       //电机号需要根据命令中的电机号赋值,暂时置位为1，因缺少线缆
+		      speed_get.modbus_func=0x03;                    //读多个寄存器
+		      speed_get.modbus_addr_h=(uint8_t)(SPEED_CURRENT_ADDR>>8);    //读当前速度
+		      speed_get.modbus_addr_l=(uint8_t)(SPEED_CURRENT_ADDR&0xFF);  
+		      speed_get.modbus_data_len_h=0x00;
+		      speed_get.modbus_data_len_l=0x02;
+		      speed_get.modbus_property=2;
+					portBASE_TYPE	status = xQueueSendToBack(send_queueHandle, &speed_get, 0);
+					if(status!=pdPASS)
+					{
+						#ifdef DEBUG_OUTPUT
+						printf("%s\n","queue overflow");
+						#endif
+					}
+					else
+					{
+						#ifdef DEBUG_OUTPUT
+						printf("%s\n","send command 7 succes to queue already");
+						#endif
+					}
+				}
+			}
+			//获取电机扭矩
+			for(i=0;i<1;i++) //暂时只读取1号电机的参数，因缺少电缆
+			{
+				if(i==1)
+				{
+					break;
+				}
+				else{
+					QUEUE_STRUCT speed_get;
+					speed_get.property=1;                          //485 send
+		      speed_get.modbus_addr=1;                       //电机号需要根据命令中的电机号赋值,暂时置位为1，因缺少线缆
+		      speed_get.modbus_func=0x03;                    //读多个寄存器
+		      speed_get.modbus_addr_h=(uint8_t)(TORQUE_CURRENT_ADDR>>8);    //读当前扭矩
+		      speed_get.modbus_addr_l=(uint8_t)(TORQUE_CURRENT_ADDR&0xFF);  
+		      speed_get.modbus_data_len_h=0x00;
+		      speed_get.modbus_data_len_l=0x02;
+		      speed_get.modbus_property=3;                   //扭矩
+					portBASE_TYPE	status = xQueueSendToBack(send_queueHandle, &speed_get, 0);
+					if(status!=pdPASS)
+					{
+						#ifdef DEBUG_OUTPUT
+						printf("%s\n","queue overflow");
+						#endif
+					}
+					else
+					{
+						#ifdef DEBUG_OUTPUT
+						printf("%s\n","send command 7 succes to queue already");
+						#endif
+					}
+				}
+			}
 			notify_use=0;
 		}
     osDelay(1);
@@ -1067,7 +1268,7 @@ void start_tk_result_process(void *argument)
 
 /* Private application code --------------------------------------------------*/
 /* USER CODE BEGIN Application */
- void start_tk_result_process_rece(void *argument)
+void start_tk_result_process_rece(void *argument)
 {
   /* USER CODE BEGIN start_tk_result_process */
 	uint32_t notify_use=0;
@@ -1094,6 +1295,13 @@ void start_tk_result_process(void *argument)
 			{
 				if(modbus_list_head!=NULL && modbus_list_head->next!=NULL)
 				{
+					//解析收到的数据放入电机结构体中
+					if(rece_cache[1]==0x03)              //读取命令
+					{
+						result_to_parameter[modbus_list_head->modbus_element.modbus_property](&rece_cache[3],rece_cache[0] - 1);
+						;
+					}
+					
 					modbus_list_head->if_over=0;
 					modbus_list_head=modbus_list_head->next;
 					if(modbus_list_head->if_over==1)
@@ -1124,7 +1332,7 @@ void start_tk_result_process(void *argument)
 }  
 
 
- void start_tk_result_process_send(void *argument)
+void start_tk_result_process_send(void *argument)
 {
   /* USER CODE BEGIN start_tk_result_process */
 	uint32_t notify_use=0;

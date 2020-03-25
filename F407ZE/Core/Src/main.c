@@ -38,6 +38,7 @@
 /* USER CODE BEGIN PTD */
 uint32_t timer_period=1000;
 xTimerHandle broadcast_timer;
+xTimerHandle motor_status_timer;     //电机状态参数定时器
 
 uint16_t iic_cache=0;
 //modbus cache
@@ -163,6 +164,7 @@ QUEUE_STRUCT command_seq[4]=
 		.modbus_addr_l=(uint8_t)(4004&0xFF),  
 		.modbus_data_len_h=0x00,
 		.modbus_data_len_l=0x02,
+		.modbus_property=1,
 	},
 	{
 		.property=1,                            //485 send
@@ -1027,6 +1029,86 @@ int command_26(uint8_t* data,uint32_t para)
 {
 	return 0;
 }
+
+//结果解析函数
+void result_parse_1(uint8_t* data, uint8_t num)
+{
+	//电机位置读取
+	if(num==1 || num>4)
+	{
+		;
+	}
+	else
+	{
+		motor_array[num].position_value.current_position=((uint32_t)data[0]<<8) | (uint32_t)data[1] | ((uint32_t)data[2] << 24) | ((uint32_t)data[3] << 16);
+	}
+	return;
+}
+void result_parse_2(uint8_t* data, uint8_t num)
+{
+	//电机速度读取
+	if(num==1 || num>4)
+	{
+		;
+	}
+	else
+	{
+		motor_array[num].speed_value.current_speed=((uint32_t)data[0]<<8) | (uint32_t)data[1] | ((uint32_t)data[2] << 24) | ((uint32_t)data[3] << 16);
+	}
+	return;
+}
+void result_parse_3(uint8_t* data, uint8_t num)
+{
+	//电机扭矩读取
+	if(num==1 || num>4)
+	{
+		;
+	}
+	else
+	{
+		motor_array[num].torque_value.current_torque=((uint32_t)data[0]<<8) | (uint32_t)data[1] | ((uint32_t)data[2] << 24) | ((uint32_t)data[3] << 16);
+	}
+	return;
+}
+void result_parse_4(uint8_t* data, uint8_t num)
+{
+	//电机故障码
+	if(num==1 || num>4)
+	{
+		;
+	}
+	else
+	{
+		motor_array[num].motor_error_code=((uint32_t)data[0]<<8) | (uint32_t)data[1] | ((uint32_t)data[2] << 24) | ((uint32_t)data[3] << 16);
+	}
+	return;
+}
+void result_parse_5(uint8_t* data, uint8_t num)
+{
+	//电机温度
+	if(num==1 || num>4)
+	{
+		;
+	}
+	else
+	{
+		motor_array[num].temperature=((uint32_t)data[0]<<8) | (uint32_t)data[1] | ((uint32_t)data[2] << 24) | ((uint32_t)data[3] << 16);
+	}
+	return;
+}
+void result_parse_6(uint8_t* data, uint8_t num)
+{
+	//电机滞留脉冲数
+	if(num==1 || num>4)
+	{
+		;
+	}
+	else
+	{
+		motor_array[num].position_value.remain_position=((uint32_t)data[0]<<8) | (uint32_t)data[1] | ((uint32_t)data[2] << 24) | ((uint32_t)data[3] << 16);
+	}
+	return;
+}
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -1128,6 +1210,16 @@ int(*command_to_function[27])(uint8_t*,uint32_t) = {
 	command_24,
 	command_25,
 	command_26,
+};
+
+void(*result_to_parameter[7])(uint8_t*, uint8_t) = {
+	NULL,
+	result_parse_1,
+	result_parse_2,
+	result_parse_3,
+	result_parse_4,
+	result_parse_5,
+	result_parse_6,
 };
 
 
@@ -1345,7 +1437,6 @@ uint8_t iic_rw(uint8_t rw_flag, uint8_t addr,uint8_t* data,uint8_t length) //add
 				#endif
 			}
 		}
-		
 		//vPortFree(rxdata);
 	}
 	//vPortFree(txdata);

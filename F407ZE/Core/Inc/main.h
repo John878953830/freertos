@@ -161,6 +161,13 @@ extern uint8_t modbus_time_flag;       //modbus  ¶¨Ê±Ê±¼ä±êÖ¾  1£º µÚÒ»´Î3.5T¶¨Ê
 //µç»úÖ¸ÁîµØÖ·
 #define P412_H                  (uint16_t)1824
 #define P412_L                  (uint16_t)1825
+
+#define POSITION_CURRENT_ADDR    4004
+#define SPEED_CURRENT_ADDR       4000
+#define TORQUE_CURRENT_ADDR      4016
+#define ERROR_CODE_ADDR          4198
+#define TEMPERATURE_ADDR         4026
+#define REMAIN_PULSE             4012
 /* USER CODE END EM */
 
 /* Exported functions prototypes ---------------------------------------------*/
@@ -168,6 +175,7 @@ void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
 typedef int (*command)(uint8_t*, uint32_t);
+typedef void (*result_parse)(uint8_t* uint8_t);
 //ÃüÁî»Øµ÷º¯Êı, 26×é£¬7×éÔ¤ÁôÃüÁî
 int command_0(uint8_t* data,uint32_t para);
 int command_1(uint8_t* data,uint32_t para);
@@ -196,6 +204,14 @@ int command_23(uint8_t* data,uint32_t para);
 int command_24(uint8_t* data,uint32_t para);
 int command_25(uint8_t* data,uint32_t para);
 int command_26(uint8_t* data,uint32_t para);
+
+//½á¹û½âÎöº¯Êı£¬¹²6×é£¬ ¶ÔÓ¦Î»ÖÃ£¬ËÙ¶È£3£¬ Å¤¾Ø£¬ 4£º´íÎóÂë£¬ 5£ºÎÂ¶È£¬ 6£ºÖÍÁôÂö³åÊı¬
+void result_parse_1(uint8_t* data, uint8_t num);
+void result_parse_2(uint8_t* data, uint8_t num);
+void result_parse_3(uint8_t* data, uint8_t num);
+void result_parse_4(uint8_t* data, uint8_t num);
+void result_parse_5(uint8_t* data, uint8_t num);
+void result_parse_6(uint8_t* data, uint8_t num);
 
 void timer_start(void);
 uint8_t can_start(void);
@@ -238,12 +254,14 @@ typedef struct queue_struct{
 	uint8_t modbus_data_3;             
 	uint8_t modbus_data_4;   
 	uint16_t modbus_crc;                        //485 CRC
+	uint8_t modbus_property;                    //±êÊ¶modbusµÄ¹¦ÄÜÂë£¬ 1£º Î»ÖÃ£¬2£¬ ËÙ¶È£¬ 3£¬ Å¤¾Ø£¬ 4£º´íÎóÂë£¬ 5£ºÎÂ¶È£¬ 6£ºÖÍÁôÂö³åÊı
 	CAN_RxHeaderTypeDef   RxHeader;             //CAN ½ÓÊÕ±¨Í·Êı¾İ
 }QUEUE_STRUCT;
 typedef struct modbus_list{
 	QUEUE_STRUCT modbus_element;
 	uint8_t if_over;                            //±êÖ¾±¾½ÚµãÊÇ·ñÓĞĞ§
 	struct modbus_list* next;
+	//uint8_t parameter;                          //±êÖ¾²Ù×÷µÄÊôĞÔÖµ£¬ 1£º Î»ÖÃ£¬ 2£º ËÙ¶È£¬ 3£¬ Å¤¾Ø£¬ 4£º´íÎóÂë£¬ 5£ºÎÂ¶È£¬ 6£ºÖÍÁôÂö³åÊı
 }MODBUS_LIST;
 typedef struct command_struct{
 	uint8_t command_id;                         //µ±Ç°Ö´ĞĞµÄÃüÁîID£¬ ³õÊ¼»¯Îª0
@@ -279,8 +297,8 @@ typedef struct posture_switch{
 	uint8_t type;                               //×ËÌ¬¿ª¹ØÀàĞÍ£¬³£¿ªĞÍ³õÊ¼»¯Îª0£¬³£±ÕĞÍ³õÊ¼»¯Îª1
 	uint8_t conflict_dir;                       //×ËÌ¬¿ª¹Ø¹ØÁªµÄÅö×²·½Ïò£¬ 0£ºÕı×ª 1£º ·´×ª, ÔËĞĞ·½Ïò¶¨ÒåºÍ´ËÏàÍ¬£¬×ËÌ¬¼ì²â¿ª¹Ø´ËÖµÃ»ÓĞÒâÒå
 	uint8_t status;                             //×ËÌ¬¿ª¹Øµ±Ç°×´Ì¬£¬ 0£º Î´´¥·¢ 1£º´¥·¢
-	uint16_t pin_number;                         //×ËÌ¬¿ª¹Ø¶ÔÓ¦µÄÒı½ÅºÅ
-	GPIO_TypeDef*  gpio_port;                        //×ËÌ¬¿ª¹Ø¶ÔÓ¦µÄÒı½Å×é
+	uint16_t pin_number;                        //×ËÌ¬¿ª¹Ø¶ÔÓ¦µÄÒı½ÅºÅ
+	GPIO_TypeDef*  gpio_port;                   //×ËÌ¬¿ª¹Ø¶ÔÓ¦µÄÒı½Å×é
 }POSTURE_SWITCH;
 typedef struct pid{
 	int32_t kp;                                 //±ÈÀıÏµÊı
@@ -293,6 +311,7 @@ typedef struct position{
 	int32_t position_min;                       //×îĞ¡Î»ÖÃ
 	int32_t current_position;                   //µ±Ç°Î»ÖÃ£¬Î»ÖÃ»ñÈ¡º¯ÊıÔÚ»ñÈ¡Î»ÖÃºó£¬½«Î»ÖÃ´æÈë´Ë±äÁ¿
 	int32_t target_position;                    //Ä¿±êÎ»ÖÃ£¬´æ´¢CANÖ¸ÁîÖĞµÄÄ¿±êÎ»ÖÃ£¬½öÓÃÓÚµ÷ÊÔµ¥²½Ö¸Áî
+	int32_t remain_position;                    //ÖÍÁôÂö³åÊı£¬ĞÂÔö£¬²»×÷Îª³£¹æ¼à²âÁ¿
 	int32_t tp1;                                //ÅäÖÃÎÄ¼şÎ»ÖÃ,¸ù¾İÃüÁîÎÄ¼şÓ³Éä²»Í¬µÄÎ»ÖÃ£¬×î¶àÖ§³Ö8¸öÎ»ÖÃ
 	int32_t tp2;
 	int32_t tp3;
@@ -349,6 +368,8 @@ typedef struct motor_struct{
 	GPIO_ACTION gpio_output[5];                     //gpio Êä³ö×é£¬ 0£º µç»úÊ¹ÄÜ 1£º PWMÊä³ö£¬ 2£º ·½ÏòÊä³ö 3£º ×ËÌ¬µçÔ´¼ÌµçÆ÷Êä³ö
 	GPIO_ACTION gpio_input[1];                      //gpio ÊäÈë×é£¬ 0£ºµç»ú±§Õ¢ÊäÈëÈ·ÈÏĞÅºÅ
 	uint32_t register_move;                         //µç»úÔË¶¯¼Ä´æÆ÷µÄ485µØÖ·
+	uint32_t temperature;                         //ÎÂ¶ÈĞÅÏ¢
+	uint32_t motor_error_code;                    //µç»úÇı¶¯Æ÷µÄ´íÎóÂë
 }MOTOR_STRUCT;
 
 typedef struct angle_struct{
@@ -372,6 +393,7 @@ uint8_t can_send(QUEUE_STRUCT send_struct);
 uint8_t modbus_send(QUEUE_STRUCT send_struct);
 uint8_t modbus_send_sub(QUEUE_STRUCT send_struct);
 extern int(*command_to_function[27])(uint8_t*,uint32_t);
+extern void(*result_to_parameter[7])(uint8_t*, uint8_t);
 extern uint16_t usMBCRC16( uint8_t * pucFrame, uint16_t usLen );
 extern MODBUS_LIST* modbus_list_head;
 extern MODBUS_LIST* modbus_list_tail;

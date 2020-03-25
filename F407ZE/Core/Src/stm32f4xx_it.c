@@ -606,8 +606,8 @@ void USART2_IRQHandler(void)
 			__HAL_UART_CLEAR_IDLEFLAG(&huart2);
 			modbus_time_flag=0;
 			HAL_UART_DMAStop(&huart2);
-			TIM12->CNT=0;
 			HAL_TIM_Base_Stop(&htim12);
+			TIM12->CNT=0;
 		}
 	}
   /* USER CODE END USART2_IRQn 0 */
