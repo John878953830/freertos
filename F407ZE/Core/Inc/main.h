@@ -142,6 +142,7 @@ extern uint8_t modbus_time_flag;       //modbus  ¶¨Ê±Ê±¼ä±êÖ¾  1£º µÚÒ»´Î3.5T¶¨Ê
 #define MODBUS_BUSY             0x25
 #define MODBUS_LIST_ERROR       0x26
 
+
 //Ö¡½á¹¹ÑÚÂë
 #define MASK_PRIORITY           (uint32_t)(0x07 << 26)
 #define MASK_COMMAND            (uint32_t)(0x7F << 9)
@@ -318,14 +319,15 @@ typedef struct position{
 	int32_t remain_position_pre;                //ÉÏÒ»²ÉÑùÊ±¿ÌµÄÖÍÁôÂö³åÊý
 	int32_t remain_position_delta;              //²îÖµ
 	int32_t remain_position_delta_pre;          //ÉÏÒ»´ÎµÄ²îÖµ
-	int32_t tp1;                                //ÅäÖÃÎÄ¼þÎ»ÖÃ,¸ù¾ÝÃüÁîÎÄ¼þÓ³Éä²»Í¬µÄÎ»ÖÃ£¬×î¶àÖ§³Ö8¸öÎ»ÖÃ
-	int32_t tp2;
-	int32_t tp3;
+	int32_t tp1;                                //ÅäÖÃÎÄ¼þÎ»ÖÃ,¸ù¾ÝÃüÁîÎÄ¼þÓ³Éä²»Í¬µÄÎ»ÖÃ£¬×î¶àÖ§³Ö8¸öÎ»ÖÃ, tp1:µç»ú45¶ÈÎ»ÖÃ£¬³õÊ¼»¯Ê±´Óeeprom¶ÁÈë
+	int32_t tp2;                                //tp2£¬µç»úÍêÈ«¼Ð½ôÎ»ÖÃ£¬ ³õÊ¼»¯Ê±´Óeeprom¶ÁÈë
+	int32_t tp3;                                //tp3£¬µç»úÍêÈ«ËÉ¿ªÎ»ÖÃ£¬³õÊ¼»¯Ê±´Óeeprom¶ÁÈë
 	int32_t tp4;
 	int32_t tp5;
 	int32_t tp6;
 	int32_t tp7;
 	int32_t tp8;
+	uint8_t if_tp_already;                      //±êÖ¾tpÊÇ·ñÓÐÐ§£¬³õÊ¼»¯Ê±Îª0£¬ ³É¹¦¶ÁÈ¡eepromÊý¾ÝºóÖÃ1
 }POSITION;
 typedef struct dimension{
 	int32_t dim_x;                              //µç»úËùÍÆ¶¯ÖÕ¶ËµÄX·½ÏòÎ¬¶È
