@@ -39,7 +39,7 @@
 uint32_t timer_period=1000;
 xTimerHandle broadcast_timer;
 xTimerHandle motor_status_timer;     //电机状态参数定时器
-
+uint32_t fifo_level=0;
 uint16_t iic_cache=0;
 //modbus cache
 uint8_t modbus_send_cache[16];
@@ -690,7 +690,7 @@ int command_8(uint8_t* data,uint32_t para)
 		{
 			if(data[0]==0x11)
 			{
-				//启动电机，电机号2
+				//启动电机，电机
 				QUEUE_STRUCT enable_motor;
 	
 				enable_motor.property=1;                            //485 send
@@ -811,6 +811,7 @@ int command_8(uint8_t* data,uint32_t para)
 		tmp.modbus_data_4=data[2];
 		*/
 		//填充序列
+		command_seq[0].can_command=0x08;
 		command_seq[0].modbus_addr=data[0];           //地址赋值为电机号
 		command_seq[1].modbus_addr=data[0];
 		command_seq[2].modbus_addr=data[0];
@@ -821,6 +822,11 @@ int command_8(uint8_t* data,uint32_t para)
 		command_seq[1].modbus_data_2=data[4];
 		command_seq[1].modbus_data_3=data[1];
 		command_seq[1].modbus_data_4=data[2];
+		
+		//填充电机的命令结构体
+		motor_array[data[0]-1].command.command_id=0x08;           //命令id填充为8
+		motor_array[data[0]-1].command.command_status=0x01;       //命令执行中
+		motor_array[data[0]-1].command.if_return=if_return;       //执行完成是否需要回复帧
 		
 		
 		//动作序列压入队列
@@ -901,13 +907,13 @@ int command_9(uint8_t* data,uint32_t para)
 	uint8_t if_return=(para>>4)&0x01;
 	//int32_t offset=(data[1] << 24) | (data[2] << 16) | (data[3] << 8) | data[4];
 	QUEUE_STRUCT tmp;
-	if(data[0]>4)
+	if(data[0]>4 || data[0]==0)
 	{
 		//索引错误
 		if(if_return==1)
 		{
 			tmp.property=0x00;             //can send
-			tmp.can_command=0x08;          //停止指令
+			tmp.can_command=0x09;          //停止指令
 			tmp.can_if_ack=0x01;           //需要ACK
 			tmp.can_source=0x03;           //本模块
 			tmp.can_target=0x00;
@@ -934,16 +940,20 @@ int command_9(uint8_t* data,uint32_t para)
 	}
 	else
 	{
-		//填充485发送结构体
-		tmp.property=1;                            //485 send
-		tmp.modbus_addr=data[0];
-		tmp.modbus_func=0x03;                      //读多个寄存器
-		tmp.modbus_addr_h=(uint8_t)(4004>>8);
-		tmp.modbus_addr_l=(uint8_t)(4004&0xFF);  //电机485地址
-		//tmp.modbus_addr_h=0x03;
-		//tmp.modbus_addr_l=0xF2;
-		tmp.modbus_data_len_h=0x00;
-		tmp.modbus_data_len_l=0x02;
+		//填充CAN发送结构体并发送
+		tmp.property=0x00;             //can send
+		tmp.can_command=0x09;          //停止指令
+		tmp.can_if_ack=0x01;           //需要ACK
+		tmp.can_source=0x03;           //本模块
+		tmp.can_target=0x00;
+		tmp.can_priority=0x05;         //数据帧
+		tmp.can_if_last=0x00;
+		tmp.can_if_return=0x00;
+		tmp.length=4;
+		tmp.data[0]=(uint8_t)((motor_array[data[0]-1].position_value.current_position>>24) & 0xFF);
+		tmp.data[1]=(uint8_t)((motor_array[data[0]-1].position_value.current_position>>16) & 0xFF);
+		tmp.data[2]=(uint8_t)((motor_array[data[0]-1].position_value.current_position>>8) & 0xFF);
+		tmp.data[3]=(uint8_t)(motor_array[data[0]-1].position_value.current_position & 0xFF);
 		portBASE_TYPE status = xQueueSendToBack(send_queueHandle, &tmp, 0);
 		if(status!=pdPASS)
 		{
@@ -954,8 +964,37 @@ int command_9(uint8_t* data,uint32_t para)
 		else
 		{
 			#ifdef DEBUG_OUTPUT
-			printf("%s\n","send command 8 error to queue already");
+			printf("%s\n","send command 7 error to queue already");
 			#endif
+		}
+		if(if_return==1)
+		{
+			tmp.property=0x00;             //can send
+			tmp.can_command=0x09;          //停止指令
+			tmp.can_if_ack=0x01;           //需要ACK
+			tmp.can_source=0x03;           //本模块
+			tmp.can_target=0x00;
+			tmp.can_priority=0x03;         //命令结束返回帧
+			tmp.can_if_last=0x00;
+			tmp.can_if_return=0x00;
+			tmp.length=4;
+			tmp.data[0]=0x00;
+			tmp.data[1]=0x00;
+			tmp.data[2]=0x00;
+			tmp.data[3]=0x00;
+			portBASE_TYPE status = xQueueSendToBack(send_queueHandle, &tmp, 0);
+			if(status!=pdPASS)
+			{
+				#ifdef DEBUG_OUTPUT
+				printf("%s\n","queue overflow");
+				#endif
+			}
+			else
+			{
+				#ifdef DEBUG_OUTPUT
+				printf("%s\n","send command 7 error to queue already");
+				#endif
+			}
 		}
 		
 	}

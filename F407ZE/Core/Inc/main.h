@@ -55,6 +55,7 @@ extern "C" {
 extern uint8_t tklog[500];
 extern uint32_t ulHighFrequencyTimerTicks;
 extern uint32_t queuespace;
+extern uint32_t fifo_level;
 //·¢ËÍ¶ÓÁĞ¾ä±ú
 extern osMessageQueueId_t send_queueHandle;
 //Êı×é¶¨Òå
@@ -86,6 +87,8 @@ extern uint8_t modbus_time_flag;       //modbus  ¶¨Ê±Ê±¼ä±êÖ¾  1£º µÚÒ»´Î3.5T¶¨Ê
 /* USER CODE BEGIN EM */
 //µ÷ÊÔÉèÖÃ
 #define DEBUG_OUTPUT 0
+#define COMPLETE_JUDGE          40            //ÖÍÁôÂö³åÊıÎó²îÏŞ
+#define SPEED_JUDGE             40            //ËÙ¶ÈÎó²îÏŞ
 //ÃüÁî²ÎÊıÓ³Éä
 #define CAN_COMMAND_NUMBER      20
 
@@ -312,6 +315,9 @@ typedef struct position{
 	int32_t current_position;                   //µ±Ç°Î»ÖÃ£¬Î»ÖÃ»ñÈ¡º¯ÊıÔÚ»ñÈ¡Î»ÖÃºó£¬½«Î»ÖÃ´æÈë´Ë±äÁ¿
 	int32_t target_position;                    //Ä¿±êÎ»ÖÃ£¬´æ´¢CANÖ¸ÁîÖĞµÄÄ¿±êÎ»ÖÃ£¬½öÓÃÓÚµ÷ÊÔµ¥²½Ö¸Áî
 	int32_t remain_position;                    //ÖÍÁôÂö³åÊı£¬ĞÂÔö£¬²»×÷Îª³£¹æ¼à²âÁ¿
+	int32_t remain_position_pre;                //ÉÏÒ»²ÉÑùÊ±¿ÌµÄÖÍÁôÂö³åÊı
+	int32_t remain_position_delta;              //²îÖµ
+	int32_t remain_position_delta_pre;          //ÉÏÒ»´ÎµÄ²îÖµ
 	int32_t tp1;                                //ÅäÖÃÎÄ¼şÎ»ÖÃ,¸ù¾İÃüÁîÎÄ¼şÓ³Éä²»Í¬µÄÎ»ÖÃ£¬×î¶àÖ§³Ö8¸öÎ»ÖÃ
 	int32_t tp2;
 	int32_t tp3;

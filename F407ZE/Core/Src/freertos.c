@@ -106,7 +106,7 @@ static void prvAutoReloadMotorStatusTimerCallback( TimerHandle_t xTimer )
 		else{
 			QUEUE_STRUCT pos_get;
 			pos_get.property=1;                          //485 send
-			pos_get.modbus_addr=1;                       //电机号需要根据命令中的电机号赋值,暂时置位为1，因缺少线缆，i+1
+			pos_get.modbus_addr=i+1;                       //电机号
 			pos_get.modbus_func=0x03;                    //读多个寄存器
 			pos_get.modbus_addr_h=(uint8_t)(ERROR_CODE_ADDR>>8);    //读电机错误码
 			pos_get.modbus_addr_l=(uint8_t)(ERROR_CODE_ADDR&0xFF);  
@@ -138,7 +138,7 @@ static void prvAutoReloadMotorStatusTimerCallback( TimerHandle_t xTimer )
 		else{
 			QUEUE_STRUCT pos_get;
 			pos_get.property=1;                          //485 send
-			pos_get.modbus_addr=1;                       //电机号需要根据命令中的电机号赋值,暂时置位为1，因缺少线缆，i+1
+			pos_get.modbus_addr=i+1;                       //电机号
 			pos_get.modbus_func=0x03;                    //读多个寄存器
 			pos_get.modbus_addr_h=(uint8_t)(TEMPERATURE_ADDR>>8);    //读电机温度
 			pos_get.modbus_addr_l=(uint8_t)(TEMPERATURE_ADDR&0xFF);  
@@ -168,9 +168,15 @@ static void prvAutoReloadMotorStatusTimerCallback( TimerHandle_t xTimer )
 			break;
 		}
 		else{
+			//计算差值
+			motor_array[i].position_value.remain_position_delta_pre=motor_array[i].position_value.remain_position_delta;
+			motor_array[i].position_value.remain_position_delta=__fabs(motor_array[i].position_value.remain_position_pre-motor_array[i].position_value.remain_position);
+			//更新当前到pre
+			motor_array[i].position_value.remain_position_pre=motor_array[i].position_value.remain_position;
+			
 			QUEUE_STRUCT pos_get;
 			pos_get.property=1;                          //485 send
-			pos_get.modbus_addr=1;                       //电机号需要根据命令中的电机号赋值,暂时置位为1，因缺少线缆，i+1
+			pos_get.modbus_addr=i+1;                       //电机号需要根据命令中的电机号赋值,暂时置位为1，因缺少线缆，i+1
 			pos_get.modbus_func=0x03;                    //读多个寄存器
 			pos_get.modbus_addr_h=(uint8_t)(REMAIN_PULSE>>8);    //读滞留脉冲数
 			pos_get.modbus_addr_l=(uint8_t)(REMAIN_PULSE&0xFF);  
@@ -189,6 +195,44 @@ static void prvAutoReloadMotorStatusTimerCallback( TimerHandle_t xTimer )
 				#ifdef DEBUG_OUTPUT
 				printf("%s\n","send command 7 succes to queue already");
 				#endif
+			}
+			
+			//确定是否发送返回帧
+			if(motor_array[i].command.if_return==0x01 && __fabs(motor_array[i].position_value.remain_position)<COMPLETE_JUDGE
+				&& motor_array[i].command.command_status==0x01 && __fabs(motor_array[i].speed_value.current_speed) < SPEED_JUDGE
+			  && motor_array[i].position_value.remain_position_delta_pre>motor_array[i].position_value.remain_position_delta 
+			  && motor_array[i].position_value.remain_position_delta < COMPLETE_JUDGE)
+			{
+				motor_array[i].command.command_status=0x02;
+				//发送返回帧
+				QUEUE_STRUCT frame_return;
+				frame_return.property=0x00;             //can send
+				frame_return.can_command=motor_array[i].command.command_id;          //停止指令
+				frame_return.can_if_ack=0x01;           //需要ACK
+				frame_return.can_source=0x03;           //本模块
+				frame_return.can_target=0x00;
+				frame_return.can_priority=0x03;         //命令结束返回帧
+				frame_return.can_if_last=0x00;          //无需拼接
+				frame_return.can_if_return=0x00;        //无需返回
+				frame_return.length=4;
+				frame_return.data[0]=0x00;              //错误码，0标识正常
+				frame_return.data[1]=0x01;              //执行结果， 1代表已完成
+				frame_return.data[2]=i+1;               //电机号
+				frame_return.data[3]=0x00;              //保留
+				
+				portBASE_TYPE status = xQueueSendToBack(send_queueHandle, &frame_return, 0);
+				if(status!=pdPASS)
+				{
+					#ifdef DEBUG_OUTPUT
+					printf("%s\n","queue overflow");
+					#endif
+				}
+				else
+				{
+					#ifdef DEBUG_OUTPUT
+					printf("%s\n","send command 7 error to queue already");
+					#endif
+				}
 			}
 		}
 	}
@@ -840,7 +884,7 @@ void start_tk_sensor_monitor(void *argument)
 				else{
 					QUEUE_STRUCT pos_get;
 					pos_get.property=1;                          //485 send
-		      pos_get.modbus_addr=1;                       //电机号需要根据命令中的电机号赋值,暂时置位为1，因缺少线缆
+		      pos_get.modbus_addr=i+1;                       //电机号
 		      pos_get.modbus_func=0x03;                    //读多个寄存器
 		      pos_get.modbus_addr_h=(uint8_t)(POSITION_CURRENT_ADDR>>8);    //读当前脉冲位置
 		      pos_get.modbus_addr_l=(uint8_t)(POSITION_CURRENT_ADDR&0xFF);  
@@ -872,7 +916,7 @@ void start_tk_sensor_monitor(void *argument)
 				else{
 					QUEUE_STRUCT speed_get;
 					speed_get.property=1;                          //485 send
-		      speed_get.modbus_addr=1;                       //电机号需要根据命令中的电机号赋值,暂时置位为1，因缺少线缆
+		      speed_get.modbus_addr=i+1;                       //电机号
 		      speed_get.modbus_func=0x03;                    //读多个寄存器
 		      speed_get.modbus_addr_h=(uint8_t)(SPEED_CURRENT_ADDR>>8);    //读当前速度
 		      speed_get.modbus_addr_l=(uint8_t)(SPEED_CURRENT_ADDR&0xFF);  
@@ -904,7 +948,7 @@ void start_tk_sensor_monitor(void *argument)
 				else{
 					QUEUE_STRUCT speed_get;
 					speed_get.property=1;                          //485 send
-		      speed_get.modbus_addr=1;                       //电机号需要根据命令中的电机号赋值,暂时置位为1，因缺少线缆
+		      speed_get.modbus_addr=i+1;                       //电机号
 		      speed_get.modbus_func=0x03;                    //读多个寄存器
 		      speed_get.modbus_addr_h=(uint8_t)(TORQUE_CURRENT_ADDR>>8);    //读当前扭矩
 		      speed_get.modbus_addr_l=(uint8_t)(TORQUE_CURRENT_ADDR&0xFF);  
@@ -1299,9 +1343,21 @@ void start_tk_result_process_rece(void *argument)
 					if(rece_cache[1]==0x03)              //读取命令
 					{
 						result_to_parameter[modbus_list_head->modbus_element.modbus_property](&rece_cache[3],rece_cache[0] - 1);
-						;
 					}
-					
+					int32_t tmp_offset=0;
+					if(modbus_list_head->modbus_element.can_command==0x08 && rece_cache[1]==0x03)
+					{
+						tmp_offset=((uint32_t)rece_cache[3]<<8) | (uint32_t)rece_cache[4] | ((uint32_t)rece_cache[5] << 24) | ((uint32_t)rece_cache[6] << 16);
+						modbus_list_head->modbus_element.can_command=0x00;
+						MODBUS_LIST* tmp_refill=modbus_list_head->next;
+						int32_t tmp_current=((uint32_t)tmp_refill->modbus_element.modbus_data_1<<8) | (uint32_t)tmp_refill->modbus_element.modbus_data_2 | ((uint32_t)tmp_refill->modbus_element.modbus_data_3 << 24) | ((uint32_t)tmp_refill->modbus_element.modbus_data_4 << 16);
+						tmp_offset+=tmp_current;
+						//重构
+						tmp_refill->modbus_element.modbus_data_1=(uint8_t)((tmp_offset>>8) & 0xFF);
+						tmp_refill->modbus_element.modbus_data_2=(uint8_t)(tmp_offset & 0xFF);
+						tmp_refill->modbus_element.modbus_data_3=(uint8_t)((tmp_offset>>24) & 0xFF);
+						tmp_refill->modbus_element.modbus_data_4=(uint8_t)((tmp_offset>>16) & 0xFF);
+					}
 					modbus_list_head->if_over=0;
 					modbus_list_head=modbus_list_head->next;
 					if(modbus_list_head->if_over==1)

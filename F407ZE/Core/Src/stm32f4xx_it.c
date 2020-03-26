@@ -106,6 +106,7 @@ extern TaskHandle_t result_processHandle;
 extern TaskHandle_t result_processHandle_rece;
 extern TaskHandle_t result_processHandle_send;
 extern uint16_t modbus_period;
+extern uint32_t fifo_level;
 /* USER CODE END EV */
 
 /******************************************************************************/
@@ -333,28 +334,24 @@ void CAN1_RX0_IRQHandler(void)
 		if(rece_queueHandle!=NULL)
 		{
 			portBASE_TYPE status;
-			uint32_t fifo_level=0;
+			
 			fifo_level=HAL_CAN_GetRxFifoFillLevel(&hcan1,CAN_RX_FIFO0);
 			#ifdef DEBUG_OUTPUT
 			printf("%s%d\n","rx fifo level is",fifo_level);
 			#endif
-			//while(fifo_level>0)
+			//timer_period=uxQueueSpacesAvailable(rece_queueHandle);
+			status = xQueueSendToBackFromISR(rece_queueHandle, &can_rece, &b_tk_master_order);
+			if(status!=pdPASS)
 			{
-				status = xQueueSendToBackFromISR(rece_queueHandle, &can_rece, &b_tk_master_order);
-				if(status!=pdPASS)
-				{
-					#ifdef DEBUG_OUTPUT
-					printf("%s\n","queue overflow");
-					#endif
-					//break;
-				}
-				else
-				{
-					#ifdef DEBUG_OUTPUT
-					printf("%s\n","send message to queue already");
-					#endif
-					//fifo_level--;
-				}
+				#ifdef DEBUG_OUTPUT
+				printf("%s\n","queue overflow");
+				#endif
+			}
+			else
+			{
+				#ifdef DEBUG_OUTPUT
+				printf("%s\n","send message to queue already");
+				#endif
 			}
 			
 		}
