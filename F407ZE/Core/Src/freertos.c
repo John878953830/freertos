@@ -207,7 +207,7 @@ static void prvAutoReloadMotorStatusTimerCallback( TimerHandle_t xTimer )
 				//发送返回帧
 				QUEUE_STRUCT frame_return;
 				frame_return.property=0x00;             //can send
-				frame_return.can_command=motor_array[i].command.command_id;          //停止指令
+				frame_return.can_command=motor_array[i].command.command_id;          
 				frame_return.can_if_ack=0x01;           //需要ACK
 				frame_return.can_source=0x03;           //本模块
 				frame_return.can_target=0x00;

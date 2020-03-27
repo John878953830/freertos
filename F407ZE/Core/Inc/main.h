@@ -141,6 +141,10 @@ extern uint8_t modbus_time_flag;       //modbus  ¶¨Ê±Ê±¼ä±êÖ¾  1£º µÚÒ»´Î3.5T¶¨Ê
 #define ERROR_EEPROM_FAIL       0x24
 #define MODBUS_BUSY             0x25
 #define MODBUS_LIST_ERROR       0x26
+#define ERROR_COMMAND_11_EEPROM_ERROR   0x27
+#define ERROR_COMMAND_12_EEPROM_ERROR   0x28
+#define ERROR_COMMAND_13_EEPROM_ERROR   0x29
+#define ERROR_COMMAND_14_EEPROM_ERROR   0x2A
 
 
 //Ö¡½á¹¹ÑÚÂë
@@ -319,14 +323,9 @@ typedef struct position{
 	int32_t remain_position_pre;                //ÉÏÒ»²ÉÑùÊ±¿ÌµÄÖÍÁôÂö³åÊı
 	int32_t remain_position_delta;              //²îÖµ
 	int32_t remain_position_delta_pre;          //ÉÏÒ»´ÎµÄ²îÖµ
-	int32_t tp1;                                //ÅäÖÃÎÄ¼şÎ»ÖÃ,¸ù¾İÃüÁîÎÄ¼şÓ³Éä²»Í¬µÄÎ»ÖÃ£¬×î¶àÖ§³Ö8¸öÎ»ÖÃ, tp1:µç»ú45¶ÈÎ»ÖÃ£¬³õÊ¼»¯Ê±´Óeeprom¶ÁÈë
-	int32_t tp2;                                //tp2£¬µç»úÍêÈ«¼Ğ½ôÎ»ÖÃ£¬ ³õÊ¼»¯Ê±´Óeeprom¶ÁÈë
-	int32_t tp3;                                //tp3£¬µç»úÍêÈ«ËÉ¿ªÎ»ÖÃ£¬³õÊ¼»¯Ê±´Óeeprom¶ÁÈë
-	int32_t tp4;
-	int32_t tp5;
-	int32_t tp6;
-	int32_t tp7;
-	int32_t tp8;
+	int32_t tp[8];                                //ÅäÖÃÎÄ¼şÎ»ÖÃ,¸ù¾İÃüÁîÎÄ¼şÓ³Éä²»Í¬µÄÎ»ÖÃ£¬×î¶àÖ§³Ö8¸öÎ»ÖÃ, tp1:µç»ú45¶ÈÎ»ÖÃ£¬³õÊ¼»¯Ê±´Óeeprom¶ÁÈë
+	//tp2£¬µç»úÍêÈ«¼Ğ½ôÎ»ÖÃ£¬ ³õÊ¼»¯Ê±´Óeeprom¶ÁÈë
+	//tp3£¬µç»úÍêÈ«ËÉ¿ªÎ»ÖÃ£¬³õÊ¼»¯Ê±´Óeeprom¶ÁÈë
 	uint8_t if_tp_already;                      //±êÖ¾tpÊÇ·ñÓĞĞ§£¬³õÊ¼»¯Ê±Îª0£¬ ³É¹¦¶ÁÈ¡eepromÊı¾İºóÖÃ1
 }POSITION;
 typedef struct dimension{
@@ -400,6 +399,7 @@ extern MOTOR_STRUCT motor_array[4];
 uint8_t can_send(QUEUE_STRUCT send_struct);
 uint8_t modbus_send(QUEUE_STRUCT send_struct);
 uint8_t modbus_send_sub(QUEUE_STRUCT send_struct);
+uint8_t iic_rw(uint8_t rw_flag, uint8_t addr,uint8_t* data,uint8_t length);
 extern int(*command_to_function[27])(uint8_t*,uint32_t);
 extern void(*result_to_parameter[7])(uint8_t*, uint8_t);
 extern uint16_t usMBCRC16( uint8_t * pucFrame, uint16_t usLen );
