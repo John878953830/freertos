@@ -220,6 +220,12 @@ static void prvAutoReloadMotorStatusTimerCallback( TimerHandle_t xTimer )
 				frame_return.data[2]=i+1;               //电机号
 				frame_return.data[3]=0x00;              //保留
 				
+				//更新自检结果
+				if(motor_array[i].command.command_id==0x0F && motor_array[i].self_check_counter!=0)
+				{
+					frame_return.data[0]=ERROR_COMMAND_15_FAIL;
+				}
+				
 				portBASE_TYPE status = xQueueSendToBack(send_queueHandle, &frame_return, 0);
 				if(status!=pdPASS)
 				{
@@ -1345,6 +1351,7 @@ void start_tk_result_process_rece(void *argument)
 						result_to_parameter[modbus_list_head->modbus_element.modbus_property](&rece_cache[3],rece_cache[0] - 1);
 					}
 					int32_t tmp_offset=0;
+					//8号命令处理程序段
 					if(modbus_list_head->modbus_element.can_command==0x08 && rece_cache[1]==0x03)
 					{
 						tmp_offset=((uint32_t)rece_cache[3]<<8) | (uint32_t)rece_cache[4] | ((uint32_t)rece_cache[5] << 24) | ((uint32_t)rece_cache[6] << 16);

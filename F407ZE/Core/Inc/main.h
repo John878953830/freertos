@@ -377,6 +377,7 @@ typedef struct motor_struct{
 	uint32_t register_move;                         //电机运动寄存器的485地址
 	uint32_t temperature;                         //温度信息
 	uint32_t motor_error_code;                    //电机驱动器的错误码
+	uint8_t self_check_counter;                   //自检计数值
 }MOTOR_STRUCT;
 
 typedef struct angle_struct{
