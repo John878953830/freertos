@@ -2428,23 +2428,834 @@ int command_15(uint8_t* data,uint32_t para)
 	motor_array[0].command.command_id=0x0F;           //命令id填充为8
 	motor_array[0].command.command_status=0x01;       //命令执行中
 	motor_array[0].command.if_return=if_return;       //执行完成是否需要回复帧
-	//暂时设置为8，实际情况中需要根据tp和当前位置计算
+	//暂时设置为8，实际情况中需要根据tp和当前位置计算,所有位置都是触发8个上下沿，但当天窗的完全关闭点不为光电开关点时，天窗有14个上下沿，其他也是如此
 	motor_array[0].self_check_counter=8;
 	return 0;
 }
 int command_16(uint8_t* data,uint32_t para)
 {
 	//天窗右电机自检
+	//天窗左电机自检
+	//声明动作序列
+	//第一段动作序列，tp0位置
+	QUEUE_STRUCT command_seq_l1[3]=
+	{
+		{
+			.property=1,                            //485 send
+			.modbus_addr=0x02,                       //电机号，2，天窗右电机
+			.modbus_func=0x10,                    //写多个寄存器
+			.modbus_addr_h=(uint8_t)(3202>>8),
+			.modbus_addr_l=(uint8_t)(3202&0xFF),        //写目标位置
+			.modbus_data_len_h=0x00,
+			.modbus_data_len_l=0x02,
+			.modbus_data_byte=0x04,
+			.modbus_data_1=(uint8_t)((motor_array[0].position_value.tp[0] >> 8) & 0xFF),                      //先赋值为命令中的数值，当前位置读取成功后修改值
+			.modbus_data_2=(uint8_t)((motor_array[0].position_value.tp[0]) & 0xFF),                      //先赋值为命令中的数值，当前位置读取成功后修改值
+			.modbus_data_3=(uint8_t)((motor_array[0].position_value.tp[0] >> 24) & 0xFF),                      //先赋值为命令中的数值，当前位置读取成功后修改值
+			.modbus_data_4=(uint8_t)((motor_array[0].position_value.tp[0] >> 16) & 0xFF),                      //先赋值为命令中的数值，当前位置读取成功后修改值
+		},
+		{
+			.property=1,                            //485 send
+			.modbus_addr=0x02,                       //电机号需要根据命令中的电机号赋值
+			.modbus_func=0x10,                    //写多个寄存器
+			.modbus_addr_h=(uint8_t)(2040>>8),
+			.modbus_addr_l=(uint8_t)(2040&0xFF),        //写使能寄存器
+			.modbus_data_len_h=0x00,
+			.modbus_data_len_l=0x02,
+			.modbus_data_byte=0x04,
+			.modbus_data_1=0xFF,                      //使能寄存器全部写为FF
+			.modbus_data_2=0xFF,                      
+			.modbus_data_3=0xFF,                      
+			.modbus_data_4=0xFF,                      
+		},
+		{
+			.property=1,                            //485 send
+			.modbus_addr=0x02,                       //电机号需要根据命令中的电机号赋值
+			.modbus_func=0x10,                    //写多个寄存器
+			.modbus_addr_h=(uint8_t)(2040>>8),
+			.modbus_addr_l=(uint8_t)(2040&0xFF),        //写使能寄存器
+			.modbus_data_len_h=0x00,
+			.modbus_data_len_l=0x02,
+			.modbus_data_byte=0x04,
+			.modbus_data_1=0x00,                      //使能寄存器全部写为00
+			.modbus_data_2=0x00,                      
+			.modbus_data_3=0x00,                      
+			.modbus_data_4=0x00,
+		},
+	};
+	//第二段
+	QUEUE_STRUCT command_seq_l2[3]=
+	{
+		{
+			.property=1,                            //485 send
+			.modbus_addr=0x02,                       //电机号,2
+			.modbus_func=0x10,                    //写多个寄存器
+			.modbus_addr_h=(uint8_t)(3202>>8),
+			.modbus_addr_l=(uint8_t)(3202&0xFF),        //写目标位置
+			.modbus_data_len_h=0x00,
+			.modbus_data_len_l=0x02,
+			.modbus_data_byte=0x04,
+			.modbus_data_1=(uint8_t)((motor_array[0].position_value.tp[1] >> 8) & 0xFF),                       //先赋值为命令中的数值，当前位置读取成功后修改值
+			.modbus_data_2=(uint8_t)((motor_array[0].position_value.tp[1]) & 0xFF),                            //先赋值为命令中的数值，当前位置读取成功后修改值
+			.modbus_data_3=(uint8_t)((motor_array[0].position_value.tp[1] >> 24) & 0xFF),                      //先赋值为命令中的数值，当前位置读取成功后修改值
+			.modbus_data_4=(uint8_t)((motor_array[0].position_value.tp[1] >> 16) & 0xFF),                      //先赋值为命令中的数值，当前位置读取成功后修改值
+		},
+		{
+			.property=1,                            //485 send
+			.modbus_addr=0x02,                       //电机号需要根据命令中的电机号赋值
+			.modbus_func=0x10,                    //写多个寄存器
+			.modbus_addr_h=(uint8_t)(2040>>8),
+			.modbus_addr_l=(uint8_t)(2040&0xFF),        //写使能寄存器
+			.modbus_data_len_h=0x00,
+			.modbus_data_len_l=0x02,
+			.modbus_data_byte=0x04,
+			.modbus_data_1=0xFF,                      //使能寄存器全部写为FF
+			.modbus_data_2=0xFF,                      
+			.modbus_data_3=0xFF,                      
+			.modbus_data_4=0xFF,                      
+		},
+		{
+			.property=1,                            //485 send
+			.modbus_addr=0x02,                       //电机号需要根据命令中的电机号赋值
+			.modbus_func=0x10,                    //写多个寄存器
+			.modbus_addr_h=(uint8_t)(2040>>8),
+			.modbus_addr_l=(uint8_t)(2040&0xFF),        //写使能寄存器
+			.modbus_data_len_h=0x00,
+			.modbus_data_len_l=0x02,
+			.modbus_data_byte=0x04,
+			.modbus_data_1=0x00,                      //使能寄存器全部写为00
+			.modbus_data_2=0x00,                      
+			.modbus_data_3=0x00,                      
+			.modbus_data_4=0x00,
+		},
+	};
+	//第三段
+	QUEUE_STRUCT command_seq_l3[3]=
+	{
+		{
+			.property=1,                            //485 send
+			.modbus_addr=0x02,                       //电机号,2,天窗电机
+			.modbus_func=0x10,                    //写多个寄存器
+			.modbus_addr_h=(uint8_t)(3202>>8),
+			.modbus_addr_l=(uint8_t)(3202&0xFF),        //写目标位置
+			.modbus_data_len_h=0x00,
+			.modbus_data_len_l=0x02,
+			.modbus_data_byte=0x04,
+			.modbus_data_1=(uint8_t)((motor_array[0].position_value.tp[2] >> 8) & 0xFF),                       //先赋值为命令中的数值，当前位置读取成功后修改值
+			.modbus_data_2=(uint8_t)((motor_array[0].position_value.tp[2]) & 0xFF),                            //先赋值为命令中的数值，当前位置读取成功后修改值
+			.modbus_data_3=(uint8_t)((motor_array[0].position_value.tp[2] >> 24) & 0xFF),                      //先赋值为命令中的数值，当前位置读取成功后修改值
+			.modbus_data_4=(uint8_t)((motor_array[0].position_value.tp[2] >> 16) & 0xFF),                      //先赋值为命令中的数值，当前位置读取成功后修改值
+		},
+		{
+			.property=1,                            //485 send
+			.modbus_addr=0x02,                       //电机号需要根据命令中的电机号赋值
+			.modbus_func=0x10,                    //写多个寄存器
+			.modbus_addr_h=(uint8_t)(2040>>8),
+			.modbus_addr_l=(uint8_t)(2040&0xFF),        //写使能寄存器
+			.modbus_data_len_h=0x00,
+			.modbus_data_len_l=0x02,
+			.modbus_data_byte=0x04,
+			.modbus_data_1=0xFF,                      //使能寄存器全部写为FF
+			.modbus_data_2=0xFF,                      
+			.modbus_data_3=0xFF,                      
+			.modbus_data_4=0xFF,                      
+		},
+		{
+			.property=1,                            //485 send
+			.modbus_addr=0x02,                       //电机号需要根据命令中的电机号赋值
+			.modbus_func=0x10,                    //写多个寄存器
+			.modbus_addr_h=(uint8_t)(2040>>8),
+			.modbus_addr_l=(uint8_t)(2040&0xFF),        //写使能寄存器
+			.modbus_data_len_h=0x00,
+			.modbus_data_len_l=0x02,
+			.modbus_data_byte=0x04,
+			.modbus_data_1=0x00,                      //使能寄存器全部写为00
+			.modbus_data_2=0x00,                      
+			.modbus_data_3=0x00,                      
+			.modbus_data_4=0x00,
+		},
+	};
+	QUEUE_STRUCT command_seq_l0[9];
+	//填充序列
+	uint8_t command_seq_counter=0;
+	if(__fabs(motor_array[1].position_value.tp[0] - motor_array[1].position_value.current_position)>COMPLETE_JUDGE)
+	{
+		memcpy(&command_seq_l0[3*command_seq_counter],command_seq_l1,3*sizeof(QUEUE_STRUCT));
+		command_seq_counter++;
+	}
+	else{
+		motor_array[1].self_check_counter++;
+	}
+	if(__fabs(motor_array[1].position_value.tp[1] - motor_array[1].position_value.current_position)>COMPLETE_JUDGE)
+	{
+		memcpy(&command_seq_l0[3*command_seq_counter],command_seq_l2,3*sizeof(QUEUE_STRUCT));
+		command_seq_counter++;
+	}
+	else
+	{
+		motor_array[1].self_check_counter++;
+	}
+	if(__fabs(motor_array[1].position_value.tp[2] - motor_array[1].position_value.current_position)>COMPLETE_JUDGE)
+	{
+		memcpy(&command_seq_l0[3*command_seq_counter],command_seq_l3,3*sizeof(QUEUE_STRUCT));
+		command_seq_counter++;
+	}
+	else
+	{
+		motor_array[1].self_check_counter++;
+	}
+	//解析数据
+	uint8_t if_return=para;     //自检命令没有参数
+	//动作序列压入队列
+	//获取队列中的空闲位置数量
+	uint32_t space_left=uxQueueSpacesAvailable(send_queueHandle);
+	//填充返回原来位置的任务命令
+	QUEUE_STRUCT tmp_last[3]=
+	{
+		{
+			.property=1,                            //485 send
+			.modbus_addr=0x02,                       //电机号,1,天窗电机
+			.modbus_func=0x10,                    //写多个寄存器
+			.modbus_addr_h=(uint8_t)(3202>>8),
+			.modbus_addr_l=(uint8_t)(3202&0xFF),        //写目标位置
+			.modbus_data_len_h=0x00,
+			.modbus_data_len_l=0x02,
+			.modbus_data_byte=0x04,
+			.modbus_data_1=(uint8_t)((motor_array[0].position_value.current_position >> 8) & 0xFF),                       //先赋值为命令中的数值，当前位置读取成功后修改值
+			.modbus_data_2=(uint8_t)((motor_array[0].position_value.current_position) & 0xFF),                            //先赋值为命令中的数值，当前位置读取成功后修改值
+			.modbus_data_3=(uint8_t)((motor_array[0].position_value.current_position >> 24) & 0xFF),                      //先赋值为命令中的数值，当前位置读取成功后修改值
+			.modbus_data_4=(uint8_t)((motor_array[0].position_value.current_position >> 16) & 0xFF),                      //先赋值为命令中的数值，当前位置读取成功后修改值
+		},
+		{
+			.property=1,                            //485 send
+			.modbus_addr=0x02,                       //电机号需要根据命令中的电机号赋值
+			.modbus_func=0x10,                    //写多个寄存器
+			.modbus_addr_h=(uint8_t)(2040>>8),
+			.modbus_addr_l=(uint8_t)(2040&0xFF),        //写使能寄存器
+			.modbus_data_len_h=0x00,
+			.modbus_data_len_l=0x02,
+			.modbus_data_byte=0x04,
+			.modbus_data_1=0xFF,                      //使能寄存器全部写为FF
+			.modbus_data_2=0xFF,                      
+			.modbus_data_3=0xFF,                      
+			.modbus_data_4=0xFF,                      
+		},
+		{
+			.property=1,                            //485 send
+			.modbus_addr=0x02,                       //电机号需要根据命令中的电机号赋值
+			.modbus_func=0x10,                    //写多个寄存器
+			.modbus_addr_h=(uint8_t)(2040>>8),
+			.modbus_addr_l=(uint8_t)(2040&0xFF),        //写使能寄存器
+			.modbus_data_len_h=0x00,
+			.modbus_data_len_l=0x02,
+			.modbus_data_byte=0x04,
+			.modbus_data_1=0x00,                      //使能寄存器全部写为00
+			.modbus_data_2=0x00,                      
+			.modbus_data_3=0x00,                      
+			.modbus_data_4=0x00,
+		},
+	};
+	                
+	if(space_left<4)
+	{
+		//发送队列已满，直接返回错误,未完成
+		;
+	}
+	else
+	{
+		uint8_t isend=0;
+		for(isend=0;isend<3*command_seq_counter;isend++)
+		{
+			//压入发送队列
+			portBASE_TYPE status = xQueueSendToBack(send_queueHandle, &command_seq_l0[isend], 0);
+			if(status!=pdPASS)
+			{
+				#ifdef DEBUG_OUTPUT
+				printf("%s\n","queue overflow");
+				#endif
+			}
+			else
+			{
+				#ifdef DEBUG_OUTPUT
+				printf("%s\n","send command 8 error to queue already");
+				#endif
+			}
+		}
+		//压入初始位置命令组
+		//压入发送队列
+		for(isend=0;isend<3;isend++)
+		{
+			portBASE_TYPE status = xQueueSendToBack(send_queueHandle, &tmp_last[isend], 0);
+			if(status!=pdPASS)
+			{
+				#ifdef DEBUG_OUTPUT
+				printf("%s\n","queue overflow");
+				#endif
+			}
+			else
+			{
+				#ifdef DEBUG_OUTPUT
+				printf("%s\n","send command 8 error to queue already");
+				#endif
+			}
+		}
+	}
+	//更新命令状态为1
+	motor_array[1].command.command_id=0x10;           //命令id填充为8
+	motor_array[1].command.command_status=0x01;       //命令执行中
+	motor_array[1].command.if_return=if_return;       //执行完成是否需要回复帧
+	//暂时设置为8，实际情况中需要根据tp和当前位置计算,所有位置都是触发8个上下沿，但当天窗的完全关闭点不为光电开关点时，天窗有14个上下沿，其他也是如此
+	motor_array[1].self_check_counter=8;
 	return 0;
 }
 int command_17(uint8_t* data,uint32_t para)
 {
 	//前后夹紧电机自检
+	//声明动作序列
+	//第一段动作序列，tp0位置
+	QUEUE_STRUCT command_seq_l1[3]=
+	{
+		{
+			.property=1,                            //485 send
+			.modbus_addr=0x03,                       //电机号，3，前后夹紧电机
+			.modbus_func=0x10,                    //写多个寄存器
+			.modbus_addr_h=(uint8_t)(3202>>8),
+			.modbus_addr_l=(uint8_t)(3202&0xFF),        //写目标位置
+			.modbus_data_len_h=0x00,
+			.modbus_data_len_l=0x02,
+			.modbus_data_byte=0x04,
+			.modbus_data_1=(uint8_t)((motor_array[0].position_value.tp[0] >> 8) & 0xFF),                      //先赋值为命令中的数值，当前位置读取成功后修改值
+			.modbus_data_2=(uint8_t)((motor_array[0].position_value.tp[0]) & 0xFF),                      //先赋值为命令中的数值，当前位置读取成功后修改值
+			.modbus_data_3=(uint8_t)((motor_array[0].position_value.tp[0] >> 24) & 0xFF),                      //先赋值为命令中的数值，当前位置读取成功后修改值
+			.modbus_data_4=(uint8_t)((motor_array[0].position_value.tp[0] >> 16) & 0xFF),                      //先赋值为命令中的数值，当前位置读取成功后修改值
+		},
+		{
+			.property=1,                            //485 send
+			.modbus_addr=0x03,                       //电机号需要根据命令中的电机号赋值
+			.modbus_func=0x10,                    //写多个寄存器
+			.modbus_addr_h=(uint8_t)(2040>>8),
+			.modbus_addr_l=(uint8_t)(2040&0xFF),        //写使能寄存器
+			.modbus_data_len_h=0x00,
+			.modbus_data_len_l=0x02,
+			.modbus_data_byte=0x04,
+			.modbus_data_1=0xFF,                      //使能寄存器全部写为FF
+			.modbus_data_2=0xFF,                      
+			.modbus_data_3=0xFF,                      
+			.modbus_data_4=0xFF,                      
+		},
+		{
+			.property=1,                            //485 send
+			.modbus_addr=0x03,                       //电机号需要根据命令中的电机号赋值
+			.modbus_func=0x10,                    //写多个寄存器
+			.modbus_addr_h=(uint8_t)(2040>>8),
+			.modbus_addr_l=(uint8_t)(2040&0xFF),        //写使能寄存器
+			.modbus_data_len_h=0x00,
+			.modbus_data_len_l=0x02,
+			.modbus_data_byte=0x04,
+			.modbus_data_1=0x00,                      //使能寄存器全部写为00
+			.modbus_data_2=0x00,                      
+			.modbus_data_3=0x00,                      
+			.modbus_data_4=0x00,
+		},
+	};
+	//第二段
+	QUEUE_STRUCT command_seq_l2[3]=
+	{
+		{
+			.property=1,                            //485 send
+			.modbus_addr=0x03,                       //电机号,3，前后夹紧电机
+			.modbus_func=0x10,                    //写多个寄存器
+			.modbus_addr_h=(uint8_t)(3202>>8),
+			.modbus_addr_l=(uint8_t)(3202&0xFF),        //写目标位置
+			.modbus_data_len_h=0x00,
+			.modbus_data_len_l=0x02,
+			.modbus_data_byte=0x04,
+			.modbus_data_1=(uint8_t)((motor_array[0].position_value.tp[1] >> 8) & 0xFF),                       //先赋值为命令中的数值，当前位置读取成功后修改值
+			.modbus_data_2=(uint8_t)((motor_array[0].position_value.tp[1]) & 0xFF),                            //先赋值为命令中的数值，当前位置读取成功后修改值
+			.modbus_data_3=(uint8_t)((motor_array[0].position_value.tp[1] >> 24) & 0xFF),                      //先赋值为命令中的数值，当前位置读取成功后修改值
+			.modbus_data_4=(uint8_t)((motor_array[0].position_value.tp[1] >> 16) & 0xFF),                      //先赋值为命令中的数值，当前位置读取成功后修改值
+		},
+		{
+			.property=1,                            //485 send
+			.modbus_addr=0x03,                       //电机号需要根据命令中的电机号赋值
+			.modbus_func=0x10,                    //写多个寄存器
+			.modbus_addr_h=(uint8_t)(2040>>8),
+			.modbus_addr_l=(uint8_t)(2040&0xFF),        //写使能寄存器
+			.modbus_data_len_h=0x00,
+			.modbus_data_len_l=0x02,
+			.modbus_data_byte=0x04,
+			.modbus_data_1=0xFF,                      //使能寄存器全部写为FF
+			.modbus_data_2=0xFF,                      
+			.modbus_data_3=0xFF,                      
+			.modbus_data_4=0xFF,                      
+		},
+		{
+			.property=1,                            //485 send
+			.modbus_addr=0x03,                       //电机号需要根据命令中的电机号赋值
+			.modbus_func=0x10,                    //写多个寄存器
+			.modbus_addr_h=(uint8_t)(2040>>8),
+			.modbus_addr_l=(uint8_t)(2040&0xFF),        //写使能寄存器
+			.modbus_data_len_h=0x00,
+			.modbus_data_len_l=0x02,
+			.modbus_data_byte=0x04,
+			.modbus_data_1=0x00,                      //使能寄存器全部写为00
+			.modbus_data_2=0x00,                      
+			.modbus_data_3=0x00,                      
+			.modbus_data_4=0x00,
+		},
+	};
+	//第三段
+	QUEUE_STRUCT command_seq_l3[3]=
+	{
+		{
+			.property=1,                            //485 send
+			.modbus_addr=0x03,                       //电机号,3，前后夹紧电机
+			.modbus_func=0x10,                    //写多个寄存器
+			.modbus_addr_h=(uint8_t)(3202>>8),
+			.modbus_addr_l=(uint8_t)(3202&0xFF),        //写目标位置
+			.modbus_data_len_h=0x00,
+			.modbus_data_len_l=0x02,
+			.modbus_data_byte=0x04,
+			.modbus_data_1=(uint8_t)((motor_array[0].position_value.tp[2] >> 8) & 0xFF),                       //先赋值为命令中的数值，当前位置读取成功后修改值
+			.modbus_data_2=(uint8_t)((motor_array[0].position_value.tp[2]) & 0xFF),                            //先赋值为命令中的数值，当前位置读取成功后修改值
+			.modbus_data_3=(uint8_t)((motor_array[0].position_value.tp[2] >> 24) & 0xFF),                      //先赋值为命令中的数值，当前位置读取成功后修改值
+			.modbus_data_4=(uint8_t)((motor_array[0].position_value.tp[2] >> 16) & 0xFF),                      //先赋值为命令中的数值，当前位置读取成功后修改值
+		},
+		{
+			.property=1,                            //485 send
+			.modbus_addr=0x02,                       //电机号需要根据命令中的电机号赋值
+			.modbus_func=0x10,                    //写多个寄存器
+			.modbus_addr_h=(uint8_t)(2040>>8),
+			.modbus_addr_l=(uint8_t)(2040&0xFF),        //写使能寄存器
+			.modbus_data_len_h=0x00,
+			.modbus_data_len_l=0x02,
+			.modbus_data_byte=0x04,
+			.modbus_data_1=0xFF,                      //使能寄存器全部写为FF
+			.modbus_data_2=0xFF,                      
+			.modbus_data_3=0xFF,                      
+			.modbus_data_4=0xFF,                      
+		},
+		{
+			.property=1,                            //485 send
+			.modbus_addr=0x02,                       //电机号需要根据命令中的电机号赋值
+			.modbus_func=0x10,                    //写多个寄存器
+			.modbus_addr_h=(uint8_t)(2040>>8),
+			.modbus_addr_l=(uint8_t)(2040&0xFF),        //写使能寄存器
+			.modbus_data_len_h=0x00,
+			.modbus_data_len_l=0x02,
+			.modbus_data_byte=0x04,
+			.modbus_data_1=0x00,                      //使能寄存器全部写为00
+			.modbus_data_2=0x00,                      
+			.modbus_data_3=0x00,                      
+			.modbus_data_4=0x00,
+		},
+	};
+	QUEUE_STRUCT command_seq_l0[9];
+	//填充序列
+	uint8_t command_seq_counter=0;
+	if(__fabs(motor_array[2].position_value.tp[0] - motor_array[2].position_value.current_position)>COMPLETE_JUDGE)
+	{
+		memcpy(&command_seq_l0[3*command_seq_counter],command_seq_l1,3*sizeof(QUEUE_STRUCT));
+		command_seq_counter++;
+	}
+	else{
+		motor_array[2].self_check_counter++;
+	}
+	if(__fabs(motor_array[2].position_value.tp[1] - motor_array[2].position_value.current_position)>COMPLETE_JUDGE)
+	{
+		memcpy(&command_seq_l0[3*command_seq_counter],command_seq_l2,3*sizeof(QUEUE_STRUCT));
+		command_seq_counter++;
+	}
+	else
+	{
+		motor_array[2].self_check_counter++;
+	}
+	if(__fabs(motor_array[2].position_value.tp[2] - motor_array[2].position_value.current_position)>COMPLETE_JUDGE)
+	{
+		memcpy(&command_seq_l0[3*command_seq_counter],command_seq_l3,3*sizeof(QUEUE_STRUCT));
+		command_seq_counter++;
+	}
+	else
+	{
+		motor_array[2].self_check_counter++;
+	}
+	//解析数据
+	uint8_t if_return=para;     //自检命令没有参数
+	//动作序列压入队列
+	//获取队列中的空闲位置数量
+	uint32_t space_left=uxQueueSpacesAvailable(send_queueHandle);
+	//填充返回原来位置的任务命令
+	QUEUE_STRUCT tmp_last[3]=
+	{
+		{
+			.property=1,                            //485 send
+			.modbus_addr=0x03,                       //电机号,3,前后夹紧电机
+			.modbus_func=0x10,                    //写多个寄存器
+			.modbus_addr_h=(uint8_t)(3202>>8),
+			.modbus_addr_l=(uint8_t)(3202&0xFF),        //写目标位置
+			.modbus_data_len_h=0x00,
+			.modbus_data_len_l=0x02,
+			.modbus_data_byte=0x04,
+			.modbus_data_1=(uint8_t)((motor_array[0].position_value.current_position >> 8) & 0xFF),                       //先赋值为命令中的数值，当前位置读取成功后修改值
+			.modbus_data_2=(uint8_t)((motor_array[0].position_value.current_position) & 0xFF),                            //先赋值为命令中的数值，当前位置读取成功后修改值
+			.modbus_data_3=(uint8_t)((motor_array[0].position_value.current_position >> 24) & 0xFF),                      //先赋值为命令中的数值，当前位置读取成功后修改值
+			.modbus_data_4=(uint8_t)((motor_array[0].position_value.current_position >> 16) & 0xFF),                      //先赋值为命令中的数值，当前位置读取成功后修改值
+		},
+		{
+			.property=1,                            //485 send
+			.modbus_addr=0x03,                       //电机号需要根据命令中的电机号赋值
+			.modbus_func=0x10,                    //写多个寄存器
+			.modbus_addr_h=(uint8_t)(2040>>8),
+			.modbus_addr_l=(uint8_t)(2040&0xFF),        //写使能寄存器
+			.modbus_data_len_h=0x00,
+			.modbus_data_len_l=0x02,
+			.modbus_data_byte=0x04,
+			.modbus_data_1=0xFF,                      //使能寄存器全部写为FF
+			.modbus_data_2=0xFF,                      
+			.modbus_data_3=0xFF,                      
+			.modbus_data_4=0xFF,                      
+		},
+		{
+			.property=1,                            //485 send
+			.modbus_addr=0x03,                       //电机号需要根据命令中的电机号赋值
+			.modbus_func=0x10,                    //写多个寄存器
+			.modbus_addr_h=(uint8_t)(2040>>8),
+			.modbus_addr_l=(uint8_t)(2040&0xFF),        //写使能寄存器
+			.modbus_data_len_h=0x00,
+			.modbus_data_len_l=0x02,
+			.modbus_data_byte=0x04,
+			.modbus_data_1=0x00,                      //使能寄存器全部写为00
+			.modbus_data_2=0x00,                      
+			.modbus_data_3=0x00,                      
+			.modbus_data_4=0x00,
+		},
+	};
+	                
+	if(space_left<4)
+	{
+		//发送队列已满，直接返回错误,未完成
+		;
+	}
+	else
+	{
+		uint8_t isend=0;
+		for(isend=0;isend<3*command_seq_counter;isend++)
+		{
+			//压入发送队列
+			portBASE_TYPE status = xQueueSendToBack(send_queueHandle, &command_seq_l0[isend], 0);
+			if(status!=pdPASS)
+			{
+				#ifdef DEBUG_OUTPUT
+				printf("%s\n","queue overflow");
+				#endif
+			}
+			else
+			{
+				#ifdef DEBUG_OUTPUT
+				printf("%s\n","send command 8 error to queue already");
+				#endif
+			}
+		}
+		//压入初始位置命令组
+		//压入发送队列
+		for(isend=0;isend<3;isend++)
+		{
+			portBASE_TYPE status = xQueueSendToBack(send_queueHandle, &tmp_last[isend], 0);
+			if(status!=pdPASS)
+			{
+				#ifdef DEBUG_OUTPUT
+				printf("%s\n","queue overflow");
+				#endif
+			}
+			else
+			{
+				#ifdef DEBUG_OUTPUT
+				printf("%s\n","send command 8 error to queue already");
+				#endif
+			}
+		}
+	}
+	//更新命令状态为1
+	motor_array[2].command.command_id=0x11;           //命令id填充为8
+	motor_array[2].command.command_status=0x01;       //命令执行中
+	motor_array[2].command.if_return=if_return;       //执行完成是否需要回复帧
+	//暂时设置为8，实际情况中需要根据tp和当前位置计算,所有位置都是触发8个上下沿，但当天窗的完全关闭点不为光电开关点时，天窗有14个上下沿，其他也是如此
+	motor_array[2].self_check_counter=8;
 	return 0;
 }
 int command_18(uint8_t* data,uint32_t para)
 {
 	//左右夹紧电机自检
+	//声明动作序列
+	//第一段动作序列，tp0位置
+	QUEUE_STRUCT command_seq_l1[3]=
+	{
+		{
+			.property=1,                            //485 send
+			.modbus_addr=0x04,                       //电机号，4，左右夹紧电机
+			.modbus_func=0x10,                    //写多个寄存器
+			.modbus_addr_h=(uint8_t)(3202>>8),
+			.modbus_addr_l=(uint8_t)(3202&0xFF),        //写目标位置
+			.modbus_data_len_h=0x00,
+			.modbus_data_len_l=0x02,
+			.modbus_data_byte=0x04,
+			.modbus_data_1=(uint8_t)((motor_array[0].position_value.tp[0] >> 8) & 0xFF),                      //先赋值为命令中的数值，当前位置读取成功后修改值
+			.modbus_data_2=(uint8_t)((motor_array[0].position_value.tp[0]) & 0xFF),                      //先赋值为命令中的数值，当前位置读取成功后修改值
+			.modbus_data_3=(uint8_t)((motor_array[0].position_value.tp[0] >> 24) & 0xFF),                      //先赋值为命令中的数值，当前位置读取成功后修改值
+			.modbus_data_4=(uint8_t)((motor_array[0].position_value.tp[0] >> 16) & 0xFF),                      //先赋值为命令中的数值，当前位置读取成功后修改值
+		},
+		{
+			.property=1,                            //485 send
+			.modbus_addr=0x04,                       //电机号需要根据命令中的电机号赋值
+			.modbus_func=0x10,                    //写多个寄存器
+			.modbus_addr_h=(uint8_t)(2040>>8),
+			.modbus_addr_l=(uint8_t)(2040&0xFF),        //写使能寄存器
+			.modbus_data_len_h=0x00,
+			.modbus_data_len_l=0x02,
+			.modbus_data_byte=0x04,
+			.modbus_data_1=0xFF,                      //使能寄存器全部写为FF
+			.modbus_data_2=0xFF,                      
+			.modbus_data_3=0xFF,                      
+			.modbus_data_4=0xFF,                      
+		},
+		{
+			.property=1,                            //485 send
+			.modbus_addr=0x04,                       //电机号需要根据命令中的电机号赋值
+			.modbus_func=0x10,                    //写多个寄存器
+			.modbus_addr_h=(uint8_t)(2040>>8),
+			.modbus_addr_l=(uint8_t)(2040&0xFF),        //写使能寄存器
+			.modbus_data_len_h=0x00,
+			.modbus_data_len_l=0x02,
+			.modbus_data_byte=0x04,
+			.modbus_data_1=0x00,                      //使能寄存器全部写为00
+			.modbus_data_2=0x00,                      
+			.modbus_data_3=0x00,                      
+			.modbus_data_4=0x00,
+		},
+	};
+	//第二段
+	QUEUE_STRUCT command_seq_l2[3]=
+	{
+		{
+			.property=1,                            //485 send
+			.modbus_addr=0x04,                       //电机号,4，左右夹紧电机
+			.modbus_func=0x10,                    //写多个寄存器
+			.modbus_addr_h=(uint8_t)(3202>>8),
+			.modbus_addr_l=(uint8_t)(3202&0xFF),        //写目标位置
+			.modbus_data_len_h=0x00,
+			.modbus_data_len_l=0x02,
+			.modbus_data_byte=0x04,
+			.modbus_data_1=(uint8_t)((motor_array[0].position_value.tp[1] >> 8) & 0xFF),                       //先赋值为命令中的数值，当前位置读取成功后修改值
+			.modbus_data_2=(uint8_t)((motor_array[0].position_value.tp[1]) & 0xFF),                            //先赋值为命令中的数值，当前位置读取成功后修改值
+			.modbus_data_3=(uint8_t)((motor_array[0].position_value.tp[1] >> 24) & 0xFF),                      //先赋值为命令中的数值，当前位置读取成功后修改值
+			.modbus_data_4=(uint8_t)((motor_array[0].position_value.tp[1] >> 16) & 0xFF),                      //先赋值为命令中的数值，当前位置读取成功后修改值
+		},
+		{
+			.property=1,                            //485 send
+			.modbus_addr=0x04,                       //电机号需要根据命令中的电机号赋值
+			.modbus_func=0x10,                    //写多个寄存器
+			.modbus_addr_h=(uint8_t)(2040>>8),
+			.modbus_addr_l=(uint8_t)(2040&0xFF),        //写使能寄存器
+			.modbus_data_len_h=0x00,
+			.modbus_data_len_l=0x02,
+			.modbus_data_byte=0x04,
+			.modbus_data_1=0xFF,                      //使能寄存器全部写为FF
+			.modbus_data_2=0xFF,                      
+			.modbus_data_3=0xFF,                      
+			.modbus_data_4=0xFF,                      
+		},
+		{
+			.property=1,                            //485 send
+			.modbus_addr=0x04,                       //电机号需要根据命令中的电机号赋值
+			.modbus_func=0x10,                    //写多个寄存器
+			.modbus_addr_h=(uint8_t)(2040>>8),
+			.modbus_addr_l=(uint8_t)(2040&0xFF),        //写使能寄存器
+			.modbus_data_len_h=0x00,
+			.modbus_data_len_l=0x02,
+			.modbus_data_byte=0x04,
+			.modbus_data_1=0x00,                      //使能寄存器全部写为00
+			.modbus_data_2=0x00,                      
+			.modbus_data_3=0x00,                      
+			.modbus_data_4=0x00,
+		},
+	};
+	//第三段
+	QUEUE_STRUCT command_seq_l3[3]=
+	{
+		{
+			.property=1,                            //485 send
+			.modbus_addr=0x04,                       //电机号,4，左右夹紧电机
+			.modbus_func=0x10,                    //写多个寄存器
+			.modbus_addr_h=(uint8_t)(3202>>8),
+			.modbus_addr_l=(uint8_t)(3202&0xFF),        //写目标位置
+			.modbus_data_len_h=0x00,
+			.modbus_data_len_l=0x02,
+			.modbus_data_byte=0x04,
+			.modbus_data_1=(uint8_t)((motor_array[0].position_value.tp[2] >> 8) & 0xFF),                       //先赋值为命令中的数值，当前位置读取成功后修改值
+			.modbus_data_2=(uint8_t)((motor_array[0].position_value.tp[2]) & 0xFF),                            //先赋值为命令中的数值，当前位置读取成功后修改值
+			.modbus_data_3=(uint8_t)((motor_array[0].position_value.tp[2] >> 24) & 0xFF),                      //先赋值为命令中的数值，当前位置读取成功后修改值
+			.modbus_data_4=(uint8_t)((motor_array[0].position_value.tp[2] >> 16) & 0xFF),                      //先赋值为命令中的数值，当前位置读取成功后修改值
+		},
+		{
+			.property=1,                            //485 send
+			.modbus_addr=0x04,                       //电机号需要根据命令中的电机号赋值
+			.modbus_func=0x10,                    //写多个寄存器
+			.modbus_addr_h=(uint8_t)(2040>>8),
+			.modbus_addr_l=(uint8_t)(2040&0xFF),        //写使能寄存器
+			.modbus_data_len_h=0x00,
+			.modbus_data_len_l=0x02,
+			.modbus_data_byte=0x04,
+			.modbus_data_1=0xFF,                      //使能寄存器全部写为FF
+			.modbus_data_2=0xFF,                      
+			.modbus_data_3=0xFF,                      
+			.modbus_data_4=0xFF,                      
+		},
+		{
+			.property=1,                            //485 send
+			.modbus_addr=0x04,                       //电机号需要根据命令中的电机号赋值
+			.modbus_func=0x10,                    //写多个寄存器
+			.modbus_addr_h=(uint8_t)(2040>>8),
+			.modbus_addr_l=(uint8_t)(2040&0xFF),        //写使能寄存器
+			.modbus_data_len_h=0x00,
+			.modbus_data_len_l=0x02,
+			.modbus_data_byte=0x04,
+			.modbus_data_1=0x00,                      //使能寄存器全部写为00
+			.modbus_data_2=0x00,                      
+			.modbus_data_3=0x00,                      
+			.modbus_data_4=0x00,
+		},
+	};
+	QUEUE_STRUCT command_seq_l0[9];
+	//填充序列
+	uint8_t command_seq_counter=0;
+	if(__fabs(motor_array[3].position_value.tp[0] - motor_array[3].position_value.current_position)>COMPLETE_JUDGE)
+	{
+		memcpy(&command_seq_l0[3*command_seq_counter],command_seq_l1,3*sizeof(QUEUE_STRUCT));
+		command_seq_counter++;
+	}
+	else{
+		motor_array[3].self_check_counter++;
+	}
+	if(__fabs(motor_array[3].position_value.tp[1] - motor_array[3].position_value.current_position)>COMPLETE_JUDGE)
+	{
+		memcpy(&command_seq_l0[3*command_seq_counter],command_seq_l2,3*sizeof(QUEUE_STRUCT));
+		command_seq_counter++;
+	}
+	else
+	{
+		motor_array[3].self_check_counter++;
+	}
+	if(__fabs(motor_array[3].position_value.tp[2] - motor_array[3].position_value.current_position)>COMPLETE_JUDGE)
+	{
+		memcpy(&command_seq_l0[3*command_seq_counter],command_seq_l3,3*sizeof(QUEUE_STRUCT));
+		command_seq_counter++;
+	}
+	else
+	{
+		motor_array[3].self_check_counter++;
+	}
+	//解析数据
+	uint8_t if_return=para;     //自检命令没有参数
+	//动作序列压入队列
+	//获取队列中的空闲位置数量
+	uint32_t space_left=uxQueueSpacesAvailable(send_queueHandle);
+	//填充返回原来位置的任务命令
+	QUEUE_STRUCT tmp_last[3]=
+	{
+		{
+			.property=1,                            //485 send
+			.modbus_addr=0x04,                       //电机号,4,左右夹紧电机
+			.modbus_func=0x10,                    //写多个寄存器
+			.modbus_addr_h=(uint8_t)(3202>>8),
+			.modbus_addr_l=(uint8_t)(3202&0xFF),        //写目标位置
+			.modbus_data_len_h=0x00,
+			.modbus_data_len_l=0x02,
+			.modbus_data_byte=0x04,
+			.modbus_data_1=(uint8_t)((motor_array[0].position_value.current_position >> 8) & 0xFF),                       //先赋值为命令中的数值，当前位置读取成功后修改值
+			.modbus_data_2=(uint8_t)((motor_array[0].position_value.current_position) & 0xFF),                            //先赋值为命令中的数值，当前位置读取成功后修改值
+			.modbus_data_3=(uint8_t)((motor_array[0].position_value.current_position >> 24) & 0xFF),                      //先赋值为命令中的数值，当前位置读取成功后修改值
+			.modbus_data_4=(uint8_t)((motor_array[0].position_value.current_position >> 16) & 0xFF),                      //先赋值为命令中的数值，当前位置读取成功后修改值
+		},
+		{
+			.property=1,                            //485 send
+			.modbus_addr=0x04,                       //电机号需要根据命令中的电机号赋值
+			.modbus_func=0x10,                    //写多个寄存器
+			.modbus_addr_h=(uint8_t)(2040>>8),
+			.modbus_addr_l=(uint8_t)(2040&0xFF),        //写使能寄存器
+			.modbus_data_len_h=0x00,
+			.modbus_data_len_l=0x02,
+			.modbus_data_byte=0x04,
+			.modbus_data_1=0xFF,                      //使能寄存器全部写为FF
+			.modbus_data_2=0xFF,                      
+			.modbus_data_3=0xFF,                      
+			.modbus_data_4=0xFF,                      
+		},
+		{
+			.property=1,                            //485 send
+			.modbus_addr=0x04,                       //电机号需要根据命令中的电机号赋值
+			.modbus_func=0x10,                    //写多个寄存器
+			.modbus_addr_h=(uint8_t)(2040>>8),
+			.modbus_addr_l=(uint8_t)(2040&0xFF),        //写使能寄存器
+			.modbus_data_len_h=0x00,
+			.modbus_data_len_l=0x02,
+			.modbus_data_byte=0x04,
+			.modbus_data_1=0x00,                      //使能寄存器全部写为00
+			.modbus_data_2=0x00,                      
+			.modbus_data_3=0x00,                      
+			.modbus_data_4=0x00,
+		},
+	};
+	                
+	if(space_left<4)
+	{
+		//发送队列已满，直接返回错误,未完成
+		;
+	}
+	else
+	{
+		uint8_t isend=0;
+		for(isend=0;isend<3*command_seq_counter;isend++)
+		{
+			//压入发送队列
+			portBASE_TYPE status = xQueueSendToBack(send_queueHandle, &command_seq_l0[isend], 0);
+			if(status!=pdPASS)
+			{
+				#ifdef DEBUG_OUTPUT
+				printf("%s\n","queue overflow");
+				#endif
+			}
+			else
+			{
+				#ifdef DEBUG_OUTPUT
+				printf("%s\n","send command 8 error to queue already");
+				#endif
+			}
+		}
+		//压入初始位置命令组
+		//压入发送队列
+		for(isend=0;isend<3;isend++)
+		{
+			portBASE_TYPE status = xQueueSendToBack(send_queueHandle, &tmp_last[isend], 0);
+			if(status!=pdPASS)
+			{
+				#ifdef DEBUG_OUTPUT
+				printf("%s\n","queue overflow");
+				#endif
+			}
+			else
+			{
+				#ifdef DEBUG_OUTPUT
+				printf("%s\n","send command 8 error to queue already");
+				#endif
+			}
+		}
+	}
+	//更新命令状态为1
+	motor_array[3].command.command_id=0x12;           //命令id填充为18
+	motor_array[3].command.command_status=0x01;       //命令执行中
+	motor_array[3].command.if_return=if_return;       //执行完成是否需要回复帧
+	//暂时设置为8，实际情况中需要根据tp和当前位置计算,所有位置都是触发8个上下沿，但当天窗的完全关闭点不为光电开关点时，天窗有14个上下沿，其他也是如此
+	motor_array[3].self_check_counter=8;
 	return 0;
 }
 int command_19(uint8_t* data,uint32_t para)

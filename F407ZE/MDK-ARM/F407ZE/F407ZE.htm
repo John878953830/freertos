@@ -3,7 +3,7 @@
 <title>Static Call Graph - [F407ZE\F407ZE.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image F407ZE\F407ZE.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060422: Last Updated: Fri Mar 27 18:02:06 2020
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060422: Last Updated: Mon Mar 30 10:00:25 2020
 <BR><P>
 <H3>Maximum Stack Usage =       1512 bytes + Unknown(Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -389,6 +389,9 @@ Global Symbols
 <P><STRONG><a name="[138]"></a>__aeabi_memcpy4</STRONG> (Thumb, 0 bytes, Stack size 0 bytes, memcpya.o(.text))
 <BR><BR>[Called By]<UL><LI><a href="#[136]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MX_FREERTOS_Init
 <LI><a href="#[17a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;modbus_send
+<LI><a href="#[12]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_18
+<LI><a href="#[11]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_17
+<LI><a href="#[10]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_16
 <LI><a href="#[f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_15
 <LI><a href="#[e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_14
 <LI><a href="#[d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_13
@@ -450,7 +453,10 @@ Global Symbols
 </UL>
 <BR>[Calls]<UL><LI><a href="#[a6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_double_epilogue
 </UL>
-<BR>[Called By]<UL><LI><a href="#[f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_15
+<BR>[Called By]<UL><LI><a href="#[12]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_18
+<LI><a href="#[11]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_17
+<LI><a href="#[10]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_16
+<LI><a href="#[f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_15
 <LI><a href="#[e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_14
 <LI><a href="#[d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_13
 <LI><a href="#[c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_12
@@ -477,7 +483,10 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[16d]"></a>__aeabi_cdrcmple</STRONG> (Thumb, 48 bytes, Stack size 0 bytes, cdrcmple.o(.text))
-<BR><BR>[Called By]<UL><LI><a href="#[f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_15
+<BR><BR>[Called By]<UL><LI><a href="#[12]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_18
+<LI><a href="#[11]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_17
+<LI><a href="#[10]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_16
+<LI><a href="#[f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_15
 </UL>
 
 <P><STRONG><a name="[1d0]"></a>__aeabi_uidiv</STRONG> (Thumb, 0 bytes, Stack size 12 bytes, uidiv.o(.text), UNUSED)
@@ -2047,6 +2056,9 @@ Global Symbols
 <LI><a href="#[7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_7
 <LI><a href="#[3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_3
 <LI><a href="#[2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_2
+<LI><a href="#[12]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_18
+<LI><a href="#[11]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_17
+<LI><a href="#[10]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_16
 <LI><a href="#[f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_15
 <LI><a href="#[e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_14
 <LI><a href="#[d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_13
@@ -2191,13 +2203,40 @@ Global Symbols
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> main.o(.data)
 </UL>
-<P><STRONG><a name="[10]"></a>command_16</STRONG> (Thumb, 4 bytes, Stack size 0 bytes, main.o(i.command_16))
+<P><STRONG><a name="[10]"></a>command_16</STRONG> (Thumb, 520 bytes, Stack size 1400 bytes, main.o(i.command_16))
+<BR><BR>[Stack]<UL><LI>Max Depth = 1512<LI>Call Chain = command_16 &rArr; xQueueGenericSend &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
+</UL>
+<BR>[Calls]<UL><LI><a href="#[16a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueGenericSend
+<LI><a href="#[16c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;uxQueueSpacesAvailable
+<LI><a href="#[a5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_i2d
+<LI><a href="#[16d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_cdrcmple
+<LI><a href="#[ad]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__2printf
+<LI><a href="#[138]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memcpy4
+</UL>
 <BR>[Address Reference Count : 1]<UL><LI> main.o(.data)
 </UL>
-<P><STRONG><a name="[11]"></a>command_17</STRONG> (Thumb, 4 bytes, Stack size 0 bytes, main.o(i.command_17))
+<P><STRONG><a name="[11]"></a>command_17</STRONG> (Thumb, 520 bytes, Stack size 1400 bytes, main.o(i.command_17))
+<BR><BR>[Stack]<UL><LI>Max Depth = 1512<LI>Call Chain = command_17 &rArr; xQueueGenericSend &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
+</UL>
+<BR>[Calls]<UL><LI><a href="#[16a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueGenericSend
+<LI><a href="#[16c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;uxQueueSpacesAvailable
+<LI><a href="#[a5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_i2d
+<LI><a href="#[16d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_cdrcmple
+<LI><a href="#[ad]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__2printf
+<LI><a href="#[138]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memcpy4
+</UL>
 <BR>[Address Reference Count : 1]<UL><LI> main.o(.data)
 </UL>
-<P><STRONG><a name="[12]"></a>command_18</STRONG> (Thumb, 4 bytes, Stack size 0 bytes, main.o(i.command_18))
+<P><STRONG><a name="[12]"></a>command_18</STRONG> (Thumb, 520 bytes, Stack size 1400 bytes, main.o(i.command_18))
+<BR><BR>[Stack]<UL><LI>Max Depth = 1512<LI>Call Chain = command_18 &rArr; xQueueGenericSend &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
+</UL>
+<BR>[Calls]<UL><LI><a href="#[16a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueGenericSend
+<LI><a href="#[16c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;uxQueueSpacesAvailable
+<LI><a href="#[a5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_i2d
+<LI><a href="#[16d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_cdrcmple
+<LI><a href="#[ad]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__2printf
+<LI><a href="#[138]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memcpy4
+</UL>
 <BR>[Address Reference Count : 1]<UL><LI> main.o(.data)
 </UL>
 <P><STRONG><a name="[13]"></a>command_19</STRONG> (Thumb, 4 bytes, Stack size 0 bytes, main.o(i.command_19))
@@ -2710,6 +2749,9 @@ Global Symbols
 <LI><a href="#[172]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;vPortEnterCritical
 </UL>
 <BR>[Called By]<UL><LI><a href="#[8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_8
+<LI><a href="#[12]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_18
+<LI><a href="#[11]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_17
+<LI><a href="#[10]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_16
 <LI><a href="#[f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_15
 <LI><a href="#[e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_14
 <LI><a href="#[d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_13
@@ -3038,6 +3080,9 @@ Global Symbols
 <LI><a href="#[7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_7
 <LI><a href="#[3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_3
 <LI><a href="#[2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_2
+<LI><a href="#[12]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_18
+<LI><a href="#[11]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_17
+<LI><a href="#[10]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_16
 <LI><a href="#[f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_15
 <LI><a href="#[e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_14
 <LI><a href="#[d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_13
