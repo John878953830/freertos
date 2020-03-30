@@ -97,11 +97,11 @@ static void prvAutoReloadMotorStatusTimerCallback( TimerHandle_t xTimer )
 	//读取电机状态的回调函数
 	uint8_t i=0;
 	//获取电机错误码
-	for(i=0;i<1;i++) //暂时只读取1号电机的参数，因缺少电缆
+	for(i=0;i<4;i++) //
 	{
 		if(i==1)
 		{
-			break;
+			continue;
 		}
 		else{
 			QUEUE_STRUCT pos_get;
@@ -129,11 +129,11 @@ static void prvAutoReloadMotorStatusTimerCallback( TimerHandle_t xTimer )
 		}
 	}
 	//获取电机温度
-	for(i=0;i<1;i++) //暂时只读取1号电机的参数，因缺少电缆
+	for(i=0;i<4;i++) //
 	{
 		if(i==1)
 		{
-			break;
+			continue;
 		}
 		else{
 			QUEUE_STRUCT pos_get;
@@ -161,11 +161,11 @@ static void prvAutoReloadMotorStatusTimerCallback( TimerHandle_t xTimer )
 		}
 	}
 	//获取滞留脉冲数
-	for(i=0;i<1;i++) //暂时只读取1号电机的参数，因缺少电缆
+	for(i=0;i<4;i++) 
 	{
 		if(i==1)
 		{
-			break;
+			continue;
 		}
 		else{
 			//计算差值
@@ -881,11 +881,11 @@ void start_tk_sensor_monitor(void *argument)
 			#endif
 			//获取电机位置
 			uint8_t i=0;
-			for(i=0;i<1;i++) //暂时只读取1号电机的参数，因缺少电缆
+			for(i=0;i<4;i++) //
 			{
 				if(i==1)
 				{
-					break;
+					continue;
 				}
 				else{
 					QUEUE_STRUCT pos_get;
@@ -913,11 +913,11 @@ void start_tk_sensor_monitor(void *argument)
 				}
 			}
 			//获取电机速度
-			for(i=0;i<1;i++) //暂时只读取1号电机的参数，因缺少电缆
+			for(i=0;i<4;i++) //
 			{
 				if(i==1)
 				{
-					break;
+					continue;
 				}
 				else{
 					QUEUE_STRUCT speed_get;
@@ -945,11 +945,11 @@ void start_tk_sensor_monitor(void *argument)
 				}
 			}
 			//获取电机扭矩
-			for(i=0;i<1;i++) //暂时只读取1号电机的参数，因缺少电缆
+			for(i=0;i<4;i++) //暂时只读取1号电机的参数，因缺少电缆
 			{
 				if(i==1)
 				{
-					break;
+					continue;
 				}
 				else{
 					QUEUE_STRUCT speed_get;

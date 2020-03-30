@@ -735,6 +735,7 @@ void TIM5_IRQHandler(void)
 		xTaskNotifyFromISR(sensor_monitorHandle,0x0001,eSetBits,&b_tk_sensor_monitor);
 		portYIELD_FROM_ISR(b_tk_sensor_monitor);
 	}
+	__HAL_TIM_CLEAR_FLAG(&htim5,TIM_FLAG_UPDATE);
   /* USER CODE END TIM5_IRQn 0 */
   HAL_TIM_IRQHandler(&htim5);
   /* USER CODE BEGIN TIM5_IRQn 1 */

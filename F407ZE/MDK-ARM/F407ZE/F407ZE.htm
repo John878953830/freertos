@@ -3,11 +3,11 @@
 <title>Static Call Graph - [F407ZE\F407ZE.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image F407ZE\F407ZE.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060422: Last Updated: Mon Mar 30 10:00:25 2020
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060422: Last Updated: Mon Mar 30 17:25:25 2020
 <BR><P>
-<H3>Maximum Stack Usage =       1512 bytes + Unknown(Cycles, Untraceable Function Pointers)</H3><H3>
+<H3>Maximum Stack Usage =       1592 bytes + Unknown(Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
-command_15 &rArr; xQueueGenericSend &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
+command_6 &rArr; command_18 &rArr; xQueueGenericSend &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
 <P>
 <H3>
 Mutually Recursive functions
@@ -1922,7 +1922,7 @@ Global Symbols
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> startup_stm32f407xx.o(RESET)
 </UL>
-<P><STRONG><a name="[5d]"></a>TIM5_IRQHandler</STRONG> (Thumb, 56 bytes, Stack size 8 bytes, stm32f4xx_it.o(i.TIM5_IRQHandler))
+<P><STRONG><a name="[5d]"></a>TIM5_IRQHandler</STRONG> (Thumb, 66 bytes, Stack size 8 bytes, stm32f4xx_it.o(i.TIM5_IRQHandler))
 <BR><BR>[Stack]<UL><LI>Max Depth = 48<LI>Call Chain = TIM5_IRQHandler &rArr; xTaskGenericNotifyFromISR &rArr; vPortValidateInterruptPriority
 </UL>
 <BR>[Calls]<UL><LI><a href="#[15b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xTaskGenericNotifyFromISR
@@ -2054,6 +2054,7 @@ Global Symbols
 <LI><a href="#[9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_9
 <LI><a href="#[8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_8
 <LI><a href="#[7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_7
+<LI><a href="#[6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_6
 <LI><a href="#[3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_3
 <LI><a href="#[2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_2
 <LI><a href="#[12]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_18
@@ -2201,6 +2202,8 @@ Global Symbols
 <LI><a href="#[ad]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__2printf
 <LI><a href="#[138]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memcpy4
 </UL>
+<BR>[Called By]<UL><LI><a href="#[6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_6
+</UL>
 <BR>[Address Reference Count : 1]<UL><LI> main.o(.data)
 </UL>
 <P><STRONG><a name="[10]"></a>command_16</STRONG> (Thumb, 520 bytes, Stack size 1400 bytes, main.o(i.command_16))
@@ -2225,6 +2228,8 @@ Global Symbols
 <LI><a href="#[ad]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__2printf
 <LI><a href="#[138]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memcpy4
 </UL>
+<BR>[Called By]<UL><LI><a href="#[6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_6
+</UL>
 <BR>[Address Reference Count : 1]<UL><LI> main.o(.data)
 </UL>
 <P><STRONG><a name="[12]"></a>command_18</STRONG> (Thumb, 520 bytes, Stack size 1400 bytes, main.o(i.command_18))
@@ -2236,6 +2241,8 @@ Global Symbols
 <LI><a href="#[16d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_cdrcmple
 <LI><a href="#[ad]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__2printf
 <LI><a href="#[138]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memcpy4
+</UL>
+<BR>[Called By]<UL><LI><a href="#[6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_6
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> main.o(.data)
 </UL>
@@ -2289,7 +2296,15 @@ Global Symbols
 <P><STRONG><a name="[5]"></a>command_5</STRONG> (Thumb, 4 bytes, Stack size 0 bytes, main.o(i.command_5))
 <BR>[Address Reference Count : 1]<UL><LI> main.o(.data)
 </UL>
-<P><STRONG><a name="[6]"></a>command_6</STRONG> (Thumb, 4 bytes, Stack size 0 bytes, main.o(i.command_6))
+<P><STRONG><a name="[6]"></a>command_6</STRONG> (Thumb, 156 bytes, Stack size 80 bytes, main.o(i.command_6))
+<BR><BR>[Stack]<UL><LI>Max Depth = 1592<LI>Call Chain = command_6 &rArr; command_18 &rArr; xQueueGenericSend &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
+</UL>
+<BR>[Calls]<UL><LI><a href="#[16a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueGenericSend
+<LI><a href="#[12]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_18
+<LI><a href="#[11]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_17
+<LI><a href="#[f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_15
+<LI><a href="#[ad]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__2printf
+</UL>
 <BR>[Address Reference Count : 1]<UL><LI> main.o(.data)
 </UL>
 <P><STRONG><a name="[7]"></a>command_7</STRONG> (Thumb, 252 bytes, Stack size 104 bytes, main.o(i.command_7))
@@ -2301,7 +2316,7 @@ Global Symbols
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> main.o(.data)
 </UL>
-<P><STRONG><a name="[8]"></a>command_8</STRONG> (Thumb, 546 bytes, Stack size 168 bytes, main.o(i.command_8))
+<P><STRONG><a name="[8]"></a>command_8</STRONG> (Thumb, 1312 bytes, Stack size 168 bytes, main.o(i.command_8))
 <BR><BR>[Stack]<UL><LI>Max Depth = 280<LI>Call Chain = command_8 &rArr; xQueueGenericSend &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
 </UL>
 <BR>[Calls]<UL><LI><a href="#[16a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueGenericSend
@@ -2678,7 +2693,7 @@ Global Symbols
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> freertos.o(i.MX_FREERTOS_Init)
 </UL>
-<P><STRONG><a name="[8b]"></a>start_tk_sensor_monitor</STRONG> (Thumb, 314 bytes, Stack size 72 bytes, freertos.o(i.start_tk_sensor_monitor))
+<P><STRONG><a name="[8b]"></a>start_tk_sensor_monitor</STRONG> (Thumb, 328 bytes, Stack size 72 bytes, freertos.o(i.start_tk_sensor_monitor))
 <BR><BR>[Stack]<UL><LI>Max Depth = 184<LI>Call Chain = start_tk_sensor_monitor &rArr; xQueueGenericSend &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
 </UL>
 <BR>[Calls]<UL><LI><a href="#[16a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueGenericSend
@@ -3078,6 +3093,7 @@ Global Symbols
 <LI><a href="#[9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_9
 <LI><a href="#[8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_8
 <LI><a href="#[7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_7
+<LI><a href="#[6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_6
 <LI><a href="#[3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_3
 <LI><a href="#[2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_2
 <LI><a href="#[12]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_18
@@ -3331,8 +3347,8 @@ Global Symbols
 <H3>
 Local Symbols
 </H3>
-<P><STRONG><a name="[99]"></a>prvAutoReloadMotorStatusTimerCallback</STRONG> (Thumb, 556 bytes, Stack size 192 bytes, freertos.o(i.prvAutoReloadMotorStatusTimerCallback))
-<BR><BR>[Stack]<UL><LI>Max Depth = 304<LI>Call Chain = prvAutoReloadMotorStatusTimerCallback &rArr; xQueueGenericSend &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
+<P><STRONG><a name="[99]"></a>prvAutoReloadMotorStatusTimerCallback</STRONG> (Thumb, 580 bytes, Stack size 200 bytes, freertos.o(i.prvAutoReloadMotorStatusTimerCallback))
+<BR><BR>[Stack]<UL><LI>Max Depth = 312<LI>Call Chain = prvAutoReloadMotorStatusTimerCallback &rArr; xQueueGenericSend &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
 </UL>
 <BR>[Calls]<UL><LI><a href="#[16a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueGenericSend
 <LI><a href="#[a5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_i2d

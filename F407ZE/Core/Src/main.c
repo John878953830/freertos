@@ -637,6 +637,46 @@ int command_5(uint8_t* data,uint32_t para)
 }
 int command_6(uint8_t* data,uint32_t para)
 {
+	uint8_t data_len=(uint8_t)(para & 0x0F);
+	uint8_t if_return=(para>>4)&0x01;
+	uint8_t if_last=(para>>5)&0x01;
+	if(if_last!=0 || data_len!=1)
+	{
+		if(if_return == 0x01)
+		{
+			QUEUE_STRUCT tmp;
+			tmp.property=0x00;             //can send
+			tmp.can_command=0x06;          //停止指令
+			tmp.can_if_ack=0x01;           //需要ACK
+			tmp.can_source=0x03;           //本模块
+			tmp.can_target=0x00;
+			tmp.can_priority=0x03;         //命令结束返回帧
+			tmp.can_if_last=0x00;
+			tmp.can_if_return=0x00;
+			tmp.length=4;
+			tmp.data[0]=0x00;
+			tmp.data[1]=0x00;
+			tmp.data[2]=0x00;
+			tmp.data[3]=ERROR_COMMAND_6_FAIL;
+			BaseType_t status_q = xQueueSendToBack(send_queueHandle, &tmp, 0);
+			if(status_q!=pdPASS)
+			{
+				#ifdef DEBUG_OUTPUT
+				printf("%s\n","queue overflow");
+				#endif
+			}
+			else
+			{
+				#ifdef DEBUG_OUTPUT
+				printf("%s\n","send command 1 success to queue already");
+				#endif
+			}
+		}
+		return ERROR_COMMAND_6_FAIL;
+	}
+	command_15(data,para);
+	command_17(data,para);
+	command_18(data,para);
 	return 0;
 }
 int command_7(uint8_t* data,uint32_t para)
@@ -751,8 +791,11 @@ int command_8(uint8_t* data,uint32_t para)
 	QUEUE_STRUCT tmp;
 	if(data[0]>4)
 	{
-		if(data[0]==0x11 || data[0]==0x12)
+		if(data[0]==0x11 || data[0]==0x12 || data[0]==0x13
+		|| data[0]==0x31 || data[0]==0x32 || data[0]==0x33
+		|| data[0]==0x41 || data[0]==0x42 || data[0]==0x43)
 		{
+			//1号电机指令，启动，停止，编码器错误修正
 			if(data[0]==0x11)
 			{
 				//启动电机，电机
@@ -802,6 +845,246 @@ int command_8(uint8_t* data,uint32_t para)
 				enable_motor.modbus_data_byte=0x04;
 				enable_motor.modbus_data_1=0x00;
 				enable_motor.modbus_data_2=0x00;
+				enable_motor.modbus_data_3=0x00;
+				enable_motor.modbus_data_4=0x00;
+				
+				//modbus_send_sub(enable_motor);
+				portBASE_TYPE	status = xQueueSendToBack(send_queueHandle, &enable_motor, 0);
+				if(status!=pdPASS)
+				{
+					#ifdef DEBUG_OUTPUT
+					printf("%s\n","queue overflow");
+					#endif
+				}
+				else
+				{
+					#ifdef DEBUG_OUTPUT
+					printf("%s\n","send command 7 succes to queue already");
+					#endif
+				}
+				;
+			}
+			if(data[0]==0x13)
+			{
+				//启动错误清零
+				QUEUE_STRUCT enable_motor;
+	
+				enable_motor.property=1;                            //485 send
+				enable_motor.modbus_addr=1;
+				enable_motor.modbus_func=0x10;                      //写多个寄存器
+				enable_motor.modbus_addr_h=(uint8_t)(1142>>8);
+				enable_motor.modbus_addr_l=(uint8_t)(1142&0xFF);                   //电机485地址
+				enable_motor.modbus_data_len_h=0x00;
+				enable_motor.modbus_data_len_l=0x02;
+				enable_motor.modbus_data_byte=0x04;
+				enable_motor.modbus_data_1=0x00;
+				enable_motor.modbus_data_2=0x01;
+				enable_motor.modbus_data_3=0x00;
+				enable_motor.modbus_data_4=0x00;
+				
+				//modbus_send_sub(enable_motor);
+				portBASE_TYPE	status = xQueueSendToBack(send_queueHandle, &enable_motor, 0);
+				if(status!=pdPASS)
+				{
+					#ifdef DEBUG_OUTPUT
+					printf("%s\n","queue overflow");
+					#endif
+				}
+				else
+				{
+					#ifdef DEBUG_OUTPUT
+					printf("%s\n","send command 7 succes to queue already");
+					#endif
+				}
+				;
+			}
+			//前后夹紧电机启动停止错误清0
+			if(data[0]==0x31)
+			{
+				//启动电机，电机
+				QUEUE_STRUCT enable_motor;
+	
+				enable_motor.property=1;                            //485 send
+				enable_motor.modbus_addr=3;
+				enable_motor.modbus_func=0x10;                      //写多个寄存器
+				enable_motor.modbus_addr_h=(uint8_t)(1008>>8);
+				enable_motor.modbus_addr_l=(uint8_t)(1008&0xFF);                   //电机485地址
+				enable_motor.modbus_data_len_h=0x00;
+				enable_motor.modbus_data_len_l=0x02;
+				enable_motor.modbus_data_byte=0x04;
+				enable_motor.modbus_data_1=0x00;
+				enable_motor.modbus_data_2=0x01;
+				enable_motor.modbus_data_3=0x00;
+				enable_motor.modbus_data_4=0x00;
+				
+				//modbus_send_sub(enable_motor);
+				portBASE_TYPE	status = xQueueSendToBack(send_queueHandle, &enable_motor, 0);
+				if(status!=pdPASS)
+				{
+					#ifdef DEBUG_OUTPUT
+					printf("%s\n","queue overflow");
+					#endif
+				}
+				else
+				{
+					#ifdef DEBUG_OUTPUT
+					printf("%s\n","send command 7 succes to queue already");
+					#endif
+				}
+				;
+			}
+			if(data[0]==0x32)
+			{
+				//停止电机，电机号2
+				QUEUE_STRUCT enable_motor;
+	
+				enable_motor.property=1;                            //485 send
+				enable_motor.modbus_addr=3;
+				enable_motor.modbus_func=0x10;                      //写多个寄存器
+				enable_motor.modbus_addr_h=(uint8_t)(1008>>8);
+				enable_motor.modbus_addr_l=(uint8_t)(1008&0xFF);                   //电机485地址
+				enable_motor.modbus_data_len_h=0x00;
+				enable_motor.modbus_data_len_l=0x02;
+				enable_motor.modbus_data_byte=0x04;
+				enable_motor.modbus_data_1=0x00;
+				enable_motor.modbus_data_2=0x00;
+				enable_motor.modbus_data_3=0x00;
+				enable_motor.modbus_data_4=0x00;
+				
+				//modbus_send_sub(enable_motor);
+				portBASE_TYPE	status = xQueueSendToBack(send_queueHandle, &enable_motor, 0);
+				if(status!=pdPASS)
+				{
+					#ifdef DEBUG_OUTPUT
+					printf("%s\n","queue overflow");
+					#endif
+				}
+				else
+				{
+					#ifdef DEBUG_OUTPUT
+					printf("%s\n","send command 7 succes to queue already");
+					#endif
+				}
+				;
+			}
+			if(data[0]==0x33)
+			{
+				//启动错误清零
+				QUEUE_STRUCT enable_motor;
+	
+				enable_motor.property=1;                            //485 send
+				enable_motor.modbus_addr=3;
+				enable_motor.modbus_func=0x10;                      //写多个寄存器
+				enable_motor.modbus_addr_h=(uint8_t)(1142>>8);
+				enable_motor.modbus_addr_l=(uint8_t)(1142&0xFF);                   //电机485地址
+				enable_motor.modbus_data_len_h=0x00;
+				enable_motor.modbus_data_len_l=0x02;
+				enable_motor.modbus_data_byte=0x04;
+				enable_motor.modbus_data_1=0x00;
+				enable_motor.modbus_data_2=0x01;
+				enable_motor.modbus_data_3=0x00;
+				enable_motor.modbus_data_4=0x00;
+				
+				//modbus_send_sub(enable_motor);
+				portBASE_TYPE	status = xQueueSendToBack(send_queueHandle, &enable_motor, 0);
+				if(status!=pdPASS)
+				{
+					#ifdef DEBUG_OUTPUT
+					printf("%s\n","queue overflow");
+					#endif
+				}
+				else
+				{
+					#ifdef DEBUG_OUTPUT
+					printf("%s\n","send command 7 succes to queue already");
+					#endif
+				}
+				;
+			}
+			//左右夹紧电机
+			if(data[0]==0x41)
+			{
+				//启动电机，电机
+				QUEUE_STRUCT enable_motor;
+	
+				enable_motor.property=1;                            //485 send
+				enable_motor.modbus_addr=4;
+				enable_motor.modbus_func=0x10;                      //写多个寄存器
+				enable_motor.modbus_addr_h=(uint8_t)(1008>>8);
+				enable_motor.modbus_addr_l=(uint8_t)(1008&0xFF);                   //电机485地址
+				enable_motor.modbus_data_len_h=0x00;
+				enable_motor.modbus_data_len_l=0x02;
+				enable_motor.modbus_data_byte=0x04;
+				enable_motor.modbus_data_1=0x00;
+				enable_motor.modbus_data_2=0x01;
+				enable_motor.modbus_data_3=0x00;
+				enable_motor.modbus_data_4=0x00;
+				
+				//modbus_send_sub(enable_motor);
+				portBASE_TYPE	status = xQueueSendToBack(send_queueHandle, &enable_motor, 0);
+				if(status!=pdPASS)
+				{
+					#ifdef DEBUG_OUTPUT
+					printf("%s\n","queue overflow");
+					#endif
+				}
+				else
+				{
+					#ifdef DEBUG_OUTPUT
+					printf("%s\n","send command 7 succes to queue already");
+					#endif
+				}
+				;
+			}
+			if(data[0]==0x42)
+			{
+				//停止电机，电机号2
+				QUEUE_STRUCT enable_motor;
+	
+				enable_motor.property=1;                            //485 send
+				enable_motor.modbus_addr=4;
+				enable_motor.modbus_func=0x10;                      //写多个寄存器
+				enable_motor.modbus_addr_h=(uint8_t)(1008>>8);
+				enable_motor.modbus_addr_l=(uint8_t)(1008&0xFF);                   //电机485地址
+				enable_motor.modbus_data_len_h=0x00;
+				enable_motor.modbus_data_len_l=0x02;
+				enable_motor.modbus_data_byte=0x04;
+				enable_motor.modbus_data_1=0x00;
+				enable_motor.modbus_data_2=0x00;
+				enable_motor.modbus_data_3=0x00;
+				enable_motor.modbus_data_4=0x00;
+				
+				//modbus_send_sub(enable_motor);
+				portBASE_TYPE	status = xQueueSendToBack(send_queueHandle, &enable_motor, 0);
+				if(status!=pdPASS)
+				{
+					#ifdef DEBUG_OUTPUT
+					printf("%s\n","queue overflow");
+					#endif
+				}
+				else
+				{
+					#ifdef DEBUG_OUTPUT
+					printf("%s\n","send command 7 succes to queue already");
+					#endif
+				}
+				;
+			}
+			if(data[0]==0x43)
+			{
+				//启动错误清零
+				QUEUE_STRUCT enable_motor;
+	
+				enable_motor.property=1;                            //485 send
+				enable_motor.modbus_addr=4;
+				enable_motor.modbus_func=0x10;                      //写多个寄存器
+				enable_motor.modbus_addr_h=(uint8_t)(1142>>8);
+				enable_motor.modbus_addr_l=(uint8_t)(1142&0xFF);                   //电机485地址
+				enable_motor.modbus_data_len_h=0x00;
+				enable_motor.modbus_data_len_l=0x02;
+				enable_motor.modbus_data_byte=0x04;
+				enable_motor.modbus_data_1=0x00;
+				enable_motor.modbus_data_2=0x01;
 				enable_motor.modbus_data_3=0x00;
 				enable_motor.modbus_data_4=0x00;
 				
@@ -2435,7 +2718,6 @@ int command_15(uint8_t* data,uint32_t para)
 int command_16(uint8_t* data,uint32_t para)
 {
 	//天窗右电机自检
-	//天窗左电机自检
 	//声明动作序列
 	//第一段动作序列，tp0位置
 	QUEUE_STRUCT command_seq_l1[3]=
