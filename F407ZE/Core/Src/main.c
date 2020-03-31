@@ -86,6 +86,44 @@ uint8_t motor_array_init(void)
 	}
 	motor_array[0].position_value.if_tp_already=0x01;
 		
+	//3号电机
+	tmp_addr=0x00;                      //3号电机起始地址
+	for(i=0;i<3;i++)
+	{
+		if(iic_rw(rw_flag, tmp_addr + i*4,data,length)!=0)
+		{
+			//读取EEPROM出错
+			break;
+			;
+		}
+		else
+		{
+			motor_array[2].position_value.tp[i]=((uint32_t)data[0] << 24) | ((uint32_t)data[1] << 16) | ((uint32_t)data[2] << 8) | ((uint32_t)data[3]);
+		}
+		//测试代码
+		motor_array[2].position_value.tp[i]=0;
+	}
+	motor_array[2].position_value.if_tp_already=0x01;
+	
+	//4号电机
+	tmp_addr=0x00;                      //4号电机起始地址
+	for(i=0;i<3;i++)
+	{
+		if(iic_rw(rw_flag, tmp_addr + i*4,data,length)!=0)
+		{
+			//读取EEPROM出错
+			break;
+			;
+		}
+		else
+		{
+			motor_array[3].position_value.tp[i]=((uint32_t)data[0] << 24) | ((uint32_t)data[1] << 16) | ((uint32_t)data[2] << 8) | ((uint32_t)data[3]);
+		}
+		//测试代码
+		motor_array[3].position_value.tp[i]=0;
+	}
+	motor_array[3].position_value.if_tp_already=0x01;
+	
 	
 	
 	return 0;

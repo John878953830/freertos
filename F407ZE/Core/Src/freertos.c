@@ -198,10 +198,17 @@ static void prvAutoReloadMotorStatusTimerCallback( TimerHandle_t xTimer )
 			}
 			
 			//确定是否发送返回帧
+			
 			if(motor_array[i].command.if_return==0x01 && __fabs(motor_array[i].position_value.remain_position)<COMPLETE_JUDGE
 				&& motor_array[i].command.command_status==0x01 && __fabs(motor_array[i].speed_value.current_speed) < SPEED_JUDGE
 			  && motor_array[i].position_value.remain_position_delta_pre>motor_array[i].position_value.remain_position_delta 
 			  && motor_array[i].position_value.remain_position_delta < COMPLETE_JUDGE)
+			
+			//动作返回帧结果发送
+			/*
+			if(motor_array[i].command.if_return==0x01 && __fabs(motor_array[i].position_value.current_position - motor_array[i].position_value.target_position)<COMPLETE_JUDGE
+				&& motor_array[i].command.command_status==0x01 && __fabs(motor_array[i].speed_value.current_speed) < SPEED_JUDGE)
+			*/
 			{
 				motor_array[i].command.command_status=0x02;
 				//发送返回帧
@@ -220,12 +227,12 @@ static void prvAutoReloadMotorStatusTimerCallback( TimerHandle_t xTimer )
 				frame_return.data[2]=i+1;               //电机号
 				frame_return.data[3]=0x00;              //保留
 				
-				//更新自检结果
-				if(motor_array[i].command.command_id==0x0F && motor_array[i].self_check_counter!=0)
+				//自检返回帧结果发送
+				if(motor_array[i].self_check_counter!=0	&& (motor_array[i].command.command_id==0x0F || motor_array[i].command.command_id==0x10 || motor_array[i].command.command_id==0x11 || motor_array[i].command.command_id==0x12 
+					 || motor_array[i].command.command_id==0x06))
 				{
 					frame_return.data[0]=ERROR_COMMAND_15_FAIL;
 				}
-				
 				portBASE_TYPE status = xQueueSendToBack(send_queueHandle, &frame_return, 0);
 				if(status!=pdPASS)
 				{
@@ -879,7 +886,7 @@ void start_tk_sensor_monitor(void *argument)
 			#ifdef DEBUG_OUTPUT
 			printf("%s\n","start tk sensor monitor");
 			#endif
-			//获取电机位置
+			//获取电机当前位置
 			uint8_t i=0;
 			for(i=0;i<4;i++) //
 			{
@@ -1364,6 +1371,8 @@ void start_tk_result_process_rece(void *argument)
 						tmp_refill->modbus_element.modbus_data_2=(uint8_t)(tmp_offset & 0xFF);
 						tmp_refill->modbus_element.modbus_data_3=(uint8_t)((tmp_offset>>24) & 0xFF);
 						tmp_refill->modbus_element.modbus_data_4=(uint8_t)((tmp_offset>>16) & 0xFF);
+						//填充目标位置
+						motor_array[modbus_list_head->modbus_element.modbus_addr-1].position_value.target_position=tmp_offset;
 					}
 					modbus_list_head->if_over=0;
 					modbus_list_head=modbus_list_head->next;

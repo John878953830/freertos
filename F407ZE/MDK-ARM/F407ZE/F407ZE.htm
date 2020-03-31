@@ -3,7 +3,7 @@
 <title>Static Call Graph - [F407ZE\F407ZE.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image F407ZE\F407ZE.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060422: Last Updated: Mon Mar 30 17:47:51 2020
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060422: Last Updated: Tue Mar 31 10:30:16 2020
 <BR><P>
 <H3>Maximum Stack Usage =       1592 bytes + Unknown(Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -2455,8 +2455,8 @@ Global Symbols
 <LI><a href="#[92]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;start_tk_result_process
 </UL>
 
-<P><STRONG><a name="[177]"></a>motor_array_init</STRONG> (Thumb, 70 bytes, Stack size 32 bytes, main.o(i.motor_array_init))
-<BR><BR>[Stack]<UL><LI>Max Depth = 224<LI>Call Chain = motor_array_init &rArr; iic_rw &rArr; HAL_I2C_Master_Receive &rArr; I2C_MasterRequestRead &rArr; I2C_WaitOnMasterAddressFlagUntilTimeout
+<P><STRONG><a name="[177]"></a>motor_array_init</STRONG> (Thumb, 164 bytes, Stack size 40 bytes, main.o(i.motor_array_init))
+<BR><BR>[Stack]<UL><LI>Max Depth = 232<LI>Call Chain = motor_array_init &rArr; iic_rw &rArr; HAL_I2C_Master_Receive &rArr; I2C_MasterRequestRead &rArr; I2C_WaitOnMasterAddressFlagUntilTimeout
 </UL>
 <BR>[Calls]<UL><LI><a href="#[16f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;iic_rw
 </UL>
@@ -2658,7 +2658,7 @@ Global Symbols
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> freertos.o(i.MX_FREERTOS_Init)
 </UL>
-<P><STRONG><a name="[93]"></a>start_tk_result_process_rece</STRONG> (Thumb, 270 bytes, Stack size 56 bytes, freertos.o(i.start_tk_result_process_rece))
+<P><STRONG><a name="[93]"></a>start_tk_result_process_rece</STRONG> (Thumb, 296 bytes, Stack size 56 bytes, freertos.o(i.start_tk_result_process_rece))
 <BR><BR>[Stack]<UL><LI>Max Depth = 148<LI>Call Chain = start_tk_result_process_rece &rArr; modbus_send_sub &rArr; HAL_UART_Transmit_DMA &rArr; HAL_DMA_Start_IT &rArr; DMA_SetConfig
 </UL>
 <BR>[Calls]<UL><LI><a href="#[13f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_GPIO_WritePin
@@ -3347,8 +3347,8 @@ Global Symbols
 <H3>
 Local Symbols
 </H3>
-<P><STRONG><a name="[99]"></a>prvAutoReloadMotorStatusTimerCallback</STRONG> (Thumb, 580 bytes, Stack size 200 bytes, freertos.o(i.prvAutoReloadMotorStatusTimerCallback))
-<BR><BR>[Stack]<UL><LI>Max Depth = 312<LI>Call Chain = prvAutoReloadMotorStatusTimerCallback &rArr; xQueueGenericSend &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
+<P><STRONG><a name="[99]"></a>prvAutoReloadMotorStatusTimerCallback</STRONG> (Thumb, 596 bytes, Stack size 176 bytes, freertos.o(i.prvAutoReloadMotorStatusTimerCallback))
+<BR><BR>[Stack]<UL><LI>Max Depth = 288<LI>Call Chain = prvAutoReloadMotorStatusTimerCallback &rArr; xQueueGenericSend &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
 </UL>
 <BR>[Calls]<UL><LI><a href="#[16a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueGenericSend
 <LI><a href="#[a5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_i2d
