@@ -118,7 +118,6 @@
         <SetRegEntry>
           <Number>0</Number>
           <Key>DLGUARM</Key>
-          <Name>d</Name>
         </SetRegEntry>
         <SetRegEntry>
           <Number>0</Number>
@@ -155,9 +154,9 @@
         <Bp>
           <Number>0</Number>
           <Type>0</Type>
-          <LineNumber>1138</LineNumber>
+          <LineNumber>1317</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134257720</Address>
+          <Address>134258208</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
@@ -166,7 +165,7 @@
           <BreakIfRCount>1</BreakIfRCount>
           <Filename>../Core/Src/freertos.c</Filename>
           <ExecCommand></ExecCommand>
-          <Expression>\\\../Core/Src/freertos.c\1138</Expression>
+          <Expression>\\F407ZE\../Core/Src/freertos.c\1317</Expression>
         </Bp>
       </Breakpoint>
       <WatchWindow1>
@@ -184,6 +183,11 @@
           <count>2</count>
           <WinNumber>1</WinNumber>
           <ItemText>id</ItemText>
+        </Ww>
+        <Ww>
+          <count>3</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>modbus_list_head</ItemText>
         </Ww>
       </WatchWindow1>
       <WatchWindow2>

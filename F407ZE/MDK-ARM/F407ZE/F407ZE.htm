@@ -3,7 +3,7 @@
 <title>Static Call Graph - [F407ZE\F407ZE.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image F407ZE\F407ZE.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060422: Last Updated: Wed Apr 01 11:04:07 2020
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060422: Last Updated: Wed Apr 01 13:42:56 2020
 <BR><P>
 <H3>Maximum Stack Usage =       1592 bytes + Unknown(Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -2008,14 +2008,13 @@ Global Symbols
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> startup_stm32f407xx.o(RESET)
 </UL>
-<P><STRONG><a name="[51]"></a>USART2_IRQHandler</STRONG> (Thumb, 198 bytes, Stack size 40 bytes, stm32f4xx_it.o(i.USART2_IRQHandler))
+<P><STRONG><a name="[51]"></a>USART2_IRQHandler</STRONG> (Thumb, 174 bytes, Stack size 40 bytes, stm32f4xx_it.o(i.USART2_IRQHandler))
 <BR><BR>[Stack]<UL><LI>Max Depth = 80<LI>Call Chain = USART2_IRQHandler &rArr; xTaskGenericNotifyFromISR &rArr; vPortValidateInterruptPriority
 </UL>
 <BR>[Calls]<UL><LI><a href="#[15c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_TIM_Base_Stop
 <LI><a href="#[15b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xTaskGenericNotifyFromISR
 <LI><a href="#[11a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_IRQHandler
 <LI><a href="#[117]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_DMAStop
-<LI><a href="#[ad]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__2printf
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> startup_stm32f407xx.o(RESET)
 </UL>
@@ -2077,7 +2076,6 @@ Global Symbols
 <LI><a href="#[89]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;start_tk_commu_monitor
 <LI><a href="#[86]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;StartDefaultTask
 <LI><a href="#[99]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;prvAutoReloadMotorStatusTimerCallback
-<LI><a href="#[51]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USART2_IRQHandler
 <LI><a href="#[3f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;CAN1_RX0_IRQHandler
 </UL>
 
@@ -2206,7 +2204,7 @@ Global Symbols
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> main.o(.data)
 </UL>
-<P><STRONG><a name="[10]"></a>command_16</STRONG> (Thumb, 520 bytes, Stack size 1400 bytes, main.o(i.command_16))
+<P><STRONG><a name="[10]"></a>command_16</STRONG> (Thumb, 516 bytes, Stack size 1400 bytes, main.o(i.command_16))
 <BR><BR>[Stack]<UL><LI>Max Depth = 1512<LI>Call Chain = command_16 &rArr; xQueueGenericSend &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
 </UL>
 <BR>[Calls]<UL><LI><a href="#[16a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueGenericSend
@@ -2218,7 +2216,7 @@ Global Symbols
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> main.o(.data)
 </UL>
-<P><STRONG><a name="[11]"></a>command_17</STRONG> (Thumb, 520 bytes, Stack size 1400 bytes, main.o(i.command_17))
+<P><STRONG><a name="[11]"></a>command_17</STRONG> (Thumb, 516 bytes, Stack size 1400 bytes, main.o(i.command_17))
 <BR><BR>[Stack]<UL><LI>Max Depth = 1512<LI>Call Chain = command_17 &rArr; xQueueGenericSend &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
 </UL>
 <BR>[Calls]<UL><LI><a href="#[16a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueGenericSend
@@ -2232,7 +2230,7 @@ Global Symbols
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> main.o(.data)
 </UL>
-<P><STRONG><a name="[12]"></a>command_18</STRONG> (Thumb, 520 bytes, Stack size 1400 bytes, main.o(i.command_18))
+<P><STRONG><a name="[12]"></a>command_18</STRONG> (Thumb, 516 bytes, Stack size 1400 bytes, main.o(i.command_18))
 <BR><BR>[Stack]<UL><LI>Max Depth = 1512<LI>Call Chain = command_18 &rArr; xQueueGenericSend &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
 </UL>
 <BR>[Calls]<UL><LI><a href="#[16a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueGenericSend
@@ -2296,7 +2294,7 @@ Global Symbols
 <P><STRONG><a name="[5]"></a>command_5</STRONG> (Thumb, 4 bytes, Stack size 0 bytes, main.o(i.command_5))
 <BR>[Address Reference Count : 1]<UL><LI> main.o(.data)
 </UL>
-<P><STRONG><a name="[6]"></a>command_6</STRONG> (Thumb, 156 bytes, Stack size 80 bytes, main.o(i.command_6))
+<P><STRONG><a name="[6]"></a>command_6</STRONG> (Thumb, 154 bytes, Stack size 80 bytes, main.o(i.command_6))
 <BR><BR>[Stack]<UL><LI>Max Depth = 1592<LI>Call Chain = command_6 &rArr; command_18 &rArr; xQueueGenericSend &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
 </UL>
 <BR>[Calls]<UL><LI><a href="#[16a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueGenericSend
@@ -2316,7 +2314,7 @@ Global Symbols
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> main.o(.data)
 </UL>
-<P><STRONG><a name="[8]"></a>command_8</STRONG> (Thumb, 1312 bytes, Stack size 168 bytes, main.o(i.command_8))
+<P><STRONG><a name="[8]"></a>command_8</STRONG> (Thumb, 1280 bytes, Stack size 168 bytes, main.o(i.command_8))
 <BR><BR>[Stack]<UL><LI>Max Depth = 280<LI>Call Chain = command_8 &rArr; xQueueGenericSend &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
 </UL>
 <BR>[Calls]<UL><LI><a href="#[16a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueGenericSend

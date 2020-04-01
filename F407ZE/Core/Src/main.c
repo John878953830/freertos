@@ -712,9 +712,10 @@ int command_6(uint8_t* data,uint32_t para)
 		}
 		return ERROR_COMMAND_6_FAIL;
 	}
-	command_15(data,para);
-	command_17(data,para);
-	command_18(data,para);
+	command_18(data,if_return);
+	command_15(data,if_return);
+	command_17(data,if_return);
+	
 	return 0;
 }
 int command_7(uint8_t* data,uint32_t para)
@@ -827,7 +828,7 @@ int command_8(uint8_t* data,uint32_t para)
 	uint8_t if_return=(para>>4)&0x01;
 	//int32_t offset=(data[1] << 24) | (data[2] << 16) | (data[3] << 8) | data[4];
 	QUEUE_STRUCT tmp;
-	if(data[0]>4)
+	if(data[0]>4 || data[0]==0)
 	{
 		if(data[0]==0x11 || data[0]==0x12 || data[0]==0x13
 		|| data[0]==0x31 || data[0]==0x32 || data[0]==0x33
@@ -2752,6 +2753,8 @@ int command_15(uint8_t* data,uint32_t para)
 	motor_array[0].self_check_counter=8;
 	return 0;
 }
+
+
 int command_16(uint8_t* data,uint32_t para)
 {
 	//天窗右电机自检
@@ -2768,10 +2771,10 @@ int command_16(uint8_t* data,uint32_t para)
 			.modbus_data_len_h=0x00,
 			.modbus_data_len_l=0x02,
 			.modbus_data_byte=0x04,
-			.modbus_data_1=(uint8_t)((motor_array[0].position_value.tp[0] >> 8) & 0xFF),                      //先赋值为命令中的数值，当前位置读取成功后修改值
-			.modbus_data_2=(uint8_t)((motor_array[0].position_value.tp[0]) & 0xFF),                      //先赋值为命令中的数值，当前位置读取成功后修改值
-			.modbus_data_3=(uint8_t)((motor_array[0].position_value.tp[0] >> 24) & 0xFF),                      //先赋值为命令中的数值，当前位置读取成功后修改值
-			.modbus_data_4=(uint8_t)((motor_array[0].position_value.tp[0] >> 16) & 0xFF),                      //先赋值为命令中的数值，当前位置读取成功后修改值
+			.modbus_data_1=(uint8_t)((motor_array[1].position_value.tp[0] >> 8) & 0xFF),                      //先赋值为命令中的数值，当前位置读取成功后修改值
+			.modbus_data_2=(uint8_t)((motor_array[1].position_value.tp[0]) & 0xFF),                      //先赋值为命令中的数值，当前位置读取成功后修改值
+			.modbus_data_3=(uint8_t)((motor_array[1].position_value.tp[0] >> 24) & 0xFF),                      //先赋值为命令中的数值，当前位置读取成功后修改值
+			.modbus_data_4=(uint8_t)((motor_array[1].position_value.tp[0] >> 16) & 0xFF),                      //先赋值为命令中的数值，当前位置读取成功后修改值
 		},
 		{
 			.property=1,                            //485 send
@@ -2814,10 +2817,10 @@ int command_16(uint8_t* data,uint32_t para)
 			.modbus_data_len_h=0x00,
 			.modbus_data_len_l=0x02,
 			.modbus_data_byte=0x04,
-			.modbus_data_1=(uint8_t)((motor_array[0].position_value.tp[1] >> 8) & 0xFF),                       //先赋值为命令中的数值，当前位置读取成功后修改值
-			.modbus_data_2=(uint8_t)((motor_array[0].position_value.tp[1]) & 0xFF),                            //先赋值为命令中的数值，当前位置读取成功后修改值
-			.modbus_data_3=(uint8_t)((motor_array[0].position_value.tp[1] >> 24) & 0xFF),                      //先赋值为命令中的数值，当前位置读取成功后修改值
-			.modbus_data_4=(uint8_t)((motor_array[0].position_value.tp[1] >> 16) & 0xFF),                      //先赋值为命令中的数值，当前位置读取成功后修改值
+			.modbus_data_1=(uint8_t)((motor_array[1].position_value.tp[1] >> 8) & 0xFF),                       //先赋值为命令中的数值，当前位置读取成功后修改值
+			.modbus_data_2=(uint8_t)((motor_array[1].position_value.tp[1]) & 0xFF),                            //先赋值为命令中的数值，当前位置读取成功后修改值
+			.modbus_data_3=(uint8_t)((motor_array[1].position_value.tp[1] >> 24) & 0xFF),                      //先赋值为命令中的数值，当前位置读取成功后修改值
+			.modbus_data_4=(uint8_t)((motor_array[1].position_value.tp[1] >> 16) & 0xFF),                      //先赋值为命令中的数值，当前位置读取成功后修改值
 		},
 		{
 			.property=1,                            //485 send
@@ -2860,10 +2863,10 @@ int command_16(uint8_t* data,uint32_t para)
 			.modbus_data_len_h=0x00,
 			.modbus_data_len_l=0x02,
 			.modbus_data_byte=0x04,
-			.modbus_data_1=(uint8_t)((motor_array[0].position_value.tp[2] >> 8) & 0xFF),                       //先赋值为命令中的数值，当前位置读取成功后修改值
-			.modbus_data_2=(uint8_t)((motor_array[0].position_value.tp[2]) & 0xFF),                            //先赋值为命令中的数值，当前位置读取成功后修改值
-			.modbus_data_3=(uint8_t)((motor_array[0].position_value.tp[2] >> 24) & 0xFF),                      //先赋值为命令中的数值，当前位置读取成功后修改值
-			.modbus_data_4=(uint8_t)((motor_array[0].position_value.tp[2] >> 16) & 0xFF),                      //先赋值为命令中的数值，当前位置读取成功后修改值
+			.modbus_data_1=(uint8_t)((motor_array[1].position_value.tp[2] >> 8) & 0xFF),                       //先赋值为命令中的数值，当前位置读取成功后修改值
+			.modbus_data_2=(uint8_t)((motor_array[1].position_value.tp[2]) & 0xFF),                            //先赋值为命令中的数值，当前位置读取成功后修改值
+			.modbus_data_3=(uint8_t)((motor_array[1].position_value.tp[2] >> 24) & 0xFF),                      //先赋值为命令中的数值，当前位置读取成功后修改值
+			.modbus_data_4=(uint8_t)((motor_array[1].position_value.tp[2] >> 16) & 0xFF),                      //先赋值为命令中的数值，当前位置读取成功后修改值
 		},
 		{
 			.property=1,                            //485 send
@@ -2940,10 +2943,10 @@ int command_16(uint8_t* data,uint32_t para)
 			.modbus_data_len_h=0x00,
 			.modbus_data_len_l=0x02,
 			.modbus_data_byte=0x04,
-			.modbus_data_1=(uint8_t)((motor_array[0].position_value.current_position >> 8) & 0xFF),                       //先赋值为命令中的数值，当前位置读取成功后修改值
-			.modbus_data_2=(uint8_t)((motor_array[0].position_value.current_position) & 0xFF),                            //先赋值为命令中的数值，当前位置读取成功后修改值
-			.modbus_data_3=(uint8_t)((motor_array[0].position_value.current_position >> 24) & 0xFF),                      //先赋值为命令中的数值，当前位置读取成功后修改值
-			.modbus_data_4=(uint8_t)((motor_array[0].position_value.current_position >> 16) & 0xFF),                      //先赋值为命令中的数值，当前位置读取成功后修改值
+			.modbus_data_1=(uint8_t)((motor_array[1].position_value.current_position >> 8) & 0xFF),                       //先赋值为命令中的数值，当前位置读取成功后修改值
+			.modbus_data_2=(uint8_t)((motor_array[1].position_value.current_position) & 0xFF),                            //先赋值为命令中的数值，当前位置读取成功后修改值
+			.modbus_data_3=(uint8_t)((motor_array[1].position_value.current_position >> 24) & 0xFF),                      //先赋值为命令中的数值，当前位置读取成功后修改值
+			.modbus_data_4=(uint8_t)((motor_array[1].position_value.current_position >> 16) & 0xFF),                      //先赋值为命令中的数值，当前位置读取成功后修改值
 		},
 		{
 			.property=1,                            //485 send
@@ -3043,10 +3046,10 @@ int command_17(uint8_t* data,uint32_t para)
 			.modbus_data_len_h=0x00,
 			.modbus_data_len_l=0x02,
 			.modbus_data_byte=0x04,
-			.modbus_data_1=(uint8_t)((motor_array[0].position_value.tp[0] >> 8) & 0xFF),                      //先赋值为命令中的数值，当前位置读取成功后修改值
-			.modbus_data_2=(uint8_t)((motor_array[0].position_value.tp[0]) & 0xFF),                      //先赋值为命令中的数值，当前位置读取成功后修改值
-			.modbus_data_3=(uint8_t)((motor_array[0].position_value.tp[0] >> 24) & 0xFF),                      //先赋值为命令中的数值，当前位置读取成功后修改值
-			.modbus_data_4=(uint8_t)((motor_array[0].position_value.tp[0] >> 16) & 0xFF),                      //先赋值为命令中的数值，当前位置读取成功后修改值
+			.modbus_data_1=(uint8_t)((motor_array[2].position_value.tp[0] >> 8) & 0xFF),                      //先赋值为命令中的数值，当前位置读取成功后修改值
+			.modbus_data_2=(uint8_t)((motor_array[2].position_value.tp[0]) & 0xFF),                      //先赋值为命令中的数值，当前位置读取成功后修改值
+			.modbus_data_3=(uint8_t)((motor_array[2].position_value.tp[0] >> 24) & 0xFF),                      //先赋值为命令中的数值，当前位置读取成功后修改值
+			.modbus_data_4=(uint8_t)((motor_array[2].position_value.tp[0] >> 16) & 0xFF),                      //先赋值为命令中的数值，当前位置读取成功后修改值
 		},
 		{
 			.property=1,                            //485 send
@@ -3089,10 +3092,10 @@ int command_17(uint8_t* data,uint32_t para)
 			.modbus_data_len_h=0x00,
 			.modbus_data_len_l=0x02,
 			.modbus_data_byte=0x04,
-			.modbus_data_1=(uint8_t)((motor_array[0].position_value.tp[1] >> 8) & 0xFF),                       //先赋值为命令中的数值，当前位置读取成功后修改值
-			.modbus_data_2=(uint8_t)((motor_array[0].position_value.tp[1]) & 0xFF),                            //先赋值为命令中的数值，当前位置读取成功后修改值
-			.modbus_data_3=(uint8_t)((motor_array[0].position_value.tp[1] >> 24) & 0xFF),                      //先赋值为命令中的数值，当前位置读取成功后修改值
-			.modbus_data_4=(uint8_t)((motor_array[0].position_value.tp[1] >> 16) & 0xFF),                      //先赋值为命令中的数值，当前位置读取成功后修改值
+			.modbus_data_1=(uint8_t)((motor_array[2].position_value.tp[1] >> 8) & 0xFF),                       //先赋值为命令中的数值，当前位置读取成功后修改值
+			.modbus_data_2=(uint8_t)((motor_array[2].position_value.tp[1]) & 0xFF),                            //先赋值为命令中的数值，当前位置读取成功后修改值
+			.modbus_data_3=(uint8_t)((motor_array[2].position_value.tp[1] >> 24) & 0xFF),                      //先赋值为命令中的数值，当前位置读取成功后修改值
+			.modbus_data_4=(uint8_t)((motor_array[2].position_value.tp[1] >> 16) & 0xFF),                      //先赋值为命令中的数值，当前位置读取成功后修改值
 		},
 		{
 			.property=1,                            //485 send
@@ -3135,14 +3138,14 @@ int command_17(uint8_t* data,uint32_t para)
 			.modbus_data_len_h=0x00,
 			.modbus_data_len_l=0x02,
 			.modbus_data_byte=0x04,
-			.modbus_data_1=(uint8_t)((motor_array[0].position_value.tp[2] >> 8) & 0xFF),                       //先赋值为命令中的数值，当前位置读取成功后修改值
-			.modbus_data_2=(uint8_t)((motor_array[0].position_value.tp[2]) & 0xFF),                            //先赋值为命令中的数值，当前位置读取成功后修改值
-			.modbus_data_3=(uint8_t)((motor_array[0].position_value.tp[2] >> 24) & 0xFF),                      //先赋值为命令中的数值，当前位置读取成功后修改值
-			.modbus_data_4=(uint8_t)((motor_array[0].position_value.tp[2] >> 16) & 0xFF),                      //先赋值为命令中的数值，当前位置读取成功后修改值
+			.modbus_data_1=(uint8_t)((motor_array[2].position_value.tp[2] >> 8) & 0xFF),                       //先赋值为命令中的数值，当前位置读取成功后修改值
+			.modbus_data_2=(uint8_t)((motor_array[2].position_value.tp[2]) & 0xFF),                            //先赋值为命令中的数值，当前位置读取成功后修改值
+			.modbus_data_3=(uint8_t)((motor_array[2].position_value.tp[2] >> 24) & 0xFF),                      //先赋值为命令中的数值，当前位置读取成功后修改值
+			.modbus_data_4=(uint8_t)((motor_array[2].position_value.tp[2] >> 16) & 0xFF),                      //先赋值为命令中的数值，当前位置读取成功后修改值
 		},
 		{
 			.property=1,                            //485 send
-			.modbus_addr=0x02,                       //电机号需要根据命令中的电机号赋值
+			.modbus_addr=0x03,                       //电机号需要根据命令中的电机号赋值
 			.modbus_func=0x10,                    //写多个寄存器
 			.modbus_addr_h=(uint8_t)(2040>>8),
 			.modbus_addr_l=(uint8_t)(2040&0xFF),        //写使能寄存器
@@ -3156,7 +3159,7 @@ int command_17(uint8_t* data,uint32_t para)
 		},
 		{
 			.property=1,                            //485 send
-			.modbus_addr=0x02,                       //电机号需要根据命令中的电机号赋值
+			.modbus_addr=0x03,                       //电机号需要根据命令中的电机号赋值
 			.modbus_func=0x10,                    //写多个寄存器
 			.modbus_addr_h=(uint8_t)(2040>>8),
 			.modbus_addr_l=(uint8_t)(2040&0xFF),        //写使能寄存器
@@ -3215,10 +3218,10 @@ int command_17(uint8_t* data,uint32_t para)
 			.modbus_data_len_h=0x00,
 			.modbus_data_len_l=0x02,
 			.modbus_data_byte=0x04,
-			.modbus_data_1=(uint8_t)((motor_array[0].position_value.current_position >> 8) & 0xFF),                       //先赋值为命令中的数值，当前位置读取成功后修改值
-			.modbus_data_2=(uint8_t)((motor_array[0].position_value.current_position) & 0xFF),                            //先赋值为命令中的数值，当前位置读取成功后修改值
-			.modbus_data_3=(uint8_t)((motor_array[0].position_value.current_position >> 24) & 0xFF),                      //先赋值为命令中的数值，当前位置读取成功后修改值
-			.modbus_data_4=(uint8_t)((motor_array[0].position_value.current_position >> 16) & 0xFF),                      //先赋值为命令中的数值，当前位置读取成功后修改值
+			.modbus_data_1=(uint8_t)((motor_array[2].position_value.current_position >> 8) & 0xFF),                       //先赋值为命令中的数值，当前位置读取成功后修改值
+			.modbus_data_2=(uint8_t)((motor_array[2].position_value.current_position) & 0xFF),                            //先赋值为命令中的数值，当前位置读取成功后修改值
+			.modbus_data_3=(uint8_t)((motor_array[2].position_value.current_position >> 24) & 0xFF),                      //先赋值为命令中的数值，当前位置读取成功后修改值
+			.modbus_data_4=(uint8_t)((motor_array[2].position_value.current_position >> 16) & 0xFF),                      //先赋值为命令中的数值，当前位置读取成功后修改值
 		},
 		{
 			.property=1,                            //485 send
@@ -3318,10 +3321,10 @@ int command_18(uint8_t* data,uint32_t para)
 			.modbus_data_len_h=0x00,
 			.modbus_data_len_l=0x02,
 			.modbus_data_byte=0x04,
-			.modbus_data_1=(uint8_t)((motor_array[0].position_value.tp[0] >> 8) & 0xFF),                      //先赋值为命令中的数值，当前位置读取成功后修改值
-			.modbus_data_2=(uint8_t)((motor_array[0].position_value.tp[0]) & 0xFF),                      //先赋值为命令中的数值，当前位置读取成功后修改值
-			.modbus_data_3=(uint8_t)((motor_array[0].position_value.tp[0] >> 24) & 0xFF),                      //先赋值为命令中的数值，当前位置读取成功后修改值
-			.modbus_data_4=(uint8_t)((motor_array[0].position_value.tp[0] >> 16) & 0xFF),                      //先赋值为命令中的数值，当前位置读取成功后修改值
+			.modbus_data_1=(uint8_t)((motor_array[3].position_value.tp[0] >> 8) & 0xFF),                      //先赋值为命令中的数值，当前位置读取成功后修改值
+			.modbus_data_2=(uint8_t)((motor_array[3].position_value.tp[0]) & 0xFF),                      //先赋值为命令中的数值，当前位置读取成功后修改值
+			.modbus_data_3=(uint8_t)((motor_array[3].position_value.tp[0] >> 24) & 0xFF),                      //先赋值为命令中的数值，当前位置读取成功后修改值
+			.modbus_data_4=(uint8_t)((motor_array[3].position_value.tp[0] >> 16) & 0xFF),                      //先赋值为命令中的数值，当前位置读取成功后修改值
 		},
 		{
 			.property=1,                            //485 send
@@ -3364,10 +3367,10 @@ int command_18(uint8_t* data,uint32_t para)
 			.modbus_data_len_h=0x00,
 			.modbus_data_len_l=0x02,
 			.modbus_data_byte=0x04,
-			.modbus_data_1=(uint8_t)((motor_array[0].position_value.tp[1] >> 8) & 0xFF),                       //先赋值为命令中的数值，当前位置读取成功后修改值
-			.modbus_data_2=(uint8_t)((motor_array[0].position_value.tp[1]) & 0xFF),                            //先赋值为命令中的数值，当前位置读取成功后修改值
-			.modbus_data_3=(uint8_t)((motor_array[0].position_value.tp[1] >> 24) & 0xFF),                      //先赋值为命令中的数值，当前位置读取成功后修改值
-			.modbus_data_4=(uint8_t)((motor_array[0].position_value.tp[1] >> 16) & 0xFF),                      //先赋值为命令中的数值，当前位置读取成功后修改值
+			.modbus_data_1=(uint8_t)((motor_array[3].position_value.tp[1] >> 8) & 0xFF),                       //先赋值为命令中的数值，当前位置读取成功后修改值
+			.modbus_data_2=(uint8_t)((motor_array[3].position_value.tp[1]) & 0xFF),                            //先赋值为命令中的数值，当前位置读取成功后修改值
+			.modbus_data_3=(uint8_t)((motor_array[3].position_value.tp[1] >> 24) & 0xFF),                      //先赋值为命令中的数值，当前位置读取成功后修改值
+			.modbus_data_4=(uint8_t)((motor_array[3].position_value.tp[1] >> 16) & 0xFF),                      //先赋值为命令中的数值，当前位置读取成功后修改值
 		},
 		{
 			.property=1,                            //485 send
@@ -3410,10 +3413,10 @@ int command_18(uint8_t* data,uint32_t para)
 			.modbus_data_len_h=0x00,
 			.modbus_data_len_l=0x02,
 			.modbus_data_byte=0x04,
-			.modbus_data_1=(uint8_t)((motor_array[0].position_value.tp[2] >> 8) & 0xFF),                       //先赋值为命令中的数值，当前位置读取成功后修改值
-			.modbus_data_2=(uint8_t)((motor_array[0].position_value.tp[2]) & 0xFF),                            //先赋值为命令中的数值，当前位置读取成功后修改值
-			.modbus_data_3=(uint8_t)((motor_array[0].position_value.tp[2] >> 24) & 0xFF),                      //先赋值为命令中的数值，当前位置读取成功后修改值
-			.modbus_data_4=(uint8_t)((motor_array[0].position_value.tp[2] >> 16) & 0xFF),                      //先赋值为命令中的数值，当前位置读取成功后修改值
+			.modbus_data_1=(uint8_t)((motor_array[3].position_value.tp[2] >> 8) & 0xFF),                       //先赋值为命令中的数值，当前位置读取成功后修改值
+			.modbus_data_2=(uint8_t)((motor_array[3].position_value.tp[2]) & 0xFF),                            //先赋值为命令中的数值，当前位置读取成功后修改值
+			.modbus_data_3=(uint8_t)((motor_array[3].position_value.tp[2] >> 24) & 0xFF),                      //先赋值为命令中的数值，当前位置读取成功后修改值
+			.modbus_data_4=(uint8_t)((motor_array[3].position_value.tp[2] >> 16) & 0xFF),                      //先赋值为命令中的数值，当前位置读取成功后修改值
 		},
 		{
 			.property=1,                            //485 send
@@ -3490,10 +3493,10 @@ int command_18(uint8_t* data,uint32_t para)
 			.modbus_data_len_h=0x00,
 			.modbus_data_len_l=0x02,
 			.modbus_data_byte=0x04,
-			.modbus_data_1=(uint8_t)((motor_array[0].position_value.current_position >> 8) & 0xFF),                       //先赋值为命令中的数值，当前位置读取成功后修改值
-			.modbus_data_2=(uint8_t)((motor_array[0].position_value.current_position) & 0xFF),                            //先赋值为命令中的数值，当前位置读取成功后修改值
-			.modbus_data_3=(uint8_t)((motor_array[0].position_value.current_position >> 24) & 0xFF),                      //先赋值为命令中的数值，当前位置读取成功后修改值
-			.modbus_data_4=(uint8_t)((motor_array[0].position_value.current_position >> 16) & 0xFF),                      //先赋值为命令中的数值，当前位置读取成功后修改值
+			.modbus_data_1=(uint8_t)((motor_array[3].position_value.current_position >> 8) & 0xFF),                       //先赋值为命令中的数值，当前位置读取成功后修改值
+			.modbus_data_2=(uint8_t)((motor_array[3].position_value.current_position) & 0xFF),                            //先赋值为命令中的数值，当前位置读取成功后修改值
+			.modbus_data_3=(uint8_t)((motor_array[3].position_value.current_position >> 24) & 0xFF),                      //先赋值为命令中的数值，当前位置读取成功后修改值
+			.modbus_data_4=(uint8_t)((motor_array[3].position_value.current_position >> 16) & 0xFF),                      //先赋值为命令中的数值，当前位置读取成功后修改值
 		},
 		{
 			.property=1,                            //485 send
@@ -4534,7 +4537,7 @@ int main(void)
 	HAL_TIM_Base_DeInit(&htim12);
 	HAL_TIM_Base_Init(&htim12);
 	
-	modbus_list_head=modbus_list_gen(128);
+	modbus_list_head=modbus_list_gen(96);
 	
 	//HAL_TIM_Base_Start_IT(&htim12);
 	

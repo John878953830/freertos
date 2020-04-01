@@ -580,9 +580,6 @@ void USART2_IRQHandler(void)
 		modbus_time_flag=0;
 		if(result_processHandle_send !=NULL)
 		{
-			#ifdef DEBUG_OUTPUT
-			printf("%s\n","dma transmit over");
-			#endif
 			xTaskNotifyFromISR(result_processHandle_send,0x0001,eSetBits,&b_tk_rece_result);
 			portYIELD_FROM_ISR( b_tk_rece_result );
 		}
@@ -594,9 +591,6 @@ void USART2_IRQHandler(void)
 		{
 			if(result_processHandle_rece !=NULL)
 			{
-				#ifdef DEBUG_OUTPUT
-				printf("%s\n","dma transmit over");
-				#endif
 				xTaskNotifyFromISR(result_processHandle_rece,0x0002,eSetBits,&b_tk_rece_result);
 				portYIELD_FROM_ISR( b_tk_rece_result );
 			}
