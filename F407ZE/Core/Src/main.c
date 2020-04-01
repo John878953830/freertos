@@ -1158,8 +1158,11 @@ int command_8(uint8_t* data,uint32_t para)
 			tmp.can_priority=0x03;         //命令结束返回帧
 			tmp.can_if_last=0x00;
 			tmp.can_if_return=0x00;
-			tmp.length=1;
-			tmp.data[0]=ERROR_COMMAND_8_FAIL;
+			tmp.length=4;
+			tmp.data[0]=0x00;
+			tmp.data[1]=0x00;
+			tmp.data[2]=0x00;
+			tmp.data[3]=ERROR_COMMAND_8_FAIL;
 			portBASE_TYPE status = xQueueSendToBack(send_queueHandle, &tmp, 0);
 			if(status!=pdPASS)
 			{
@@ -1307,8 +1310,11 @@ int command_9(uint8_t* data,uint32_t para)
 			tmp.can_priority=0x03;         //命令结束返回帧
 			tmp.can_if_last=0x00;
 			tmp.can_if_return=0x00;
-			tmp.length=1;
-			tmp.data[0]=ERROR_COMMAND_8_FAIL;
+			tmp.length=4;
+			tmp.data[0]=0x00;
+			tmp.data[1]=0x00;
+			tmp.data[2]=0x00;
+			tmp.data[3]=ERROR_COMMAND_8_FAIL;
 			portBASE_TYPE status = xQueueSendToBack(send_queueHandle, &tmp, 0);
 			if(status!=pdPASS)
 			{
@@ -1665,6 +1671,34 @@ int command_11(uint8_t* data,uint32_t para)
 }
 int command_12(uint8_t* data,uint32_t para)
 {
+	QUEUE_STRUCT tmp;
+	tmp.property=0x00;             //can send
+	tmp.can_command=0x0C;          //停止指令
+	tmp.can_if_ack=0x01;           //需要ACK
+	tmp.can_source=0x03;           //本模块
+	tmp.can_target=0x00;
+	tmp.can_priority=0x03;         //命令结束返回帧
+	tmp.can_if_last=0x00;
+	tmp.can_if_return=0x00;
+	tmp.length=4;
+	tmp.data[0]=0x00;
+	tmp.data[1]=0x00;
+	tmp.data[2]=0x00;
+	tmp.data[3]=ERROR_COMMAND_12_FAIL;
+	BaseType_t status_q = xQueueSendToBack(send_queueHandle, &tmp, 0);
+	if(status_q!=pdPASS)
+	{
+		#ifdef DEBUG_OUTPUT
+		printf("%s\n","queue overflow");
+		#endif
+	}
+	else
+	{
+		#ifdef DEBUG_OUTPUT
+		printf("%s\n","send command 1 success to queue already");
+		#endif
+	}
+	/*
 	//声明动作序列
 	QUEUE_STRUCT command_seq_l1[4]=
 	{
@@ -1933,6 +1967,7 @@ int command_12(uint8_t* data,uint32_t para)
 		}
 		return ERROR_COMMAND_12_EEPROM_ERROR;
 	}
+	*/
 	return 0;
 }
 int command_13(uint8_t* data,uint32_t para)
@@ -2052,8 +2087,8 @@ int command_13(uint8_t* data,uint32_t para)
 					tmp.can_if_return=0x00;
 					tmp.length=4;
 					tmp.data[0]=0x00;
-					tmp.data[1]=0x01;              //执行结果，1代表已完成
-					tmp.data[2]=0x03;              //电机号， 1代表天窗左电机
+					tmp.data[1]=0x00;              //执行结果，1代表已完成
+					tmp.data[2]=0x00;              //电机号， 1代表天窗左电机
 					tmp.data[3]=0x00;
 					BaseType_t status_q = xQueueSendToBack(send_queueHandle, &tmp, 0);
 					if(status_q!=pdPASS)
@@ -2315,7 +2350,7 @@ int command_14(uint8_t* data,uint32_t para)
 				{
 					QUEUE_STRUCT tmp;
 					tmp.property=0x00;             //can send
-					tmp.can_command=0x0D;          //停止指令
+					tmp.can_command=0x0E;          //停止指令
 					tmp.can_if_ack=0x01;           //需要ACK
 					tmp.can_source=0x03;           //本模块
 					tmp.can_target=0x00;
@@ -2324,8 +2359,8 @@ int command_14(uint8_t* data,uint32_t para)
 					tmp.can_if_return=0x00;
 					tmp.length=4;
 					tmp.data[0]=0x00;
-					tmp.data[1]=0x01;              //执行结果，1代表已完成
-					tmp.data[2]=0x04;              //电机号， 1代表天窗左电机
+					tmp.data[1]=0x00;              //执行结果，1代表已完成
+					tmp.data[2]=0x00;              //电机号， 1代表天窗左电机
 					tmp.data[3]=0x00;
 					BaseType_t status_q = xQueueSendToBack(send_queueHandle, &tmp, 0);
 					if(status_q!=pdPASS)
@@ -2757,6 +2792,34 @@ int command_15(uint8_t* data,uint32_t para)
 
 int command_16(uint8_t* data,uint32_t para)
 {
+	QUEUE_STRUCT tmp;
+	tmp.property=0x00;             //can send
+	tmp.can_command=0x10;          //停止指令
+	tmp.can_if_ack=0x01;           //需要ACK
+	tmp.can_source=0x03;           //本模块
+	tmp.can_target=0x00;
+	tmp.can_priority=0x03;         //命令结束返回帧
+	tmp.can_if_last=0x00;
+	tmp.can_if_return=0x00;
+	tmp.length=4;
+	tmp.data[0]=0x00;
+	tmp.data[1]=0x00;
+	tmp.data[2]=0x00;
+	tmp.data[3]=ERROR_COMMAND_16_FAIL;  //没有16号指令电机
+	BaseType_t status_q = xQueueSendToBack(send_queueHandle, &tmp, 0);
+	if(status_q!=pdPASS)
+	{
+		#ifdef DEBUG_OUTPUT
+		printf("%s\n","queue overflow");
+		#endif
+	}
+	else
+	{
+		#ifdef DEBUG_OUTPUT
+		printf("%s\n","send command 1 success to queue already");
+		#endif
+	}
+	/*
 	//天窗右电机自检
 	//声明动作序列
 	//第一段动作序列，tp0位置
@@ -3028,6 +3091,7 @@ int command_16(uint8_t* data,uint32_t para)
 	motor_array[1].command.if_return=if_return;       //执行完成是否需要回复帧
 	//暂时设置为8，实际情况中需要根据tp和当前位置计算,所有位置都是触发8个上下沿，但当天窗的完全关闭点不为光电开关点时，天窗有14个上下沿，其他也是如此
 	motor_array[1].self_check_counter=8;
+	*/
 	return 0;
 }
 int command_17(uint8_t* data,uint32_t para)

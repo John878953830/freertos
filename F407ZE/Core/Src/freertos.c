@@ -222,10 +222,10 @@ static void prvAutoReloadMotorStatusTimerCallback( TimerHandle_t xTimer )
 				frame_return.can_if_last=0x00;          //无需拼接
 				frame_return.can_if_return=0x00;        //无需返回
 				frame_return.length=4;
-				frame_return.data[0]=0x00;              //错误码，0标识正常
-				frame_return.data[1]=0x00;              //执行结果， 1代表已完成
-				frame_return.data[2]=0x00;               //电机号
-				frame_return.data[3]=0x00;              //保留
+				frame_return.data[0]=0xFF;              //错误码，0标识正常
+				frame_return.data[1]=0xFF;              //执行结果， 1代表已完成
+				frame_return.data[2]=0xFF;               //电机号
+				frame_return.data[3]=0xFE;              //保留
 				
 				//自检返回帧结果发送
 				if(motor_array[i].self_check_counter!=0	&& (motor_array[i].command.command_id==0x0F || motor_array[i].command.command_id==0x10 || motor_array[i].command.command_id==0x11 || motor_array[i].command.command_id==0x12 
