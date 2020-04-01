@@ -1763,7 +1763,7 @@ int command_12(uint8_t* data,uint32_t para)
 		//检测当前位置是否为目标位置
 		if(data[0]==0x00 || data[0]==0x01)
 		{
-			if(__fabs(motor_array[1].position_value.tp[1+data[0]] - motor_array[0].position_value.current_position) < COMPLETE_JUDGE)
+			if(__fabs(motor_array[1].position_value.tp[1+data[0]] - motor_array[1].position_value.current_position) < COMPLETE_JUDGE)
 			{
 				//当前位置已经处于误差限中
 				if(if_return == 0x01)
@@ -2035,7 +2035,7 @@ int command_13(uint8_t* data,uint32_t para)
 		//检测当前位置是否为目标位置
 		if(data[0]==0x00 || data[0]==0x01)
 		{
-			if(__fabs(motor_array[2].position_value.tp[1+data[0]] - motor_array[0].position_value.current_position) < COMPLETE_JUDGE)
+			if(__fabs(motor_array[2].position_value.tp[1+data[0]] - motor_array[2].position_value.current_position) < COMPLETE_JUDGE)
 			{
 				//当前位置已经处于误差限中
 				if(if_return == 0x01)
@@ -2307,7 +2307,7 @@ int command_14(uint8_t* data,uint32_t para)
 		//检测当前位置是否为目标位置
 		if(data[0]==0x00 || data[0]==0x01)
 		{
-			if(__fabs(motor_array[3].position_value.tp[1+data[0]] - motor_array[0].position_value.current_position) < COMPLETE_JUDGE)
+			if(__fabs(motor_array[3].position_value.tp[1+data[0]] - motor_array[3].position_value.current_position) < COMPLETE_JUDGE)
 			{
 				//当前位置已经处于误差限中
 				if(if_return == 0x01)
@@ -2700,7 +2700,6 @@ int command_15(uint8_t* data,uint32_t para)
 			.modbus_data_4=0x00,
 		},
 	};
-	                
 	if(space_left<4)
 	{
 		//发送队列已满，直接返回错误,未完成
@@ -3616,7 +3615,7 @@ int command_26(uint8_t* data,uint32_t para)
 void result_parse_1(uint8_t* data, uint8_t num)
 {
 	//电机位置读取
-	if(num==1 || num>4)
+	if(num==1 || num>4)//屏蔽掉2号电机
 	{
 		;
 	}
@@ -3887,8 +3886,8 @@ uint8_t can_start(void)
   sFilterConfig.FilterScale = CAN_FILTERSCALE_32BIT;
   sFilterConfig.FilterIdHigh = 0x0018;
   sFilterConfig.FilterIdLow = 0x0004;
-  sFilterConfig.FilterMaskIdHigh = 0x0000;//0x1F18;
-  sFilterConfig.FilterMaskIdLow = 0x0000;//0x0004;
+  sFilterConfig.FilterMaskIdHigh = 0x0018;
+  sFilterConfig.FilterMaskIdLow = 0x0004;
   sFilterConfig.FilterFIFOAssignment = CAN_RX_FIFO0;
   sFilterConfig.FilterActivation = ENABLE;
   sFilterConfig.SlaveStartFilterBank = 14;
@@ -4246,7 +4245,10 @@ uint8_t can_send(QUEUE_STRUCT send_struct)
 	
 	exid|=((send_struct.can_if_ack & 0x01)<<6);
 	
-	exid|=(send_struct.can_version & 0x07);
+	//exid|=(send_struct.can_version & 0x07);
+	exid|=(0x00 & 0x07);
+	
+	exid&=0xFFFFFFC0;
 	
 	TxHeader.ExtId = exid;
 	

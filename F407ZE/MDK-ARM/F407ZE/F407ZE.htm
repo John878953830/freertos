@@ -3,7 +3,7 @@
 <title>Static Call Graph - [F407ZE\F407ZE.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image F407ZE\F407ZE.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060422: Last Updated: Tue Mar 31 10:30:16 2020
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060422: Last Updated: Wed Apr 01 11:04:07 2020
 <BR><P>
 <H3>Maximum Stack Usage =       1592 bytes + Unknown(Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -2101,7 +2101,7 @@ Global Symbols
 
 <P><STRONG><a name="[1db]"></a>__scatterload_zeroinit</STRONG> (Thumb, 14 bytes, Stack size unknown bytes, handlers.o(i.__scatterload_zeroinit), UNUSED)
 
-<P><STRONG><a name="[165]"></a>can_send</STRONG> (Thumb, 154 bytes, Stack size 48 bytes, main.o(i.can_send))
+<P><STRONG><a name="[165]"></a>can_send</STRONG> (Thumb, 148 bytes, Stack size 48 bytes, main.o(i.can_send))
 <BR><BR>[Stack]<UL><LI>Max Depth = 68<LI>Call Chain = can_send &rArr; HAL_CAN_AddTxMessage
 </UL>
 <BR>[Calls]<UL><LI><a href="#[166]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_CAN_AddTxMessage
@@ -3347,8 +3347,8 @@ Global Symbols
 <H3>
 Local Symbols
 </H3>
-<P><STRONG><a name="[99]"></a>prvAutoReloadMotorStatusTimerCallback</STRONG> (Thumb, 596 bytes, Stack size 176 bytes, freertos.o(i.prvAutoReloadMotorStatusTimerCallback))
-<BR><BR>[Stack]<UL><LI>Max Depth = 288<LI>Call Chain = prvAutoReloadMotorStatusTimerCallback &rArr; xQueueGenericSend &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
+<P><STRONG><a name="[99]"></a>prvAutoReloadMotorStatusTimerCallback</STRONG> (Thumb, 598 bytes, Stack size 192 bytes, freertos.o(i.prvAutoReloadMotorStatusTimerCallback))
+<BR><BR>[Stack]<UL><LI>Max Depth = 304<LI>Call Chain = prvAutoReloadMotorStatusTimerCallback &rArr; xQueueGenericSend &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
 </UL>
 <BR>[Calls]<UL><LI><a href="#[16a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueGenericSend
 <LI><a href="#[a5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_i2d

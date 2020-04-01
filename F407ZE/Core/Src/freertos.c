@@ -223,8 +223,8 @@ static void prvAutoReloadMotorStatusTimerCallback( TimerHandle_t xTimer )
 				frame_return.can_if_return=0x00;        //无需返回
 				frame_return.length=4;
 				frame_return.data[0]=0x00;              //错误码，0标识正常
-				frame_return.data[1]=0x01;              //执行结果， 1代表已完成
-				frame_return.data[2]=i+1;               //电机号
+				frame_return.data[1]=0x00;              //执行结果， 1代表已完成
+				frame_return.data[2]=0x00;               //电机号
 				frame_return.data[3]=0x00;              //保留
 				
 				//自检返回帧结果发送
@@ -1044,7 +1044,6 @@ void start_tk_posture_monitor(void *argument)
 			#ifdef DEBUG_OUTPUT
 			printf("%s\n","start tk posture monitor");
 			#endif
-			
 			notify_use=0;
 		}
     osDelay(1);
@@ -1136,7 +1135,7 @@ void start_tk_master_order(void *argument)
 					uint8_t tmp_target=(id.RxHeader.ExtId & MASK_TARGET) >> 16;
 					
 					//判断ACK是否需要立即回复发送方
-					if(tmp_if_ack==1 && tmp_priority!=1)
+					if(tmp_if_ack==1 && tmp_priority!=1) //priority = 1 时为ACK帧
 					{
 						//tmp填充为cansend
 						tmp.property=0;                     //can send 
@@ -1147,7 +1146,7 @@ void start_tk_master_order(void *argument)
 						tmp.can_if_last=0x00;               //can if last, 0: 最后一帧
 						tmp.can_if_return=0x00;             //can if return， 0：保留
 						tmp.can_if_ack=0x00;                //can if ack， 0：无需ACK
-						tmp.can_version=0x01;               //can version，1：暂定为1
+						tmp.can_version=0x00;               //can version，1：暂定为1
 						
 						tmp.length=id.RxHeader.DLC;         //ack帧需要返回数据,所有数据原路返回
 						memcpy(tmp.data,id.data,id.RxHeader.DLC);
