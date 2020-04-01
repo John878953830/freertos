@@ -828,7 +828,7 @@ int command_8(uint8_t* data,uint32_t para)
 	uint8_t if_return=(para>>4)&0x01;
 	//int32_t offset=(data[1] << 24) | (data[2] << 16) | (data[3] << 8) | data[4];
 	QUEUE_STRUCT tmp;
-	if(data[0]>4 || data[0]==0)
+	if(data[0]>4 || data[0]==0 || data[0]==0x02)
 	{
 		if(data[0]==0x11 || data[0]==0x12 || data[0]==0x13
 		|| data[0]==0x31 || data[0]==0x32 || data[0]==0x33
