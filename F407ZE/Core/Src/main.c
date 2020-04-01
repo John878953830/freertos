@@ -4601,7 +4601,7 @@ int main(void)
 	HAL_TIM_Base_DeInit(&htim12);
 	HAL_TIM_Base_Init(&htim12);
 	
-	modbus_list_head=modbus_list_gen(96);
+	modbus_list_head=modbus_list_gen(128);
 	
 	//HAL_TIM_Base_Start_IT(&htim12);
 	
