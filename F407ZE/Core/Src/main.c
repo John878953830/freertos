@@ -36,7 +36,7 @@
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
-uint32_t timer_period=1000;
+uint32_t timer_period=100;
 xTimerHandle broadcast_timer;
 xTimerHandle motor_status_timer;     //µç»ú×´Ì¬²ÎÊı¶¨Ê±Æ÷
 uint32_t fifo_level=0;
@@ -52,6 +52,7 @@ uint8_t modbus_time_status;     //modbus ³¬Ê±±êÖ¾£¬ 0£º¿ÕÏĞ£¬ 1£º½»»¥³¬Ê± 2£º½»»
 uint8_t modbus_time_flag=0;       //modbus  ¶¨Ê±Ê±¼ä±êÖ¾  1£º µÚÒ»´Î3.5T¶¨Ê±  1£ºµÚ¶ş´Î3.5T¶¨Ê±
 
 
+
 MODBUS_LIST* modbus_list_head=NULL;  //head Ö¸ÏòÑ°ÕÒµ½µÄµÚÒ»¸ö²»Îª¿ÕµÄ½Úµã
 MODBUS_LIST* modbus_list_tail=NULL;  //tail Ö¸Ïò²»Îª¿ÕµÄ½ÚµãµÄÏÂÒ»¸ö½Úµã
 uint16_t modbus_period=89;
@@ -59,13 +60,105 @@ uint16_t modbus_period=89;
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+void enable_motor(void)
+{
+	//Æô¶¯µç»ú£¬Ìì´°µç»ú
+	QUEUE_STRUCT enable_motor;
+
+	enable_motor.property=1;                            //485 send
+	enable_motor.modbus_addr=1;
+	enable_motor.modbus_func=0x10;                      //Ğ´¶à¸ö¼Ä´æÆ÷
+	enable_motor.modbus_addr_h=(uint8_t)(1008>>8);
+	enable_motor.modbus_addr_l=(uint8_t)(1008&0xFF);                   //µç»ú485µØÖ·
+	enable_motor.modbus_data_len_h=0x00;
+	enable_motor.modbus_data_len_l=0x02;
+	enable_motor.modbus_data_byte=0x04;
+	enable_motor.modbus_data_1=0x00;
+	enable_motor.modbus_data_2=0x01;
+	enable_motor.modbus_data_3=0x00;
+	enable_motor.modbus_data_4=0x00;
+	
+	//modbus_send_sub(enable_motor);
+	portBASE_TYPE	status = xQueueSendToBack(send_queueHandle, &enable_motor, 0);
+	if(status!=pdPASS)
+	{
+		#ifdef DEBUG_OUTPUT
+		printf("%s\n","queue overflow");
+		#endif
+	}
+	else
+	{
+		#ifdef DEBUG_OUTPUT
+		printf("%s\n","send command 7 succes to queue already");
+		#endif
+	}
+	
+	//Æô¶¯µç»ú£¬Ç°ºó¼Ğ½ôµç»ú
+
+	enable_motor.property=1;                            //485 send
+	enable_motor.modbus_addr=3;
+	enable_motor.modbus_func=0x10;                      //Ğ´¶à¸ö¼Ä´æÆ÷
+	enable_motor.modbus_addr_h=(uint8_t)(1008>>8);
+	enable_motor.modbus_addr_l=(uint8_t)(1008&0xFF);                   //µç»ú485µØÖ·
+	enable_motor.modbus_data_len_h=0x00;
+	enable_motor.modbus_data_len_l=0x02;
+	enable_motor.modbus_data_byte=0x04;
+	enable_motor.modbus_data_1=0x00;
+	enable_motor.modbus_data_2=0x01;
+	enable_motor.modbus_data_3=0x00;
+	enable_motor.modbus_data_4=0x00;
+	
+	status = xQueueSendToBack(send_queueHandle, &enable_motor, 0);
+	if(status!=pdPASS)
+	{
+		#ifdef DEBUG_OUTPUT
+		printf("%s\n","queue overflow");
+		#endif
+	}
+	else
+	{
+		#ifdef DEBUG_OUTPUT
+		printf("%s\n","send command 7 succes to queue already");
+		#endif
+	}
+	
+	//Æô¶¯µç»ú£¬×óÓÒ¼Ğ½ôµç»ú
+
+	enable_motor.property=1;                            //485 send
+	enable_motor.modbus_addr=4;
+	enable_motor.modbus_func=0x10;                      //Ğ´¶à¸ö¼Ä´æÆ÷
+	enable_motor.modbus_addr_h=(uint8_t)(1008>>8);
+	enable_motor.modbus_addr_l=(uint8_t)(1008&0xFF);                   //µç»ú485µØÖ·
+	enable_motor.modbus_data_len_h=0x00;
+	enable_motor.modbus_data_len_l=0x02;
+	enable_motor.modbus_data_byte=0x04;
+	enable_motor.modbus_data_1=0x00;
+	enable_motor.modbus_data_2=0x01;
+	enable_motor.modbus_data_3=0x00;
+	enable_motor.modbus_data_4=0x00;
+	
+	status = xQueueSendToBack(send_queueHandle, &enable_motor, 0);
+	if(status!=pdPASS)
+	{
+		#ifdef DEBUG_OUTPUT
+		printf("%s\n","queue overflow");
+		#endif
+	}
+	else
+	{
+		#ifdef DEBUG_OUTPUT
+		printf("%s\n","send command 7 succes to queue already");
+		#endif
+	}
+	return;
+}
 uint8_t motor_array_init(void)
 {
 	uint8_t rw_flag=0,addr=0,length=0;
 	uint16_t i=0,j=0;
 	uint8_t data[4]={0};
 	//³õÊ¼»¯µç»ú½á¹¹ÌåÖĞµÄÒ»Ğ©Á¿
-	uint8_t tmp_addr=0x00;                      //1ºÅµç»úÆğÊ¼µØÖ·
+	uint8_t tmp_addr=0x00;                      //1ºÅµç»úÆğÊ¼µØÖ·£¬tp1£¬2£¬3´æ´¢Çø
 	length=4;
 	rw_flag=0;
 	//1ºÅµç»ú
@@ -87,7 +180,7 @@ uint8_t motor_array_init(void)
 	motor_array[0].position_value.if_tp_already=0x01;
 		
 	//3ºÅµç»ú
-	tmp_addr=0x00;                      //3ºÅµç»úÆğÊ¼µØÖ·
+	tmp_addr=28;                      //3ºÅµç»úÆğÊ¼µØÖ·,tp1,2,3
 	for(i=0;i<3;i++)
 	{
 		if(iic_rw(rw_flag, tmp_addr + i*4,data,length)!=0)
@@ -106,7 +199,7 @@ uint8_t motor_array_init(void)
 	motor_array[2].position_value.if_tp_already=0x01;
 	
 	//4ºÅµç»ú
-	tmp_addr=0x00;                      //4ºÅµç»úÆğÊ¼µØÖ·
+	tmp_addr=40;                      //4ºÅµç»úÆğÊ¼µØÖ·
 	for(i=0;i<3;i++)
 	{
 		if(iic_rw(rw_flag, tmp_addr + i*4,data,length)!=0)
@@ -125,6 +218,57 @@ uint8_t motor_array_init(void)
 	motor_array[3].position_value.if_tp_already=0x01;
 	
 	
+	//µ¼³Ì´æ´¢Çø£¬48µØÖ·¿ªÊ¼
+	tmp_addr=48;
+	for(i=0;i<4;i++)
+	{
+		if(iic_rw(rw_flag, tmp_addr + i*4,data,length)!=0)
+		{
+			//¶ÁÈ¡EEPROM³ö´í
+			break;
+			;
+		}
+		else
+		{
+			motor_array[i].speed_value.scal=((uint32_t)data[0] << 24) | ((uint32_t)data[1] << 16) | ((uint32_t)data[2] << 8) | ((uint32_t)data[3]);
+		}
+		//²âÊÔ´úÂë
+		motor_array[i].speed_value.scal=210;
+	}
+	
+	//¹ã²¥¼ä¸ôÊ±¼ä´æ´¢Çø
+	tmp_addr=64;
+	if(iic_rw(rw_flag, tmp_addr,data,length)!=0)
+	{
+		//¶ÁÈ¡EEPROM³ö´í
+		;
+	}
+	else
+	{
+		timer_period=((uint32_t)data[0] << 24) | ((uint32_t)data[1] << 16) | ((uint32_t)data[2] << 8) | ((uint32_t)data[3]);
+	}
+	//²âÊÔ´úÂë
+	timer_period=100;
+	
+	//Ä¬ÈÏËÙ¶È´æ´¢Çø£¬´æ´¢µç»úÔËĞĞµÄËÙ¶ÈÖµ
+	tmp_addr=68;
+	for(i=0;i<4;i++)
+	{
+		if(iic_rw(rw_flag, tmp_addr + i*4,data,length)!=0)
+		{
+			//¶ÁÈ¡EEPROM³ö´í
+			break;
+			;
+		}
+		else
+		{
+			motor_array[i].speed_value.default_speed=((uint32_t)data[0] << 24) | ((uint32_t)data[1] << 16) | ((uint32_t)data[2] << 8) | ((uint32_t)data[3]);
+		}
+		//²âÊÔ´úÂë
+		motor_array[i].speed_value.default_speed=200;
+	}
+	//
+	tmp_addr=84;
 	
 	return 0;
 }
@@ -826,7 +970,6 @@ int command_8(uint8_t* data,uint32_t para)
 {
 	//µç»úµ¥²½µ÷ÊÔ,Ğ´¶¯×÷
 	uint8_t if_return=(para>>4)&0x01;
-	//int32_t offset=(data[1] << 24) | (data[2] << 16) | (data[3] << 8) | data[4];
 	QUEUE_STRUCT tmp;
 	if(data[0]>4 || data[0]==0 || data[0]==0x02)
 	{
@@ -3651,6 +3794,48 @@ int command_19(uint8_t* data,uint32_t para)
 }
 int command_20(uint8_t* data,uint32_t para)
 {
+	uint8_t data_len=(uint8_t)(para & 0x0F);
+	uint8_t if_return=(para>>4)&0x01;
+	uint8_t if_last=(para>>5)&0x01;
+	if(if_last!=0x00 || data_len!=1 || data[0]>1)
+	{
+		if(if_return == 0x01)
+		{
+			QUEUE_STRUCT tmp;
+			tmp.property=0x00;             //can send
+			tmp.can_command=0x14;          //Í£Ö¹Ö¸Áî
+			tmp.can_if_ack=0x01;           //ĞèÒªACK
+			tmp.can_source=0x03;           //±¾Ä£¿é
+			tmp.can_target=0x00;
+			tmp.can_priority=0x03;         //ÃüÁî½áÊø·µ»ØÖ¡
+			tmp.can_if_last=0x00;
+			tmp.can_if_return=0x00;
+			tmp.length=4;
+			tmp.data[0]=0x00;
+			tmp.data[1]=0x00;
+			tmp.data[2]=0x00;
+			tmp.data[3]=ERROR_COMMAND_20_FAIL;
+			BaseType_t status_q = xQueueSendToBack(send_queueHandle, &tmp, 0);
+			if(status_q!=pdPASS)
+			{
+				#ifdef DEBUG_OUTPUT
+				printf("%s\n","queue overflow");
+				#endif
+			}
+			else
+			{
+				#ifdef DEBUG_OUTPUT
+				printf("%s\n","send command 1 success to queue already");
+				#endif
+			}
+		}
+		return ERROR_COMMAND_20_FAIL;
+	}
+	command_13(data,para);
+	command_14(data,para);
+	//Ìî³äÃüÁîÊôĞÔ
+	motor_array[2].command.command_union=0x14;
+	motor_array[3].command.command_union=0x14;
 	return 0;
 }
 int command_21(uint8_t* data,uint32_t para)
@@ -3702,6 +3887,14 @@ void result_parse_2(uint8_t* data, uint8_t num)
 	else
 	{
 		motor_array[num].speed_value.current_speed=((uint32_t)data[0]<<8) | (uint32_t)data[1] | ((uint32_t)data[2] << 24) | ((uint32_t)data[3] << 16);
+		if(__fabs(motor_array[num].speed_value.current_speed>SPEED_JUDGE))
+		{
+			motor_array[num].current_status=1;
+		}
+		else
+		{
+			motor_array[num].current_status=0;
+		}
 	}
 	return;
 }
@@ -3754,6 +3947,25 @@ void result_parse_6(uint8_t* data, uint8_t num)
 	else
 	{
 		motor_array[num].position_value.remain_position=((uint32_t)data[0]<<8) | (uint32_t)data[1] | ((uint32_t)data[2] << 24) | ((uint32_t)data[3] << 16);
+		if(__fabs(motor_array[num].position_value.remain_position)<COMPLETE_JUDGE && motor_array[num].current_status==0x00 && motor_array[num].current_status_pre==0x01)
+		{
+			//·¢ËÍ·µ»ØÖ¡
+			;
+		}
+	}
+	return;
+}
+void result_parse_7(uint8_t* data,uint8_t num)
+{
+	//µç»úÄ¿±êÎ»ÖÃ
+	if(num==1 || num>4)
+	{
+		;
+	}
+	else
+	{
+		motor_array[num].position_value.target_position=((uint32_t)data[0]<<8) | (uint32_t)data[1] | ((uint32_t)data[2] << 24) | ((uint32_t)data[3] << 16);
+		
 	}
 	return;
 }
@@ -3860,7 +4072,7 @@ int(*command_to_function[27])(uint8_t*,uint32_t) = {
 	command_26,
 };
 
-void(*result_to_parameter[7])(uint8_t*, uint8_t) = {
+void(*result_to_parameter[10])(uint8_t*, uint8_t) = {
 	NULL,
 	result_parse_1,
 	result_parse_2,
@@ -3868,6 +4080,7 @@ void(*result_to_parameter[7])(uint8_t*, uint8_t) = {
 	result_parse_4,
 	result_parse_5,
 	result_parse_6,
+	result_parse_7,
 };
 
 
@@ -4601,7 +4814,7 @@ int main(void)
 	HAL_TIM_Base_DeInit(&htim12);
 	HAL_TIM_Base_Init(&htim12);
 	
-	modbus_list_head=modbus_list_gen(128);
+	modbus_list_head=modbus_list_gen(96);
 	
 	//HAL_TIM_Base_Start_IT(&htim12);
 	

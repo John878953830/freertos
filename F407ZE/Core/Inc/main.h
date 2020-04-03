@@ -176,6 +176,7 @@ extern uint8_t modbus_time_flag;       //modbus  ¶¨Ê±Ê±¼ä±êÖ¾  1£º µÚÒ»´Î3.5T¶¨Ê
 #define ERROR_CODE_ADDR          4198
 #define TEMPERATURE_ADDR         4026
 #define REMAIN_PULSE             4012
+#define TARGET_POSITION_ADDR     4008
 /* USER CODE END EM */
 
 /* Exported functions prototypes ---------------------------------------------*/
@@ -229,6 +230,10 @@ uint8_t iic_rw(uint8_t rw_flag, uint8_t addr,uint8_t* data,uint8_t length);
 
 /* Private defines -----------------------------------------------------------*/
 /* USER CODE BEGIN Private defines */
+typedef union broadcast_union{
+	uint8_t data[4];
+	float   distance;
+}UNION;
 typedef struct list_struct{
 	uint8_t command_id;                         //CAN ÃüÁîID
 	uint8_t command_status;                     //ÃüÁî×´Ì¬£¬ 0£º Î´Ö´ĞĞ£¬ 1£º Ö´ĞĞÖĞ  2£ºÖ´ĞĞÍê³É
@@ -269,7 +274,7 @@ typedef struct modbus_list{
 	QUEUE_STRUCT modbus_element;
 	uint8_t if_over;                            //±êÖ¾±¾½ÚµãÊÇ·ñÓĞĞ§
 	struct modbus_list* next;
-	//uint8_t parameter;                          //±êÖ¾²Ù×÷µÄÊôĞÔÖµ£¬ 1£º Î»ÖÃ£¬ 2£º ËÙ¶È£¬ 3£¬ Å¤¾Ø£¬ 4£º´íÎóÂë£¬ 5£ºÎÂ¶È£¬ 6£ºÖÍÁôÂö³åÊı
+	//uint8_t parameter;                          //±êÖ¾²Ù×÷µÄÊôĞÔÖµ£¬ 1£º Î»ÖÃ£¬ 2£º ËÙ¶È£¬ 3£¬ Å¤¾Ø£¬ 4£º´íÎóÂë£¬ 5£ºÎÂ¶È£¬ 6£ºÖÍÁôÂö³åÊı,7:Ä¿±êÎ»ÖÃ
 }MODBUS_LIST;
 typedef struct command_struct{
 	uint8_t command_id;                         //µ±Ç°Ö´ĞĞµÄÃüÁîID£¬ ³õÊ¼»¯Îª0
@@ -281,6 +286,7 @@ typedef struct command_struct{
 	uint8_t if_last;                            //ÊÇ·ñĞèÒªÆ´½Ó
 	uint8_t can_version;                        //°æ±¾ºÅ
 	uint16_t command_status;                    //µ±Ç°Ö´ĞĞµÄÃüÁîµÄ×´Ì¬£¬ 0£ºÎ´Ö´ĞĞ£¬ 1£º Ö´ĞĞÖĞ 2£º Ö´ĞĞÍê³É ÆäËû£º ´íÎóÂë
+	uint8_t command_union;                      //ÁªºÏÃüÁîÂë£¬ 0 £º ¿ÕÏĞ  ÆäËû£º ÃüÁî±àºÅ
 	
 }COMMAND_STRUCT;
 typedef struct speed{
@@ -323,9 +329,9 @@ typedef struct position{
 	int32_t remain_position_pre;                //ÉÏÒ»²ÉÑùÊ±¿ÌµÄÖÍÁôÂö³åÊı
 	int32_t remain_position_delta;              //²îÖµ
 	int32_t remain_position_delta_pre;          //ÉÏÒ»´ÎµÄ²îÖµ
-	int32_t tp[8];                                //ÅäÖÃÎÄ¼şÎ»ÖÃ,¸ù¾İÃüÁîÎÄ¼şÓ³Éä²»Í¬µÄÎ»ÖÃ£¬×î¶àÖ§³Ö8¸öÎ»ÖÃ, tp1:µç»ú45¶ÈÎ»ÖÃ£¬³õÊ¼»¯Ê±´Óeeprom¶ÁÈë
-	//tp2£¬µç»úÍêÈ«¼Ğ½ôÎ»ÖÃ£¬ ³õÊ¼»¯Ê±´Óeeprom¶ÁÈë
-	//tp3£¬µç»úÍêÈ«ËÉ¿ªÎ»ÖÃ£¬³õÊ¼»¯Ê±´Óeeprom¶ÁÈë
+	int32_t tp[8];                                //ÅäÖÃÎÄ¼şÎ»ÖÃ,¸ù¾İÃüÁîÎÄ¼şÓ³Éä²»Í¬µÄÎ»ÖÃ£¬×î¶àÖ§³Ö8¸öÎ»ÖÃ, tp0:µç»ú45¶ÈÎ»ÖÃ£¬³õÊ¼»¯Ê±´Óeeprom¶ÁÈë
+	//tp1£¬´ò¿ª/ËÉ¿ª
+	//tp2£¬¹Ø±Õ/¼Ğ½ô
 	uint8_t if_tp_already;                      //±êÖ¾tpÊÇ·ñÓĞĞ§£¬³õÊ¼»¯Ê±Îª0£¬ ³É¹¦¶ÁÈ¡eepromÊı¾İºóÖÃ1
 }POSITION;
 typedef struct dimension{
@@ -364,6 +370,7 @@ typedef struct motor_struct{
 	uint8_t id;                                  //µç»úID
 	COMMAND_STRUCT command;                      //ÃüÁî½á¹¹Ìå
 	uint8_t current_status;                      //µç»úµ±Ç°×´Ì¬£¬ 0£ºÍ£Ö¹  1£º ÔËĞĞ 2: ¶Â×ª 3£º ³ö´í
+	uint8_t current_status_pre;                  //µç»úÒÔÇ°×´Ì¬
 	uint8_t dir;                                 //·½ÏòĞÅÏ¢ºÍ·½ÏòÅäÖÃ£¬  bit 0: µ±Ç°ÔËĞĞ·½Ïò  bit 1£º Õı·´×ª·½ÏòÅäÖÃ  bit 2£º×ø±êÏµ·½ÏòÅäÖÃ bit 3£ºËÙ¶ÈÓ³Éä·½ÏòÅäÖÃ  bit 4£º Î»ÖÃÓ³Éä·½ÏòÅäÖÃ  bit 5£ºpid·½ÏòÓ³ÉäÅäÖÃ  bit 6£ºÁãµã¸´Î»·½ÏòÅäÖÃ bit 7£º±£Áô
 	SPEED speed_value;                           //ËÙ¶È½á¹¹Ìå
 	POSITION position_value;                     //Î»ÖÃ½á¹¹Ìå
@@ -402,7 +409,8 @@ uint8_t modbus_send(QUEUE_STRUCT send_struct);
 uint8_t modbus_send_sub(QUEUE_STRUCT send_struct);
 uint8_t iic_rw(uint8_t rw_flag, uint8_t addr,uint8_t* data,uint8_t length);
 extern int(*command_to_function[27])(uint8_t*,uint32_t);
-extern void(*result_to_parameter[7])(uint8_t*, uint8_t);
+extern void(*result_to_parameter[10])(uint8_t*, uint8_t);
+extern void enable_motor(void);
 extern uint16_t usMBCRC16( uint8_t * pucFrame, uint16_t usLen );
 extern MODBUS_LIST* modbus_list_head;
 extern MODBUS_LIST* modbus_list_tail;

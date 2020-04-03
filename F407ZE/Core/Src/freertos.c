@@ -52,27 +52,20 @@ static void prvAutoReloadTimerCallback( TimerHandle_t xTimer )
 	//广播
 	//发送消息测试，包括CAN MODBUS
 	//dummy data
-	/*
+	//广播顶盖单元在线工作
 	QUEUE_STRUCT queue_id;
 	portBASE_TYPE status;
 	queue_id.property=0;             //can send
-	queue_id.can_priority=0x05;      //can priority
+	queue_id.can_priority=0x06;      //can priority
 	queue_id.can_source=0x03;        //can source
 	queue_id.can_target=0x00;        //can target
-	queue_id.can_command=0x43;       //can command
+	queue_id.can_command=0x00;       //can command
 	queue_id.can_if_last=0x00;       //can if last
 	queue_id.can_if_return=0x00;     //can if return
 	queue_id.can_if_ack=0x00;        //can if ack
-	queue_id.can_version=0x07;       //can version
-	queue_id.data[0]=0x57;
-	queue_id.data[1]=0x39;
-	queue_id.data[2]=0xF6;
-	queue_id.data[3]=0x90;
-	queue_id.data[4]=0x13;
-	queue_id.data[5]=0x52;
-	queue_id.data[6]=0x30;
-	queue_id.data[7]=0x33;
-	queue_id.length=8;
+	queue_id.can_version=0x00;       //can version
+	queue_id.data[0]=0x01;
+	queue_id.length=1;
 	queuespace= uxQueueSpacesAvailable( send_queueHandle );
 	uint8_t tmp=can_send(queue_id);
 	status = xQueueSendToBack(send_queueHandle, &queue_id, 0);
@@ -88,7 +81,207 @@ static void prvAutoReloadTimerCallback( TimerHandle_t xTimer )
 		printf("%s\n","send message to queue already");
 		#endif
 	}
-	*/
+	
+	//广播11号
+	queue_id.property=0;             //can send
+	queue_id.can_priority=0x06;      //can priority
+	queue_id.can_source=0x03;        //can source
+	queue_id.can_target=0x00;        //can target
+	queue_id.can_command=0x0B;       //can command
+	queue_id.can_if_last=0x00;       //can if last
+	queue_id.can_if_return=0x00;     //can if return
+	queue_id.can_if_ack=0x00;        //can if ack
+	queue_id.can_version=0x00;       //can version
+	queue_id.data[0]=0x00;
+	queue_id.data[1]=0x00;
+	queue_id.data[2]=0x00;
+	//计算填充数据
+	queue_id.data[3]=0x00;
+	//天窗位置
+	if(__fabs(motor_array[0].position_value.current_position-motor_array[0].position_value.tp[1])<COMPLETE_JUDGE)
+	{
+		queue_id.data[3]|=0x01;
+	}
+	else
+	{
+		queue_id.data[3]&=0xFE;
+	}
+	//天窗位置
+	if(__fabs(motor_array[0].position_value.current_position-motor_array[0].position_value.tp[2]<COMPLETE_JUDGE))
+	{
+		queue_id.data[3]|=0x02;
+	}
+	else
+	{
+		queue_id.data[3]&=0xFD;
+	}
+	//前后夹紧电机位置
+	if(__fabs(motor_array[2].position_value.current_position-motor_array[2].position_value.tp[1]<COMPLETE_JUDGE))
+	{
+		queue_id.data[3]|=0x04;
+	}
+	else
+	{
+		queue_id.data[3]&=0xFB;
+	}
+	if(__fabs(motor_array[2].position_value.current_position-motor_array[2].position_value.tp[2]<COMPLETE_JUDGE))
+	{
+		queue_id.data[3]|=0x08;
+	}
+	else
+	{
+		queue_id.data[3]&=0xF7;
+	}
+	//左右夹紧电机位置
+	if(__fabs(motor_array[3].position_value.current_position-motor_array[3].position_value.tp[1]<COMPLETE_JUDGE))
+	{
+		queue_id.data[3]|=0x10;
+	}
+	else
+	{
+		queue_id.data[3]&=0xEF;
+	}
+	if(__fabs(motor_array[3].position_value.current_position-motor_array[3].position_value.tp[2]<COMPLETE_JUDGE))
+	{
+		queue_id.data[3]|=0x20;
+	}
+	else
+	{
+		queue_id.data[3]&=0xDF;
+	}
+	queue_id.length=4;
+	queuespace= uxQueueSpacesAvailable( send_queueHandle );
+	tmp=can_send(queue_id);
+	status = xQueueSendToBack(send_queueHandle, &queue_id, 0);
+	if(status!=pdPASS)
+	{
+		#ifdef DEBUG_OUTPUT
+		printf("%s\n","queue overflow");
+		#endif
+	}
+	else
+	{
+		#ifdef DEBUG_OUTPUT
+		printf("%s\n","send message to queue already");
+		#endif
+	}
+	uint8_t i=0;
+	for(i=0;i<4;i++)
+	{
+		//广播12-15号
+		queue_id.property=0;             //can send
+		queue_id.can_priority=0x06;      //can priority
+		queue_id.can_source=0x03;        //can source
+		queue_id.can_target=0x00;        //can target
+		queue_id.can_command=0x0C + i;       //can command
+		queue_id.can_if_last=0x00;       //can if last
+		queue_id.can_if_return=0x00;     //can if return
+		queue_id.can_if_ack=0x00;        //can if ack
+		queue_id.can_version=0x00;       //can version
+		queue_id.data[0]=(uint8_t)((motor_array[i].motor_error_code >> 24) & 0xFF);
+		queue_id.data[1]=(uint8_t)((motor_array[i].motor_error_code >> 16) & 0xFF);
+		queue_id.data[2]=(uint8_t)((motor_array[i].motor_error_code >> 8) & 0xFF);
+		queue_id.data[3]=(uint8_t)((motor_array[i].motor_error_code) & 0xFF);
+		queue_id.length=4;
+		queuespace= uxQueueSpacesAvailable( send_queueHandle );
+		tmp=can_send(queue_id);
+		status = xQueueSendToBack(send_queueHandle, &queue_id, 0);
+		if(status!=pdPASS)
+		{
+			#ifdef DEBUG_OUTPUT
+			printf("%s\n","queue overflow");
+			#endif
+		}
+		else
+		{
+			#ifdef DEBUG_OUTPUT
+			printf("%s\n","send message to queue already");
+			#endif
+		}
+	}
+	
+	//广播16-21号
+	for(i=0;i<4;i++)
+	{
+		if(i==1)
+			continue;
+		//
+		queue_id.property=0;             //can send
+		queue_id.can_priority=0x06;      //can priority
+		queue_id.can_source=0x03;        //can source
+		queue_id.can_target=0x00;        //can target
+		if(i==0)
+			queue_id.can_command=0x10;       //can command
+		else
+			queue_id.can_command=0x10 + 2*(i-1);
+		queue_id.can_if_last=0x00;       //can if last
+		queue_id.can_if_return=0x00;     //can if return
+		queue_id.can_if_ack=0x00;        //can if ack
+		queue_id.can_version=0x00;       //can version
+		int32_t tmp_position=motor_array[i].position_value.current_position;
+		//导程变换
+		tmp_position=tmp_position/10000*motor_array[i].speed_value.scal;
+		queue_id.data[0]=(uint8_t)((tmp_position >> 24) & 0xFF);
+		queue_id.data[1]=(uint8_t)((tmp_position >> 16) & 0xFF);
+		queue_id.data[2]=(uint8_t)((tmp_position >> 8) & 0xFF);
+		queue_id.data[3]=(uint8_t)(tmp_position & 0xFF);
+		queue_id.length=4;
+		queuespace= uxQueueSpacesAvailable( send_queueHandle );
+		tmp=can_send(queue_id);
+		status = xQueueSendToBack(send_queueHandle, &queue_id, 0);
+		if(status!=pdPASS)
+		{
+			#ifdef DEBUG_OUTPUT
+			printf("%s\n","queue overflow");
+			#endif
+		}
+		else
+		{
+			#ifdef DEBUG_OUTPUT
+			printf("%s\n","send message to queue already");
+			#endif
+		}
+		
+		queue_id.property=0;             //can send
+		queue_id.can_priority=0x06;      //can priority
+		queue_id.can_source=0x03;        //can source
+		queue_id.can_target=0x00;        //can target
+		if(i==0)
+			queue_id.can_command=0x10 + 1;       //can command
+		else
+			queue_id.can_command=0x10 + 2*(i-1) +1;
+		queue_id.can_if_last=0x00;       //can if last
+		queue_id.can_if_return=0x00;     //can if return
+		queue_id.can_if_ack=0x00;        //can if ack
+		queue_id.can_version=0x00;       //can version
+		//导程变换
+		int32_t tmp_speed=motor_array[i].speed_value.current_speed;
+		float tmp_speed_f=tmp_speed/10/60*motor_array[i].speed_value.scal;
+		tmp_speed_f*=100;
+		tmp_speed=(int32_t)tmp_speed_f;
+		queue_id.data[0]=(uint8_t)((tmp_speed >> 24) & 0xFF);
+		queue_id.data[1]=(uint8_t)((tmp_speed >> 16) & 0xFF);
+		queue_id.data[2]=(uint8_t)((tmp_speed >> 8) & 0xFF);
+		queue_id.data[3]=(uint8_t)((tmp_speed) & 0xFF);
+		queue_id.length=4;
+		queuespace= uxQueueSpacesAvailable( send_queueHandle );
+		tmp=can_send(queue_id);
+		status = xQueueSendToBack(send_queueHandle, &queue_id, 0);
+		if(status!=pdPASS)
+		{
+			#ifdef DEBUG_OUTPUT
+			printf("%s\n","queue overflow");
+			#endif
+		}
+		else
+		{
+			#ifdef DEBUG_OUTPUT
+			printf("%s\n","send message to queue already");
+			#endif
+		}
+	}
+	
+	return;
 }
 
 extern xTimerHandle motor_status_timer;                    //电机状态定时器，读取错误码，温度，滞留脉冲数
@@ -173,7 +366,7 @@ static void prvAutoReloadMotorStatusTimerCallback( TimerHandle_t xTimer )
 			motor_array[i].position_value.remain_position_delta=__fabs(motor_array[i].position_value.remain_position_pre-motor_array[i].position_value.remain_position);
 			//更新当前到pre
 			motor_array[i].position_value.remain_position_pre=motor_array[i].position_value.remain_position;
-			
+			//读取滞留脉冲数
 			QUEUE_STRUCT pos_get;
 			pos_get.property=1;                          //485 send
 			pos_get.modbus_addr=i+1;                       //电机号需要根据命令中的电机号赋值,暂时置位为1，因缺少线缆，i+1
@@ -211,44 +404,86 @@ static void prvAutoReloadMotorStatusTimerCallback( TimerHandle_t xTimer )
 			*/
 			{
 				motor_array[i].command.command_status=0x02;
-				//发送返回帧
-				QUEUE_STRUCT frame_return;
-				frame_return.property=0x00;             //can send
-				frame_return.can_command=motor_array[i].command.command_id;          
-				frame_return.can_if_ack=0x01;           //需要ACK
-				frame_return.can_source=0x03;           //本模块
-				frame_return.can_target=0x00;
-				frame_return.can_priority=0x03;         //命令结束返回帧
-				frame_return.can_if_last=0x00;          //无需拼接
-				frame_return.can_if_return=0x00;        //无需返回
-				frame_return.length=4;
-				frame_return.data[0]=0xFF;              //错误码，0标识正常
-				frame_return.data[1]=0xFF;              //执行结果， 1代表已完成
-				frame_return.data[2]=0xFF;               //电机号
-				frame_return.data[3]=0xFE;              //保留
-				
-				//自检返回帧结果发送
-				if(motor_array[i].self_check_counter!=0	&& (motor_array[i].command.command_id==0x0F || motor_array[i].command.command_id==0x10 || motor_array[i].command.command_id==0x11 || motor_array[i].command.command_id==0x12 
-					 || motor_array[i].command.command_id==0x06))
+				if(motor_array[i].command.command_union!=0x14)
 				{
-					frame_return.data[0]=ERROR_COMMAND_15_FAIL;
-				}
-				portBASE_TYPE status = xQueueSendToBack(send_queueHandle, &frame_return, 0);
-				if(status!=pdPASS)
-				{
-					#ifdef DEBUG_OUTPUT
-					printf("%s\n","queue overflow");
-					#endif
-				}
-				else
-				{
-					#ifdef DEBUG_OUTPUT
-					printf("%s\n","send command 7 error to queue already");
-					#endif
+					//发送返回帧
+					QUEUE_STRUCT frame_return;
+					frame_return.property=0x00;             //can send
+					frame_return.can_command=motor_array[i].command.command_id;          
+					frame_return.can_if_ack=0x01;           //需要ACK
+					frame_return.can_source=0x03;           //本模块
+					frame_return.can_target=0x00;
+					frame_return.can_priority=0x03;         //命令结束返回帧
+					frame_return.can_if_last=0x00;          //无需拼接
+					frame_return.can_if_return=0x00;        //无需返回
+					frame_return.length=4;
+					frame_return.data[0]=0xFF;              //错误码，0标识正常
+					frame_return.data[1]=0xFF;              //执行结果， 1代表已完成
+					frame_return.data[2]=0xFF;               //电机号
+					frame_return.data[3]=0xFE;              //保留
+					
+					//自检返回帧结果发送
+					if(motor_array[i].self_check_counter!=0	&& (motor_array[i].command.command_id==0x0F || motor_array[i].command.command_id==0x10 || motor_array[i].command.command_id==0x11 || motor_array[i].command.command_id==0x12 
+						 || motor_array[i].command.command_id==0x06))
+					{
+						frame_return.data[0]=ERROR_COMMAND_15_FAIL;
+					}
+					portBASE_TYPE status = xQueueSendToBack(send_queueHandle, &frame_return, 0);
+					if(status!=pdPASS)
+					{
+						#ifdef DEBUG_OUTPUT
+						printf("%s\n","queue overflow");
+						#endif
+					}
+					else
+					{
+						#ifdef DEBUG_OUTPUT
+						printf("%s\n","send command 7 error to queue already");
+						#endif
+					}
 				}
 			}
 		}
 	}
+	//组合命令判定
+	if(motor_array[2].command.command_union==0x14 && motor_array[3].command.command_union==0x14
+		&& motor_array[2].command.if_return==0x01 && motor_array[3].command.if_return==0x01 
+	  && motor_array[2].command.command_status==0x02 && motor_array[3].command.command_status==0x02)
+	{
+		motor_array[2].command.command_union=0x00;
+		motor_array[3].command.command_union=0x00;
+		//发送返回帧
+		QUEUE_STRUCT frame_return;
+		frame_return.property=0x00;             //can send
+		frame_return.can_command=0x14;          
+		frame_return.can_if_ack=0x01;           //需要ACK
+		frame_return.can_source=0x03;           //本模块
+		frame_return.can_target=0x00;
+		frame_return.can_priority=0x03;         //命令结束返回帧
+		frame_return.can_if_last=0x00;          //无需拼接
+		frame_return.can_if_return=0x00;        //无需返回
+		frame_return.length=4;
+		frame_return.data[0]=0x00;              //错误码，0标识正常
+		frame_return.data[1]=0x00;              //执行结果， 1代表已完成
+		frame_return.data[2]=0x00;               //电机号
+		frame_return.data[3]=0x00;              //保留
+		
+		portBASE_TYPE status = xQueueSendToBack(send_queueHandle, &frame_return, 0);
+		if(status!=pdPASS)
+		{
+			#ifdef DEBUG_OUTPUT
+			printf("%s\n","queue overflow");
+			#endif
+		}
+		else
+		{
+			#ifdef DEBUG_OUTPUT
+			printf("%s\n","send command 7 error to queue already");
+			#endif
+		}
+	}
+	
+	return;
 }
 
 void start_soft_timer(void)
@@ -613,8 +848,7 @@ osKernelInitialize();
 	can_start();
 	
 	//使能电机
-	QUEUE_STRUCT enable_motor;
-	
+	enable_motor();
 	/*
 	enable_motor.property=1;                            //485 send
 	enable_motor.modbus_addr=2;
@@ -983,6 +1217,40 @@ void start_tk_sensor_monitor(void *argument)
 					}
 				}
 			}
+			
+			//获取电机目标位置
+			for(i=0;i<4;i++) //暂时只读取1号电机的参数，因缺少电缆
+			{
+				if(i==1)
+				{
+					continue;
+				}
+				else{
+					QUEUE_STRUCT speed_get;
+					speed_get.property=1;                          //485 send
+		      speed_get.modbus_addr=i+1;                       //电机号
+		      speed_get.modbus_func=0x03;                    //读多个寄存器
+		      speed_get.modbus_addr_h=(uint8_t)(TARGET_POSITION_ADDR>>8);    //读当前扭矩
+		      speed_get.modbus_addr_l=(uint8_t)(TARGET_POSITION_ADDR&0xFF);  
+		      speed_get.modbus_data_len_h=0x00;
+		      speed_get.modbus_data_len_l=0x02;
+		      speed_get.modbus_property=7;                   //目标位置
+					portBASE_TYPE	status = xQueueSendToBack(send_queueHandle, &speed_get, 0);
+					if(status!=pdPASS)
+					{
+						#ifdef DEBUG_OUTPUT
+						printf("%s\n","queue overflow");
+						#endif
+					}
+					else
+					{
+						#ifdef DEBUG_OUTPUT
+						printf("%s\n","send command 7 succes to queue already");
+						#endif
+					}
+				}
+			}
+			
 			notify_use=0;
 		}
     osDelay(1);
@@ -1211,7 +1479,9 @@ void start_tk_master_order(void *argument)
 									 tmp_command_id==11 ||
 									 tmp_command_id==12 ||
 									 tmp_command_id==13 ||
-									 tmp_command_id==14 )
+									 tmp_command_id==14 ||
+								   tmp_command_id==20
+								)
 								{
 									uint8_t data[8];
 									memcpy(data,id.data,id.RxHeader.DLC);

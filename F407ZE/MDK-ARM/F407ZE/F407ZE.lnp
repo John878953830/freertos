@@ -47,4 +47,4 @@
 --library_type=microlib --strict --scatter "F407ZE\F407ZE.sct"
 --summary_stderr --info summarysizes --map --xref --callgraph --symbols
 --info sizes --info totals --info unused --info veneers
---list "F407ZE.map" -o F407ZE\F407ZE.axf
+--list "..\..\F407ZE.map" -o F407ZE\F407ZE.axf
