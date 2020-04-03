@@ -269,6 +269,7 @@ typedef struct queue_struct{
 	uint16_t modbus_crc;                        //485 CRC
 	uint8_t modbus_property;                    //标识modbus的功能码， 1： 位置，2， 速度， 3， 扭矩， 4：错误码， 5：温度， 6：滞留脉冲数
 	CAN_RxHeaderTypeDef   RxHeader;             //CAN 接收报头数据
+	uint8_t modbus_retry_counter;               //重发次数计数器，超过重发次数停止电机并将错误码填入电机结构体
 }QUEUE_STRUCT;
 typedef struct modbus_list{
 	QUEUE_STRUCT modbus_element;
@@ -411,6 +412,7 @@ uint8_t iic_rw(uint8_t rw_flag, uint8_t addr,uint8_t* data,uint8_t length);
 extern int(*command_to_function[27])(uint8_t*,uint32_t);
 extern void(*result_to_parameter[10])(uint8_t*, uint8_t);
 extern void enable_motor(void);
+extern uint8_t motor_array_init(void);
 extern uint16_t usMBCRC16( uint8_t * pucFrame, uint16_t usLen );
 extern MODBUS_LIST* modbus_list_head;
 extern MODBUS_LIST* modbus_list_tail;

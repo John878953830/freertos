@@ -58,7 +58,7 @@ static void prvAutoReloadTimerCallback( TimerHandle_t xTimer )
 	queue_id.property=0;             //can send
 	queue_id.can_priority=0x06;      //can priority
 	queue_id.can_source=0x03;        //can source
-	queue_id.can_target=0x00;        //can target
+	queue_id.can_target=0x1F;        //can target
 	queue_id.can_command=0x00;       //can command
 	queue_id.can_if_last=0x00;       //can if last
 	queue_id.can_if_return=0x00;     //can if return
@@ -67,7 +67,6 @@ static void prvAutoReloadTimerCallback( TimerHandle_t xTimer )
 	queue_id.data[0]=0x01;
 	queue_id.length=1;
 	queuespace= uxQueueSpacesAvailable( send_queueHandle );
-	uint8_t tmp=can_send(queue_id);
 	status = xQueueSendToBack(send_queueHandle, &queue_id, 0);
 	if(status!=pdPASS)
 	{
@@ -81,12 +80,11 @@ static void prvAutoReloadTimerCallback( TimerHandle_t xTimer )
 		printf("%s\n","send message to queue already");
 		#endif
 	}
-	
 	//广播11号
 	queue_id.property=0;             //can send
 	queue_id.can_priority=0x06;      //can priority
 	queue_id.can_source=0x03;        //can source
-	queue_id.can_target=0x00;        //can target
+	queue_id.can_target=0x1F;        //can target
 	queue_id.can_command=0x0B;       //can command
 	queue_id.can_if_last=0x00;       //can if last
 	queue_id.can_if_return=0x00;     //can if return
@@ -151,7 +149,6 @@ static void prvAutoReloadTimerCallback( TimerHandle_t xTimer )
 	}
 	queue_id.length=4;
 	queuespace= uxQueueSpacesAvailable( send_queueHandle );
-	tmp=can_send(queue_id);
 	status = xQueueSendToBack(send_queueHandle, &queue_id, 0);
 	if(status!=pdPASS)
 	{
@@ -172,7 +169,7 @@ static void prvAutoReloadTimerCallback( TimerHandle_t xTimer )
 		queue_id.property=0;             //can send
 		queue_id.can_priority=0x06;      //can priority
 		queue_id.can_source=0x03;        //can source
-		queue_id.can_target=0x00;        //can target
+		queue_id.can_target=0x1F;        //can target
 		queue_id.can_command=0x0C + i;       //can command
 		queue_id.can_if_last=0x00;       //can if last
 		queue_id.can_if_return=0x00;     //can if return
@@ -184,7 +181,6 @@ static void prvAutoReloadTimerCallback( TimerHandle_t xTimer )
 		queue_id.data[3]=(uint8_t)((motor_array[i].motor_error_code) & 0xFF);
 		queue_id.length=4;
 		queuespace= uxQueueSpacesAvailable( send_queueHandle );
-		tmp=can_send(queue_id);
 		status = xQueueSendToBack(send_queueHandle, &queue_id, 0);
 		if(status!=pdPASS)
 		{
@@ -209,7 +205,7 @@ static void prvAutoReloadTimerCallback( TimerHandle_t xTimer )
 		queue_id.property=0;             //can send
 		queue_id.can_priority=0x06;      //can priority
 		queue_id.can_source=0x03;        //can source
-		queue_id.can_target=0x00;        //can target
+		queue_id.can_target=0x1F;        //can target
 		if(i==0)
 			queue_id.can_command=0x10;       //can command
 		else
@@ -227,7 +223,6 @@ static void prvAutoReloadTimerCallback( TimerHandle_t xTimer )
 		queue_id.data[3]=(uint8_t)(tmp_position & 0xFF);
 		queue_id.length=4;
 		queuespace= uxQueueSpacesAvailable( send_queueHandle );
-		tmp=can_send(queue_id);
 		status = xQueueSendToBack(send_queueHandle, &queue_id, 0);
 		if(status!=pdPASS)
 		{
@@ -245,7 +240,7 @@ static void prvAutoReloadTimerCallback( TimerHandle_t xTimer )
 		queue_id.property=0;             //can send
 		queue_id.can_priority=0x06;      //can priority
 		queue_id.can_source=0x03;        //can source
-		queue_id.can_target=0x00;        //can target
+		queue_id.can_target=0x1F;        //can target
 		if(i==0)
 			queue_id.can_command=0x10 + 1;       //can command
 		else
@@ -265,7 +260,6 @@ static void prvAutoReloadTimerCallback( TimerHandle_t xTimer )
 		queue_id.data[3]=(uint8_t)((tmp_speed) & 0xFF);
 		queue_id.length=4;
 		queuespace= uxQueueSpacesAvailable( send_queueHandle );
-		tmp=can_send(queue_id);
 		status = xQueueSendToBack(send_queueHandle, &queue_id, 0);
 		if(status!=pdPASS)
 		{
@@ -841,6 +835,9 @@ osKernelInitialize();
   };
   result_processHandle_send = osThreadNew(start_tk_result_process_send, NULL, &result_process_send_attributes);
   /* add threads, ... */
+	
+	//初始化电机中的位置和一些其他的关键变量
+	motor_array_init();
 	//启动软件定时器
 	start_soft_timer();
 	//定时器初始化
@@ -849,6 +846,7 @@ osKernelInitialize();
 	
 	//使能电机
 	enable_motor();
+	
 	/*
 	enable_motor.property=1;                            //485 send
 	enable_motor.modbus_addr=2;

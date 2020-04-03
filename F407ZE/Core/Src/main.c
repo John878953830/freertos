@@ -36,7 +36,7 @@
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
-uint32_t timer_period=100;
+uint32_t timer_period=1000;
 xTimerHandle broadcast_timer;
 xTimerHandle motor_status_timer;     //电机状态参数定时器
 uint32_t fifo_level=0;
@@ -247,8 +247,6 @@ uint8_t motor_array_init(void)
 	{
 		timer_period=((uint32_t)data[0] << 24) | ((uint32_t)data[1] << 16) | ((uint32_t)data[2] << 8) | ((uint32_t)data[3]);
 	}
-	//测试代码
-	timer_period=100;
 	
 	//默认速度存储区，存储电机运行的速度值
 	tmp_addr=68;
@@ -267,8 +265,74 @@ uint8_t motor_array_init(void)
 		//测试代码
 		motor_array[i].speed_value.default_speed=200;
 	}
-	//
+	//默认扭矩设置
 	tmp_addr=84;
+	for(i=0;i<4;i++)
+	{
+		if(iic_rw(rw_flag, tmp_addr + i*4,data,length)!=0)
+		{
+			//读取EEPROM出错
+			break;
+			;
+		}
+		else
+		{
+			motor_array[i].torque_value.max_torque=((uint32_t)data[0] << 24) | ((uint32_t)data[1] << 16) | ((uint32_t)data[2] << 8) | ((uint32_t)data[3]);
+		}
+		//测试代码
+		motor_array[i].torque_value.max_torque=200;
+	}
+	//最大速度设置，设置最大的速度值
+	tmp_addr=100;
+	for(i=0;i<4;i++)
+	{
+		if(iic_rw(rw_flag, tmp_addr + i*4,data,length)!=0)
+		{
+			//读取EEPROM出错
+			break;
+			;
+		}
+		else
+		{
+			motor_array[i].speed_value.max_speed=((uint32_t)data[0] << 24) | ((uint32_t)data[1] << 16) | ((uint32_t)data[2] << 8) | ((uint32_t)data[3]);
+		}
+		//测试代码
+		motor_array[i].speed_value.max_speed=200;
+	}
+	//最大行程设置，是脉冲数设置，超过这个脉冲数停止电机
+	tmp_addr=116;
+	for(i=0;i<4;i++)
+	{
+		if(iic_rw(rw_flag, tmp_addr + i*4,data,length)!=0)
+		{
+			//读取EEPROM出错
+			break;
+			;
+		}
+		else
+		{
+			motor_array[i].position_value.position_max=((int32_t)data[0] << 24) | ((uint32_t)data[1] << 16) | ((uint32_t)data[2] << 8) | ((uint32_t)data[3]);
+		}
+		//测试代码
+		motor_array[i].position_value.position_max=200;
+	}
+	//最小行程设置
+	tmp_addr=132;
+	for(i=0;i<4;i++)
+	{
+		if(iic_rw(rw_flag, tmp_addr + i*4,data,length)!=0)
+		{
+			//读取EEPROM出错
+			break;
+			;
+		}
+		else
+		{
+			motor_array[i].position_value.position_min=((int32_t)data[0] << 24) | ((uint32_t)data[1] << 16) | ((uint32_t)data[2] << 8) | ((uint32_t)data[3]);
+		}
+		//测试代码
+		motor_array[i].position_value.position_min=-200;
+	}
 	
 	return 0;
 }
@@ -866,7 +930,8 @@ int command_7(uint8_t* data,uint32_t para)
 {
 	uint8_t if_return=(para>>4)&0x01;
 	int32_t period=(data[0] << 24)|(data[1]<<16)|(data[2]<<8)|data[3];
-	if(period==0x00)
+	uint8_t data_len=(uint8_t)(para & 0x0F);
+	if(period==0x00 || data_len != 4)
 	{
 		if(if_return==1)
 		{
@@ -933,6 +998,16 @@ int command_7(uint8_t* data,uint32_t para)
 			}
 		}
 		return ERROR_COMMAND_7_FAIL;
+	}
+	//timeperiod 写入EEPROM
+	uint8_t data_iic[4]={0};
+	data_iic[0]=(uint8_t)((period>>24) & 0xFF);
+	data_iic[1]=(uint8_t)((period>>16) & 0xFF);
+	data_iic[2]=(uint8_t)((period>>8) & 0xFF);
+	data_iic[3]=(uint8_t)(period & 0xFF);
+	while(iic_rw(1,64,data_iic,4)!=0)
+	{
+		vTaskDelay(1);
 	}
 	if(if_return==1)
 	{
@@ -4831,8 +4906,7 @@ int main(void)
 	HAL_GPIO_WritePin(GPIOG,GPIO_PIN_6,GPIO_PIN_SET);
 	printf("%s\n","start free rtos");
 	
-	//初始化电机中的位置和一些其他的关键变量
-	motor_array_init();
+	
 	
   /* USER CODE END 2 */
 
