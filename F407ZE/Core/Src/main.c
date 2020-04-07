@@ -884,7 +884,7 @@ int command_5(uint8_t* data,uint32_t para)
 int command_6(uint8_t* data,uint32_t para)
 {
 	uint8_t data_len=(uint8_t)(para & 0x0F);
-	uint8_t if_return=(para>>4)&0x01;
+	uint8_t if_return=(uint8_t)(para&0x01);
 	uint8_t if_last=(para>>5)&0x01;
 	if(if_last!=0 || data_len!=1)
 	{
