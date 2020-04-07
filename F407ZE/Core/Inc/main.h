@@ -297,6 +297,8 @@ typedef struct speed{
 	int32_t max_speed;                          //最大速度，有符号数，单位微米
 	int32_t min_speed;                          //最小速度，有符号数，单位微米
 	int32_t max_acc;                            //最大加速度，无符号数，单位微米
+	int32_t current_speed_pre;
+	int32_t current_speed_delta;
 	uint32_t scal;                              //导程，单位微米
 }SPEED;
 typedef struct limit_switch{

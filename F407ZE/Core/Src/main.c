@@ -4633,6 +4633,7 @@ uint8_t modbus_send(QUEUE_STRUCT send_struct)
 		//Ð´¼Ä´æÆ÷
 		if(send_struct.modbus_func == 0x10)
 		{
+			taskENTER_CRITICAL();
 			HAL_GPIO_WritePin(GPIOG,GPIO_PIN_6,GPIO_PIN_SET);
 			__NOP();
 		  __NOP();
@@ -4655,10 +4656,12 @@ uint8_t modbus_send(QUEUE_STRUCT send_struct)
 			modbus_time_flag=1;
 			rece_count=8;
 			modbus_status=1;
+			taskEXIT_CRITICAL();
 		}
 		//¶Á¼Ä´æÆ÷
 		if(send_struct.modbus_func==0x03)
 		{
+			taskENTER_CRITICAL();
 			HAL_GPIO_WritePin(GPIOG,GPIO_PIN_6,GPIO_PIN_SET);
 			__NOP();
 		  __NOP();
@@ -4675,6 +4678,7 @@ uint8_t modbus_send(QUEUE_STRUCT send_struct)
 			modbus_time_flag=1;
 			rece_count=9;
 			modbus_status=1;
+			taskEXIT_CRITICAL();
 		}
 	}
 	else
@@ -4701,6 +4705,7 @@ uint8_t modbus_send_sub(QUEUE_STRUCT send_struct)
 	//Ð´¼Ä´æÆ÷
 	if(send_struct.modbus_func == 0x10)
 	{
+		taskENTER_CRITICAL();
 		HAL_GPIO_WritePin(GPIOG,GPIO_PIN_6,GPIO_PIN_SET);
 		__NOP();
 		__NOP();
@@ -4725,11 +4730,12 @@ uint8_t modbus_send_sub(QUEUE_STRUCT send_struct)
 		}
 		modbus_time_flag=1;
 		rece_count=8;
+		taskEXIT_CRITICAL();
 	}
 	//¶Á¼Ä´æÆ÷
 	if(send_struct.modbus_func==0x03)
 	{
-		
+		taskENTER_CRITICAL();
 		HAL_GPIO_WritePin(GPIOG,GPIO_PIN_6,GPIO_PIN_SET);
 		__NOP();
 		__NOP();
@@ -4749,6 +4755,7 @@ uint8_t modbus_send_sub(QUEUE_STRUCT send_struct)
 		}
 		modbus_time_flag=1;
 		rece_count=9;
+		taskEXIT_CRITICAL();
 	}
 	return 0;
 }

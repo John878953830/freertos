@@ -348,6 +348,7 @@ static void prvAutoReloadMotorStatusTimerCallback( TimerHandle_t xTimer )
 		}
 	}
 	//获取滞留脉冲数
+	
 	for(i=0;i<4;i++) 
 	{
 		if(i==1)
@@ -363,7 +364,7 @@ static void prvAutoReloadMotorStatusTimerCallback( TimerHandle_t xTimer )
 			//读取滞留脉冲数
 			QUEUE_STRUCT pos_get;
 			pos_get.property=1;                          //485 send
-			pos_get.modbus_addr=i+1;                       //电机号需要根据命令中的电机号赋值,暂时置位为1，因缺少线缆，i+1
+			pos_get.modbus_addr=i+1;                       //电机号需要根据命令中的电机号赋值
 			pos_get.modbus_func=0x03;                    //读多个寄存器
 			pos_get.modbus_addr_h=(uint8_t)(REMAIN_PULSE>>8);    //读滞留脉冲数
 			pos_get.modbus_addr_l=(uint8_t)(REMAIN_PULSE&0xFF);  
@@ -396,6 +397,7 @@ static void prvAutoReloadMotorStatusTimerCallback( TimerHandle_t xTimer )
 			if(motor_array[i].command.if_return==0x01 && __fabs(motor_array[i].position_value.current_position - motor_array[i].position_value.target_position)<COMPLETE_JUDGE
 				&& motor_array[i].command.command_status==0x01 && __fabs(motor_array[i].speed_value.current_speed) < SPEED_JUDGE)
 			*/
+			
 			{
 				motor_array[i].command.command_status=0x02;
 				if(motor_array[i].command.command_union!=0x14)
@@ -1248,7 +1250,6 @@ void start_tk_sensor_monitor(void *argument)
 					}
 				}
 			}
-			
 			notify_use=0;
 		}
     osDelay(1);
