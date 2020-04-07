@@ -386,18 +386,18 @@ static void prvAutoReloadMotorStatusTimerCallback( TimerHandle_t xTimer )
 			}
 			
 			//确定是否发送返回帧
-			
+			/*
 			if(motor_array[i].command.if_return==0x01 && __fabs(motor_array[i].position_value.remain_position)<COMPLETE_JUDGE
 				&& motor_array[i].command.command_status==0x01 && __fabs(motor_array[i].speed_value.current_speed) < SPEED_JUDGE
 			  && motor_array[i].position_value.remain_position_delta_pre>motor_array[i].position_value.remain_position_delta 
 			  && motor_array[i].position_value.remain_position_delta < COMPLETE_JUDGE)
-			
+			*/
 			//动作返回帧结果发送
 			/*
 			if(motor_array[i].command.if_return==0x01 && __fabs(motor_array[i].position_value.current_position - motor_array[i].position_value.target_position)<COMPLETE_JUDGE
 				&& motor_array[i].command.command_status==0x01 && __fabs(motor_array[i].speed_value.current_speed) < SPEED_JUDGE)
 			*/
-			
+			/*
 			{
 				motor_array[i].command.command_status=0x02;
 				if(motor_array[i].command.command_union!=0x14)
@@ -439,8 +439,10 @@ static void prvAutoReloadMotorStatusTimerCallback( TimerHandle_t xTimer )
 					}
 				}
 			}
+			*/
 		}
 	}
+	/*
 	//组合命令判定
 	if(motor_array[2].command.command_union==0x14 && motor_array[3].command.command_union==0x14
 		&& motor_array[2].command.if_return==0x01 && motor_array[3].command.if_return==0x01 
@@ -478,7 +480,7 @@ static void prvAutoReloadMotorStatusTimerCallback( TimerHandle_t xTimer )
 			#endif
 		}
 	}
-	
+	*/
 	return;
 }
 
@@ -1161,6 +1163,9 @@ void start_tk_sensor_monitor(void *argument)
 					continue;
 				}
 				else{
+					//更新当前速度到pre
+					motor_array[i].speed_value.current_speed_pre=motor_array[i].speed_value.current_speed;
+					
 					QUEUE_STRUCT speed_get;
 					speed_get.property=1;                          //485 send
 		      speed_get.modbus_addr=i+1;                       //电机号

@@ -3,7 +3,7 @@
 <title>Static Call Graph - [F407ZE\F407ZE.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image F407ZE\F407ZE.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060422: Last Updated: Tue Apr 07 11:35:43 2020
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060422: Last Updated: Tue Apr 07 15:09:14 2020
 <BR><P>
 <H3>Maximum Stack Usage =       1672 bytes + Unknown(Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -452,7 +452,7 @@ Global Symbols
 </UL>
 <BR>[Calls]<UL><LI><a href="#[a7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_double_epilogue
 </UL>
-<BR>[Called By]<UL><LI><a href="#[20]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;result_parse_6
+<BR>[Called By]<UL><LI><a href="#[1c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;result_parse_2
 <LI><a href="#[12]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_18
 <LI><a href="#[11]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_17
 <LI><a href="#[f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_15
@@ -486,16 +486,16 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[16f]"></a>__aeabi_cdcmple</STRONG> (Thumb, 48 bytes, Stack size 0 bytes, cdcmple.o(.text))
-<BR><BR>[Called By]<UL><LI><a href="#[20]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;result_parse_6
+<BR><BR>[Called By]<UL><LI><a href="#[1c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;result_parse_2
 <LI><a href="#[e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_14
 <LI><a href="#[d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_13
 <LI><a href="#[b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_11
 <LI><a href="#[99]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;prvAutoReloadTimerCallback
-<LI><a href="#[9a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;prvAutoReloadMotorStatusTimerCallback
 </UL>
 
 <P><STRONG><a name="[171]"></a>__aeabi_cdrcmple</STRONG> (Thumb, 48 bytes, Stack size 0 bytes, cdrcmple.o(.text))
-<BR><BR>[Called By]<UL><LI><a href="#[12]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_18
+<BR><BR>[Called By]<UL><LI><a href="#[1c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;result_parse_2
+<LI><a href="#[12]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_18
 <LI><a href="#[11]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_17
 <LI><a href="#[f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_15
 </UL>
@@ -2062,7 +2062,8 @@ Global Symbols
 <P><STRONG><a name="[af]"></a>__2printf</STRONG> (Thumb, 0 bytes, Stack size 24 bytes, printf3.o(i.__0printf$3))
 <BR><BR>[Stack]<UL><LI>Max Depth = 24<LI>Call Chain = __2printf
 </UL>
-<BR>[Called By]<UL><LI><a href="#[7d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
+<BR>[Called By]<UL><LI><a href="#[1c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;result_parse_2
+<LI><a href="#[7d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 <LI><a href="#[173]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;iic_rw
 <LI><a href="#[141]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;enable_motor
 <LI><a href="#[9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_9
@@ -2578,11 +2579,18 @@ Global Symbols
 <P><STRONG><a name="[1b]"></a>result_parse_1</STRONG> (Thumb, 44 bytes, Stack size 0 bytes, main.o(i.result_parse_1))
 <BR>[Address Reference Count : 1]<UL><LI> main.o(.data)
 </UL>
-<P><STRONG><a name="[1c]"></a>result_parse_2</STRONG> (Thumb, 96 bytes, Stack size 8 bytes, main.o(i.result_parse_2))
-<BR><BR>[Stack]<UL><LI>Max Depth = 64<LI>Call Chain = result_parse_2 &rArr; __aeabi_ui2d &rArr; _double_epilogue &rArr; _double_round
+<P><STRONG><a name="[1c]"></a>result_parse_2</STRONG> (Thumb, 486 bytes, Stack size 112 bytes, main.o(i.result_parse_2))
+<BR><BR>[Stack]<UL><LI>Max Depth = 224<LI>Call Chain = result_parse_2 &rArr; xQueueGenericSend &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
 </UL>
-<BR>[Calls]<UL><LI><a href="#[a8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_ui2d
+<BR>[Calls]<UL><LI><a href="#[16e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueGenericSend
+<LI><a href="#[177]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;vPortExitCritical
+<LI><a href="#[176]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;vPortEnterCritical
+<LI><a href="#[a8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_ui2d
+<LI><a href="#[a6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_i2d
+<LI><a href="#[171]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_cdrcmple
+<LI><a href="#[16f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_cdcmple
 <LI><a href="#[18b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_cdcmpeq
+<LI><a href="#[af]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__2printf
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> main.o(.data)
 </UL>
@@ -2595,12 +2603,7 @@ Global Symbols
 <P><STRONG><a name="[1f]"></a>result_parse_5</STRONG> (Thumb, 44 bytes, Stack size 0 bytes, main.o(i.result_parse_5))
 <BR>[Address Reference Count : 1]<UL><LI> main.o(.data)
 </UL>
-<P><STRONG><a name="[20]"></a>result_parse_6</STRONG> (Thumb, 78 bytes, Stack size 8 bytes, main.o(i.result_parse_6))
-<BR><BR>[Stack]<UL><LI>Max Depth = 64<LI>Call Chain = result_parse_6 &rArr; __aeabi_i2d &rArr; _double_epilogue &rArr; _double_round
-</UL>
-<BR>[Calls]<UL><LI><a href="#[a6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_i2d
-<LI><a href="#[16f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_cdcmple
-</UL>
+<P><STRONG><a name="[20]"></a>result_parse_6</STRONG> (Thumb, 44 bytes, Stack size 0 bytes, main.o(i.result_parse_6))
 <BR>[Address Reference Count : 1]<UL><LI> main.o(.data)
 </UL>
 <P><STRONG><a name="[21]"></a>result_parse_7</STRONG> (Thumb, 44 bytes, Stack size 0 bytes, main.o(i.result_parse_7))
@@ -2739,7 +2742,7 @@ Global Symbols
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> freertos.o(i.MX_FREERTOS_Init)
 </UL>
-<P><STRONG><a name="[8c]"></a>start_tk_sensor_monitor</STRONG> (Thumb, 432 bytes, Stack size 72 bytes, freertos.o(i.start_tk_sensor_monitor))
+<P><STRONG><a name="[8c]"></a>start_tk_sensor_monitor</STRONG> (Thumb, 448 bytes, Stack size 72 bytes, freertos.o(i.start_tk_sensor_monitor))
 <BR><BR>[Stack]<UL><LI>Max Depth = 184<LI>Call Chain = start_tk_sensor_monitor &rArr; xQueueGenericSend &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
 </UL>
 <BR>[Calls]<UL><LI><a href="#[16e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueGenericSend
@@ -2876,6 +2879,7 @@ Global Symbols
 <BR><BR>[Called By]<UL><LI><a href="#[1b1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueSemaphoreTake
 <LI><a href="#[16e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueGenericSend
 <LI><a href="#[170]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;uxQueueSpacesAvailable
+<LI><a href="#[1c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;result_parse_2
 <LI><a href="#[17f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;modbus_send_sub
 <LI><a href="#[17d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;modbus_send
 <LI><a href="#[159]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xTaskNotifyWait
@@ -2897,6 +2901,7 @@ Global Symbols
 <BR><BR>[Called By]<UL><LI><a href="#[1b1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueSemaphoreTake
 <LI><a href="#[16e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueGenericSend
 <LI><a href="#[170]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;uxQueueSpacesAvailable
+<LI><a href="#[1c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;result_parse_2
 <LI><a href="#[17f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;modbus_send_sub
 <LI><a href="#[17d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;modbus_send
 <LI><a href="#[159]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xTaskNotifyWait
@@ -3139,6 +3144,7 @@ Global Symbols
 </UL>
 <BR>[Called By]<UL><LI><a href="#[174]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xTimerGenericCommand
 <LI><a href="#[1b0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;switchGet
+<LI><a href="#[1c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;result_parse_2
 <LI><a href="#[178]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;lock_init
 <LI><a href="#[141]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;enable_motor
 <LI><a href="#[9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_9
@@ -3400,12 +3406,11 @@ Global Symbols
 <H3>
 Local Symbols
 </H3>
-<P><STRONG><a name="[9a]"></a>prvAutoReloadMotorStatusTimerCallback</STRONG> (Thumb, 748 bytes, Stack size 184 bytes, freertos.o(i.prvAutoReloadMotorStatusTimerCallback))
-<BR><BR>[Stack]<UL><LI>Max Depth = 296<LI>Call Chain = prvAutoReloadMotorStatusTimerCallback &rArr; xQueueGenericSend &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
+<P><STRONG><a name="[9a]"></a>prvAutoReloadMotorStatusTimerCallback</STRONG> (Thumb, 356 bytes, Stack size 104 bytes, freertos.o(i.prvAutoReloadMotorStatusTimerCallback))
+<BR><BR>[Stack]<UL><LI>Max Depth = 216<LI>Call Chain = prvAutoReloadMotorStatusTimerCallback &rArr; xQueueGenericSend &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
 </UL>
 <BR>[Calls]<UL><LI><a href="#[16e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueGenericSend
 <LI><a href="#[a6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_i2d
-<LI><a href="#[16f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_cdcmple
 <LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_d2iz
 <LI><a href="#[af]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__2printf
 </UL>
