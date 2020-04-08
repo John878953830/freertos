@@ -334,6 +334,23 @@ uint8_t motor_array_init(void)
 		motor_array[i].position_value.position_min=-200;
 	}
 	
+	
+	
+	
+	
+	
+	//初始化碰撞检测结构体的一些量
+	motor_array[0].conflict_value.conflict_counter=1;
+	motor_array[0].conflict_value.conflict_number[0]=1;
+	
+	motor_array[2].conflict_value.conflict_counter=2;
+	motor_array[2].conflict_value.conflict_number[0]=4;
+	motor_array[2].conflict_value.conflict_number[1]=9;
+	
+	motor_array[3].conflict_value.conflict_counter=2;
+	motor_array[3].conflict_value.conflict_number[0]=4;
+	motor_array[3].conflict_value.conflict_number[1]=9;
+	
 	return 0;
 }
 //链表创建函数
@@ -929,9 +946,10 @@ int command_6(uint8_t* data,uint32_t para)
 int command_7(uint8_t* data,uint32_t para)
 {
 	uint8_t if_return=(para>>4)&0x01;
-	int32_t period=(data[0] << 24)|(data[1]<<16)|(data[2]<<8)|data[3];
+	//int32_t period=(data[0] << 24)|(data[1]<<16)|(data[2]<<8)|data[3];
+	int32_t period=(data[0]<<8)|data[1];
 	uint8_t data_len=(uint8_t)(para & 0x0F);
-	if(period==0x00 || data_len != 4)
+	if(period==0x00 || data_len != 2)
 	{
 		if(if_return==1)
 		{
@@ -1366,7 +1384,7 @@ int command_8(uint8_t* data,uint32_t para)
 		else{
 			
 		//索引错误
-		if(if_return==1)
+		if(if_return==1 || motor_array[data[0] - 1].conflict_value.if_conflict==0x01)
 		{
 			tmp.property=0x00;             //can send
 			tmp.can_command=0x08;          //停止指令
@@ -1401,6 +1419,38 @@ int command_8(uint8_t* data,uint32_t para)
 	}
 	else
 	{
+		
+		//碰撞检测判定，不管是否需要返回帧，强制发送
+		if(motor_array[data[0] - 1].conflict_value.if_conflict==0x01)
+		{
+			tmp.property=0x00;             //can send
+			tmp.can_command=0x08;          //停止指令
+			tmp.can_if_ack=0x01;           //需要ACK
+			tmp.can_source=0x03;           //本模块
+			tmp.can_target=0x00;
+			tmp.can_priority=0x03;         //命令结束返回帧
+			tmp.can_if_last=0x00;
+			tmp.can_if_return=0x00;
+			tmp.length=4;
+			tmp.data[0]=0x00;
+			tmp.data[1]=0x00;
+			tmp.data[2]=0x00;
+			tmp.data[3]=ERROR_COMMAND_8_FAIL;
+			portBASE_TYPE status = xQueueSendToBack(send_queueHandle, &tmp, 0);
+			if(status!=pdPASS)
+			{
+				#ifdef DEBUG_OUTPUT
+				printf("%s\n","queue overflow");
+				#endif
+			}
+			else
+			{
+				#ifdef DEBUG_OUTPUT
+				printf("%s\n","send command 7 error to queue already");
+				#endif
+			}
+			return ERROR_COMMAND_8_FAIL;
+		}
 		//填充485发送结构体
 		/*
 		tmp.property=1;                            //485 send

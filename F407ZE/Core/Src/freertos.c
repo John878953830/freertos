@@ -216,7 +216,7 @@ static void prvAutoReloadTimerCallback( TimerHandle_t xTimer )
 		queue_id.can_version=0x00;       //can version
 		int32_t tmp_position=motor_array[i].position_value.current_position;
 		//导程变换
-		tmp_position=tmp_position/10000*motor_array[i].speed_value.scal;
+		tmp_position=tmp_position*motor_array[i].speed_value.scal/10000;
 		queue_id.data[0]=(uint8_t)((tmp_position >> 24) & 0xFF);
 		queue_id.data[1]=(uint8_t)((tmp_position >> 16) & 0xFF);
 		queue_id.data[2]=(uint8_t)((tmp_position >> 8) & 0xFF);
@@ -250,8 +250,8 @@ static void prvAutoReloadTimerCallback( TimerHandle_t xTimer )
 		queue_id.can_if_ack=0x00;        //can if ack
 		queue_id.can_version=0x00;       //can version
 		//导程变换
-		int32_t tmp_speed=motor_array[i].speed_value.current_speed;
-		float tmp_speed_f=tmp_speed/10/60*motor_array[i].speed_value.scal;
+		int32_t tmp_speed=__fabs(motor_array[i].speed_value.current_speed) < SPEED_JUDGE ? motor_array[i].speed_value.default_speed : motor_array[i].speed_value.current_speed;
+		float tmp_speed_f=(float)tmp_speed*motor_array[i].speed_value.scal/10/60;
 		tmp_speed_f*=100;
 		tmp_speed=(int32_t)tmp_speed_f;
 		queue_id.data[0]=(uint8_t)((tmp_speed >> 24) & 0xFF);
@@ -1091,7 +1091,65 @@ void start_tk_conflict_monitor(void *argument)
 			#ifdef DEBUG_OUTPUT
 			printf("%s\n","start tk conflict monitor");
 			#endif
-			
+			uint8_t i=0;
+			for(i=0;i<4;i++)
+			{
+				if(i==1)
+					continue;
+				uint8_t j=0;
+				uint8_t counter=0;
+				for(j=0;j<motor_array[i].conflict_value.conflict_counter;j++)
+				{
+					if(motor_array[i].conflict_value.conflict_status[j]==0x01 && motor_array[i].command.command_status==0x01)
+					{
+						//条件累加计数
+						counter++;
+					}
+				}
+				if(counter==motor_array[i].conflict_value.conflict_counter)
+				{
+					//触发碰撞检测，停止所运动电机,并发送return帧
+					//各电机GPIO使能输出低电平
+		      HAL_GPIO_WritePin(motor_array[i].gpio_output[ENABLE_MOTOR].gpio_port,motor_array[i].gpio_output[ENABLE_MOTOR].pin_number,GPIO_PIN_RESET);
+					motor_array[i].conflict_value.if_conflict=0x01;
+					//压入发送队列
+					//停止电机，电机号2
+					QUEUE_STRUCT enable_motor;
+		
+					enable_motor.property=1;                            //485 send
+					enable_motor.modbus_addr=i+1;
+					enable_motor.modbus_func=0x10;                      //写多个寄存器
+					enable_motor.modbus_addr_h=(uint8_t)(2040>>8);
+					enable_motor.modbus_addr_l=(uint8_t)(2040&0xFF);                   //电机485地址
+					enable_motor.modbus_data_len_h=0x00;
+					enable_motor.modbus_data_len_l=0x02;
+					enable_motor.modbus_data_byte=0x04;
+					enable_motor.modbus_data_1=0x08;
+					enable_motor.modbus_data_2=0x00;
+					enable_motor.modbus_data_3=0x00;
+					enable_motor.modbus_data_4=0x00;
+					
+					//modbus_send_sub(enable_motor);
+					portBASE_TYPE	status = xQueueSendToBack(send_queueHandle, &enable_motor, 0);
+					if(status!=pdPASS)
+					{
+						#ifdef DEBUG_OUTPUT
+						printf("%s\n","queue overflow");
+						#endif
+					}
+					else
+					{
+						#ifdef DEBUG_OUTPUT
+						printf("%s\n","send command 7 succes to queue already");
+						#endif
+					}
+					
+				}
+				else
+				{
+					motor_array[i].conflict_value.if_conflict=0;
+				}
+			}
 			notify_use=0;
 		}
     osDelay(1);
@@ -1405,6 +1463,7 @@ void start_tk_master_order(void *argument)
 					uint8_t tmp_if_last=(id.RxHeader.ExtId & MASK_IF_LAST) >> 8;
 					uint8_t tmp_can_version=(id.RxHeader.ExtId & MASK_VERSION) >> 0;
 					uint8_t tmp_target=(id.RxHeader.ExtId & MASK_TARGET) >> 16;
+					uint8_t tmp_source=(id.RxHeader.ExtId & MASK_SOURCE) >> 21;
 					
 					//判断ACK是否需要立即回复发送方
 					if(tmp_if_ack==1 && tmp_priority!=1) //priority = 1 时为ACK帧
@@ -1438,7 +1497,7 @@ void start_tk_master_order(void *argument)
 						}
 					}
 					
-					if(tmp_priority!=1)
+					if(tmp_priority!=1)//非ACK帧
 					{
 						if(tmp_command_id>CAN_COMMAND_NUMBER)
 						{
@@ -1451,10 +1510,28 @@ void start_tk_master_order(void *argument)
 						{
 							if(tmp_target==31)
 							{
-								//广播ID， 只有一组急停指令
+								//广播ID
 								uint8_t data=0;
 								uint8_t para=tmp_if_return;
-								command_to_function[tmp_command_id](&data,para);
+								if(tmp_source==0x00 && tmp_command_id==0x00)
+								{
+									command_to_function[tmp_command_id](&data,para);
+								}
+								if(tmp_source==0x01 && tmp_command_id==0x0B)
+								{
+									//填充碰撞检测结构体
+									uint8_t i=0;
+									for(i=0;i<4;i++)
+									{
+										if(i==1)
+											continue;
+										uint8_t j;
+										for(j=0;j<motor_array[i].conflict_value.conflict_counter;j++)
+										{
+											motor_array[i].conflict_value.conflict_status[j]=(id.data[3]>>motor_array[i].conflict_value.conflict_number[j])&0x01;
+										}
+									}
+								}
 							}
 							else
 							{
@@ -1508,6 +1585,11 @@ void start_tk_master_order(void *argument)
 						//根据命令电机映射表找到要动作的电机，并将参数压入电机中的命令结构
 						//uint8_t motor_id=command_to_motor[tmp_command_id];
 						}
+					}
+					else
+					{
+						//主机发送的ACK帧处理，未完成
+						
 					}
 				}
 			}

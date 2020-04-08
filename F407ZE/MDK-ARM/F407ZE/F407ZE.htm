@@ -3,7 +3,7 @@
 <title>Static Call Graph - [F407ZE\F407ZE.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image F407ZE\F407ZE.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060422: Last Updated: Tue Apr 07 17:18:38 2020
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060422: Last Updated: Wed Apr 08 17:00:53 2020
 <BR><P>
 <H3>Maximum Stack Usage =       1672 bytes + Unknown(Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -1001,6 +1001,7 @@ Global Symbols
 <LI><a href="#[95]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;start_tk_result_process_send
 <LI><a href="#[94]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;start_tk_result_process_rece
 <LI><a href="#[92]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;start_tk_limit_sw
+<LI><a href="#[8b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;start_tk_conflict_monitor
 </UL>
 
 <P><STRONG><a name="[c6]"></a>HAL_GetTick</STRONG> (Thumb, 6 bytes, Stack size 0 bytes, stm32f4xx_hal.o(i.HAL_GetTick))
@@ -2137,7 +2138,7 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[138]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MX_FREERTOS_Init
 </UL>
 
-<P><STRONG><a name="[0]"></a>command_0</STRONG> (Thumb, 260 bytes, Stack size 104 bytes, main.o(i.command_0))
+<P><STRONG><a name="[0]"></a>command_0</STRONG> (Thumb, 258 bytes, Stack size 104 bytes, main.o(i.command_0))
 <BR><BR>[Stack]<UL><LI>Max Depth = 216<LI>Call Chain = command_0 &rArr; xQueueGenericSend &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
 </UL>
 <BR>[Calls]<UL><LI><a href="#[16e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueGenericSend
@@ -2326,7 +2327,7 @@ Global Symbols
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> main.o(.data)
 </UL>
-<P><STRONG><a name="[7]"></a>command_7</STRONG> (Thumb, 308 bytes, Stack size 112 bytes, main.o(i.command_7))
+<P><STRONG><a name="[7]"></a>command_7</STRONG> (Thumb, 296 bytes, Stack size 112 bytes, main.o(i.command_7))
 <BR><BR>[Stack]<UL><LI>Max Depth = 304<LI>Call Chain = command_7 &rArr; iic_rw &rArr; HAL_I2C_Master_Receive &rArr; I2C_MasterRequestRead &rArr; I2C_WaitOnMasterAddressFlagUntilTimeout
 </UL>
 <BR>[Calls]<UL><LI><a href="#[174]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xTimerGenericCommand
@@ -2337,7 +2338,7 @@ Global Symbols
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> main.o(.data)
 </UL>
-<P><STRONG><a name="[8]"></a>command_8</STRONG> (Thumb, 1314 bytes, Stack size 176 bytes, main.o(i.command_8))
+<P><STRONG><a name="[8]"></a>command_8</STRONG> (Thumb, 1336 bytes, Stack size 176 bytes, main.o(i.command_8))
 <BR><BR>[Stack]<UL><LI>Max Depth = 288<LI>Call Chain = command_8 &rArr; xQueueGenericSend &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
 </UL>
 <BR>[Calls]<UL><LI><a href="#[16e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueGenericSend
@@ -2346,7 +2347,7 @@ Global Symbols
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> main.o(.data)
 </UL>
-<P><STRONG><a name="[9]"></a>command_9</STRONG> (Thumb, 402 bytes, Stack size 104 bytes, main.o(i.command_9))
+<P><STRONG><a name="[9]"></a>command_9</STRONG> (Thumb, 390 bytes, Stack size 104 bytes, main.o(i.command_9))
 <BR><BR>[Stack]<UL><LI>Max Depth = 216<LI>Call Chain = command_9 &rArr; xQueueGenericSend &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
 </UL>
 <BR>[Calls]<UL><LI><a href="#[16e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueGenericSend
@@ -2489,7 +2490,7 @@ Global Symbols
 <LI><a href="#[93]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;start_tk_result_process
 </UL>
 
-<P><STRONG><a name="[13d]"></a>motor_array_init</STRONG> (Thumb, 480 bytes, Stack size 40 bytes, main.o(i.motor_array_init))
+<P><STRONG><a name="[13d]"></a>motor_array_init</STRONG> (Thumb, 498 bytes, Stack size 40 bytes, main.o(i.motor_array_init))
 <BR><BR>[Stack]<UL><LI>Max Depth = 232<LI>Call Chain = motor_array_init &rArr; iic_rw &rArr; HAL_I2C_Master_Receive &rArr; I2C_MasterRequestRead &rArr; I2C_WaitOnMasterAddressFlagUntilTimeout
 </UL>
 <BR>[Calls]<UL><LI><a href="#[173]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;iic_rw
@@ -2576,10 +2577,10 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[195]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;prvInitialiseNewTask
 </UL>
 
-<P><STRONG><a name="[1b]"></a>result_parse_1</STRONG> (Thumb, 44 bytes, Stack size 0 bytes, main.o(i.result_parse_1))
+<P><STRONG><a name="[1b]"></a>result_parse_1</STRONG> (Thumb, 42 bytes, Stack size 0 bytes, main.o(i.result_parse_1))
 <BR>[Address Reference Count : 1]<UL><LI> main.o(.data)
 </UL>
-<P><STRONG><a name="[1c]"></a>result_parse_2</STRONG> (Thumb, 494 bytes, Stack size 112 bytes, main.o(i.result_parse_2))
+<P><STRONG><a name="[1c]"></a>result_parse_2</STRONG> (Thumb, 492 bytes, Stack size 112 bytes, main.o(i.result_parse_2))
 <BR><BR>[Stack]<UL><LI>Max Depth = 224<LI>Call Chain = result_parse_2 &rArr; xQueueGenericSend &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
 </UL>
 <BR>[Calls]<UL><LI><a href="#[16e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueGenericSend
@@ -2594,19 +2595,19 @@ Global Symbols
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> main.o(.data)
 </UL>
-<P><STRONG><a name="[1d]"></a>result_parse_3</STRONG> (Thumb, 44 bytes, Stack size 0 bytes, main.o(i.result_parse_3))
+<P><STRONG><a name="[1d]"></a>result_parse_3</STRONG> (Thumb, 42 bytes, Stack size 0 bytes, main.o(i.result_parse_3))
 <BR>[Address Reference Count : 1]<UL><LI> main.o(.data)
 </UL>
-<P><STRONG><a name="[1e]"></a>result_parse_4</STRONG> (Thumb, 44 bytes, Stack size 0 bytes, main.o(i.result_parse_4))
+<P><STRONG><a name="[1e]"></a>result_parse_4</STRONG> (Thumb, 42 bytes, Stack size 0 bytes, main.o(i.result_parse_4))
 <BR>[Address Reference Count : 1]<UL><LI> main.o(.data)
 </UL>
-<P><STRONG><a name="[1f]"></a>result_parse_5</STRONG> (Thumb, 44 bytes, Stack size 0 bytes, main.o(i.result_parse_5))
+<P><STRONG><a name="[1f]"></a>result_parse_5</STRONG> (Thumb, 42 bytes, Stack size 0 bytes, main.o(i.result_parse_5))
 <BR>[Address Reference Count : 1]<UL><LI> main.o(.data)
 </UL>
-<P><STRONG><a name="[20]"></a>result_parse_6</STRONG> (Thumb, 44 bytes, Stack size 0 bytes, main.o(i.result_parse_6))
+<P><STRONG><a name="[20]"></a>result_parse_6</STRONG> (Thumb, 42 bytes, Stack size 0 bytes, main.o(i.result_parse_6))
 <BR>[Address Reference Count : 1]<UL><LI> main.o(.data)
 </UL>
-<P><STRONG><a name="[21]"></a>result_parse_7</STRONG> (Thumb, 44 bytes, Stack size 0 bytes, main.o(i.result_parse_7))
+<P><STRONG><a name="[21]"></a>result_parse_7</STRONG> (Thumb, 42 bytes, Stack size 0 bytes, main.o(i.result_parse_7))
 <BR>[Address Reference Count : 1]<UL><LI> main.o(.data)
 </UL>
 <P><STRONG><a name="[13e]"></a>start_soft_timer</STRONG> (Thumb, 86 bytes, Stack size 24 bytes, freertos.o(i.start_soft_timer))
@@ -2639,10 +2640,12 @@ Global Symbols
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> freertos.o(i.MX_FREERTOS_Init)
 </UL>
-<P><STRONG><a name="[8b]"></a>start_tk_conflict_monitor</STRONG> (Thumb, 42 bytes, Stack size 8 bytes, freertos.o(i.start_tk_conflict_monitor))
-<BR><BR>[Stack]<UL><LI>Max Depth = 80<LI>Call Chain = start_tk_conflict_monitor &rArr; osDelay &rArr; vTaskDelay &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
+<P><STRONG><a name="[8b]"></a>start_tk_conflict_monitor</STRONG> (Thumb, 234 bytes, Stack size 72 bytes, freertos.o(i.start_tk_conflict_monitor))
+<BR><BR>[Stack]<UL><LI>Max Depth = 184<LI>Call Chain = start_tk_conflict_monitor &rArr; xQueueGenericSend &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
 </UL>
-<BR>[Calls]<UL><LI><a href="#[159]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xTaskNotifyWait
+<BR>[Calls]<UL><LI><a href="#[16e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueGenericSend
+<LI><a href="#[143]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_GPIO_WritePin
+<LI><a href="#[159]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xTaskNotifyWait
 <LI><a href="#[15c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osDelay
 <LI><a href="#[af]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__2printf
 </UL>
@@ -2657,7 +2660,7 @@ Global Symbols
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> freertos.o(i.MX_FREERTOS_Init)
 </UL>
-<P><STRONG><a name="[92]"></a>start_tk_limit_sw</STRONG> (Thumb, 92 bytes, Stack size 8 bytes, freertos.o(i.start_tk_limit_sw))
+<P><STRONG><a name="[92]"></a>start_tk_limit_sw</STRONG> (Thumb, 88 bytes, Stack size 8 bytes, freertos.o(i.start_tk_limit_sw))
 <BR><BR>[Stack]<UL><LI>Max Depth = 160<LI>Call Chain = start_tk_limit_sw &rArr; switchGet &rArr; xQueueGenericSend &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
 </UL>
 <BR>[Calls]<UL><LI><a href="#[143]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_GPIO_WritePin
@@ -2668,8 +2671,8 @@ Global Symbols
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> freertos.o(i.MX_FREERTOS_Init)
 </UL>
-<P><STRONG><a name="[91]"></a>start_tk_master_order</STRONG> (Thumb, 348 bytes, Stack size 160 bytes, freertos.o(i.start_tk_master_order))
-<BR><BR>[Stack]<UL><LI>Max Depth = 272<LI>Call Chain = start_tk_master_order &rArr; xQueueGenericSend &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
+<P><STRONG><a name="[91]"></a>start_tk_master_order</STRONG> (Thumb, 450 bytes, Stack size 168 bytes, freertos.o(i.start_tk_master_order))
+<BR><BR>[Stack]<UL><LI>Max Depth = 280<LI>Call Chain = start_tk_master_order &rArr; xQueueGenericSend &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
 </UL>
 <BR>[Calls]<UL><LI><a href="#[16e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueGenericSend
 <LI><a href="#[1a0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueReceive
@@ -2707,7 +2710,7 @@ Global Symbols
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> freertos.o(i.MX_FREERTOS_Init)
 </UL>
-<P><STRONG><a name="[94]"></a>start_tk_result_process_rece</STRONG> (Thumb, 296 bytes, Stack size 56 bytes, freertos.o(i.start_tk_result_process_rece))
+<P><STRONG><a name="[94]"></a>start_tk_result_process_rece</STRONG> (Thumb, 294 bytes, Stack size 56 bytes, freertos.o(i.start_tk_result_process_rece))
 <BR><BR>[Stack]<UL><LI>Max Depth = 148<LI>Call Chain = start_tk_result_process_rece &rArr; modbus_send_sub &rArr; HAL_UART_Transmit_DMA &rArr; HAL_DMA_Start_IT &rArr; DMA_SetConfig
 </UL>
 <BR>[Calls]<UL><LI><a href="#[143]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_GPIO_WritePin
@@ -2742,7 +2745,7 @@ Global Symbols
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> freertos.o(i.MX_FREERTOS_Init)
 </UL>
-<P><STRONG><a name="[8c]"></a>start_tk_sensor_monitor</STRONG> (Thumb, 448 bytes, Stack size 72 bytes, freertos.o(i.start_tk_sensor_monitor))
+<P><STRONG><a name="[8c]"></a>start_tk_sensor_monitor</STRONG> (Thumb, 446 bytes, Stack size 72 bytes, freertos.o(i.start_tk_sensor_monitor))
 <BR><BR>[Stack]<UL><LI>Max Depth = 184<LI>Call Chain = start_tk_sensor_monitor &rArr; xQueueGenericSend &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
 </UL>
 <BR>[Calls]<UL><LI><a href="#[16e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueGenericSend
@@ -2763,7 +2766,7 @@ Global Symbols
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> freertos.o(i.MX_FREERTOS_Init)
 </UL>
-<P><STRONG><a name="[1b0]"></a>switchGet</STRONG> (Thumb, 346 bytes, Stack size 40 bytes, main.o(i.switchGet))
+<P><STRONG><a name="[1b0]"></a>switchGet</STRONG> (Thumb, 338 bytes, Stack size 40 bytes, main.o(i.switchGet))
 <BR><BR>[Stack]<UL><LI>Max Depth = 152<LI>Call Chain = switchGet &rArr; xQueueGenericSend &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
 </UL>
 <BR>[Calls]<UL><LI><a href="#[1b1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueSemaphoreTake
@@ -3166,6 +3169,7 @@ Global Symbols
 <LI><a href="#[0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_0
 <LI><a href="#[8c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;start_tk_sensor_monitor
 <LI><a href="#[91]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;start_tk_master_order
+<LI><a href="#[8b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;start_tk_conflict_monitor
 <LI><a href="#[99]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;prvAutoReloadTimerCallback
 <LI><a href="#[9a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;prvAutoReloadMotorStatusTimerCallback
 </UL>
@@ -3406,7 +3410,7 @@ Global Symbols
 <H3>
 Local Symbols
 </H3>
-<P><STRONG><a name="[9a]"></a>prvAutoReloadMotorStatusTimerCallback</STRONG> (Thumb, 356 bytes, Stack size 104 bytes, freertos.o(i.prvAutoReloadMotorStatusTimerCallback))
+<P><STRONG><a name="[9a]"></a>prvAutoReloadMotorStatusTimerCallback</STRONG> (Thumb, 354 bytes, Stack size 104 bytes, freertos.o(i.prvAutoReloadMotorStatusTimerCallback))
 <BR><BR>[Stack]<UL><LI>Max Depth = 216<LI>Call Chain = prvAutoReloadMotorStatusTimerCallback &rArr; xQueueGenericSend &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
 </UL>
 <BR>[Calls]<UL><LI><a href="#[16e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueGenericSend
@@ -3416,8 +3420,8 @@ Local Symbols
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> freertos.o(i.start_soft_timer)
 </UL>
-<P><STRONG><a name="[99]"></a>prvAutoReloadTimerCallback</STRONG> (Thumb, 1208 bytes, Stack size 112 bytes, freertos.o(i.prvAutoReloadTimerCallback))
-<BR><BR>[Stack]<UL><LI>Max Depth = 224<LI>Call Chain = prvAutoReloadTimerCallback &rArr; xQueueGenericSend &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
+<P><STRONG><a name="[99]"></a>prvAutoReloadTimerCallback</STRONG> (Thumb, 1252 bytes, Stack size 128 bytes, freertos.o(i.prvAutoReloadTimerCallback))
+<BR><BR>[Stack]<UL><LI>Max Depth = 240<LI>Call Chain = prvAutoReloadTimerCallback &rArr; xQueueGenericSend &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
 </UL>
 <BR>[Calls]<UL><LI><a href="#[16e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueGenericSend
 <LI><a href="#[170]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;uxQueueSpacesAvailable

@@ -155,6 +155,7 @@ extern uint8_t modbus_time_flag;       //modbus  ¶¨Ê±Ê±¼ä±êÖ¾  1£º µÚÒ»´Î3.5T¶¨Ê
 #define MASK_IF_ACK             (uint32_t)(0x01 << 6)
 #define MASK_VERSION            (uint32_t)(0x07 << 0)
 #define MASK_TARGET             (uint32_t)(0x1F << 16)
+#define MASK_SOURCE             (uint32_t)(0x1F << 21)
 //µç»ú¸öÊýºÍ´«¸ÐÆ÷¸öÊýÉèÖÃ
 #define MAX_MOTOR_NUMBER        3
 #define POSTURE_NUM             6
@@ -230,6 +231,12 @@ uint8_t iic_rw(uint8_t rw_flag, uint8_t addr,uint8_t* data,uint8_t length);
 
 /* Private defines -----------------------------------------------------------*/
 /* USER CODE BEGIN Private defines */
+typedef struct conflict_struct{
+	uint8_t conflict_status[8];                 //±íÊ¾Åö×²¼ì²â×´Ì¬µãÎ»µÄ×´Ì¬
+	uint8_t conflict_number[8];                 //±íÊ¾Åö×²¼ì²âËùÒª¼ì²âµÄ×´Ì¬µãµÄÎ»ÖÃ
+	uint8_t conflict_counter;                   //±íÊ¾Åö×²¼ì²âµãÎ»µÄ×Ü¸öÊý£¬×î´óÎª8
+	uint8_t if_conflict;                        //0: ÎÞÅö×² 1£º´æÔÚÅö×²
+}CONFLICT_STRUCT;
 typedef union broadcast_union{
 	uint8_t data[4];
 	float   distance;
@@ -388,6 +395,7 @@ typedef struct motor_struct{
 	uint32_t temperature;                         //ÎÂ¶ÈÐÅÏ¢
 	uint32_t motor_error_code;                    //µç»úÇý¶¯Æ÷µÄ´íÎóÂë
 	uint8_t self_check_counter;                   //×Ô¼ì¼ÆÊýÖµ
+	CONFLICT_STRUCT conflict_value;               //Åö×²¼ì²â½á¹¹Ìå
 }MOTOR_STRUCT;
 
 typedef struct angle_struct{
