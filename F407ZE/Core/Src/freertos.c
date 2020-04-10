@@ -1470,7 +1470,7 @@ void start_tk_master_order(void *argument)
 					uint8_t tmp_source=(id.RxHeader.ExtId & MASK_SOURCE) >> 21;
 					
 					//判断ACK是否需要立即回复发送方
-					if(tmp_if_ack==1 && tmp_priority!=1) //priority = 1 时为ACK帧
+					if(tmp_if_ack==1 && (tmp_priority==2 || tmp_priority==5)) //priority = 1 时为ACK帧
 					{
 						//tmp填充为cansend
 						tmp.property=0;                     //can send 

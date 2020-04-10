@@ -81,6 +81,9 @@ extern uint8_t modbus_act_status;      //modbus µç»ú¶¯×÷Íê³É±êÖ¾£¬ 0£º¿ÕÏÐ£¬ 1£º
 extern uint8_t modbus_time_status;     //modbus ³¬Ê±±êÖ¾£¬ 0£º¿ÕÏÐ£¬ 1£º½»»¥³¬Ê± 2£º½»»¥Íê³É
 extern uint8_t modbus_time_flag;       //modbus  ¶¨Ê±Ê±¼ä±êÖ¾  1£º µÚÒ»´Î3.5T¶¨Ê±  1£ºµÚ¶þ´Î3.5T¶¨Ê±
 
+extern uint8_t self_check_counter_6;           //6ºÅ×Ô¼ìÖ¸ÁîµÄ¼ÆÊýÖµ
+extern uint8_t cmd6_if_return;                 //6ºÅ×ÜÌå×Ô¼ìÍê³ÉÊÇ·ñ·µ»Ø
+
 /* USER CODE END EC */
 
 /* Exported macro ------------------------------------------------------------*/
@@ -178,6 +181,23 @@ extern uint8_t modbus_time_flag;       //modbus  ¶¨Ê±Ê±¼ä±êÖ¾  1£º µÚÒ»´Î3.5T¶¨Ê
 #define TEMPERATURE_ADDR         4026
 #define REMAIN_PULSE             4012
 #define TARGET_POSITION_ADDR     4008
+
+//×Ô¼ì¿ªÊ¼Óë½áÊø¶¨Òå
+#define CMD6_START_SELFCHECK_0           3500
+#define CMD6_START_SELFCHECK_ERR0_0      3501
+#define CMD6_START_SELFCHECK_ERR1_0      3502
+#define CMD6_START_SELFCHECK_OK_0        3550
+
+#define CMD6_START_SELFCHECK_2           3600
+#define CMD6_START_SELFCHECK_ERR0_2      3601
+#define CMD6_START_SELFCHECK_ERR1_2      3602
+#define CMD6_START_SELFCHECK_OK_2        3650
+
+#define CMD6_START_SELFCHECK_3           3700
+#define CMD6_START_SELFCHECK_ERR0_3      3701
+#define CMD6_START_SELFCHECK_ERR1_3      3702
+#define CMD6_START_SELFCHECK_OK_3        3750
+
 /* USER CODE END EM */
 
 /* Exported functions prototypes ---------------------------------------------*/
@@ -385,7 +405,7 @@ typedef struct motor_struct{
 	SPEED speed_value;                           //ËÙ¶È½á¹¹Ìå
 	POSITION position_value;                     //Î»ÖÃ½á¹¹Ìå
 	uint8_t limit_sw_number;                     //ÏÞÎ»¿ª¹Ø¸öÊý£¬×î´óÎª8£¬×îÐ¡Îª0
-	SWITCH limit_sw[7];                          //ÏÞÎ»¿ª¹Ø×é£¬×î¶à¿É¹ØÁª4¸öÏÞÎ»¿ª¹Ø£¬0£º×ó¼«ÏÞ 1£ºÓÒ¼«ÏÞ 2£º×ó0µã 3£ºÓÒ0µã
+	SWITCH limit_sw[7];                          //ÏÞÎ»¿ª¹Ø×é£¬×î¶à¿É¹ØÁª4¸öÏÞÎ»¿ª¹Ø£¬0:TP0 µ½Î»¿ª¹Ø 1£ºtp1µ½Î»¿ª¹Ø 2£ºtp2 µ½Î»¿ª¹Ø
 	PID pid_value;                               //PID½á¹¹Ìå
 	TORQUE torque_value;                         //µç»úÅ¤¾ØÌØÐÔ
 	DIM dim_value;                               //Î¬¶È½á¹¹Ìå
