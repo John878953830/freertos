@@ -937,10 +937,10 @@ int command_6(uint8_t* data,uint32_t para)
 		}
 		return ERROR_COMMAND_6_FAIL;
 	}
-	command_18(data,if_return);
+	
 	command_15(data,if_return);
 	command_17(data,if_return);
-	
+	command_18(data,if_return);
 	return 0;
 }
 int command_7(uint8_t* data,uint32_t para)

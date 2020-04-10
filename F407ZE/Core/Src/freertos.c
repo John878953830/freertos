@@ -252,7 +252,7 @@ static void prvAutoReloadTimerCallback( TimerHandle_t xTimer )
 		//µ¼³Ì±ä»»
 		int32_t tmp_speed=__fabs(motor_array[i].speed_value.current_speed) < SPEED_JUDGE ? motor_array[i].speed_value.default_speed : motor_array[i].speed_value.current_speed;
 		float tmp_speed_f=(float)tmp_speed*motor_array[i].speed_value.scal/10/60;
-		tmp_speed_f*=100;
+		tmp_speed_f*=10;
 		tmp_speed=(int32_t)tmp_speed_f;
 		queue_id.data[0]=(uint8_t)((tmp_speed >> 24) & 0xFF);
 		queue_id.data[1]=(uint8_t)((tmp_speed >> 16) & 0xFF);
