@@ -486,9 +486,14 @@ static void prvAutoReloadMotorStatusTimerCallback( TimerHandle_t xTimer )
 
 void start_soft_timer(void)
 {
-	broadcast_timer = xTimerCreate( "AutoReload",timer_period,pdTRUE,0,prvAutoReloadTimerCallback );
+	broadcast_timer = xTimerCreate( "AutoReload",2000,pdTRUE,0,prvAutoReloadTimerCallback );
 	motor_status_timer=xTimerCreate( "AutoReloadStatusTimer",2000,pdTRUE,0,prvAutoReloadMotorStatusTimerCallback );
-	xTimerStart(broadcast_timer,0);
+	if(timer_period)
+	{
+		xTimerStart(broadcast_timer,0);
+		xTimerChangePeriod(broadcast_timer,timer_period/portTICK_PERIOD_MS,50);
+		
+	}
 	xTimerStart(motor_status_timer,0);
 	;
 }

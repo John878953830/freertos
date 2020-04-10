@@ -949,9 +949,9 @@ int command_7(uint8_t* data,uint32_t para)
 	//int32_t period=(data[0] << 24)|(data[1]<<16)|(data[2]<<8)|data[3];
 	int32_t period=(data[0]<<8)|data[1];
 	uint8_t data_len=(uint8_t)(para & 0x0F);
-	if(period==0x00 || data_len != 2)
+	if((data_len != 2) && if_return==1)
 	{
-		if(if_return==1)
+		if(period!=0)
 		{
 			QUEUE_STRUCT tmp;
 			tmp.property=0x00;             //can send
@@ -980,43 +980,63 @@ int command_7(uint8_t* data,uint32_t para)
 				printf("%s\n","send command 7 error to queue already");
 				#endif
 			}
+			return ERROR_COMMAND_7_FAIL;
 		}
-		return ERROR_COMMAND_7_FAIL;
 	}
-	if(xTimerChangePeriod(broadcast_timer,period/portTICK_PERIOD_MS,50)!=pdPASS)
+	if(period)
 	{
-		if(if_return==1)
+		if(timer_period==0)
 		{
-			QUEUE_STRUCT tmp;
-			tmp.property=0x00;             //can send
-			tmp.can_command=0x07;          //停止指令
-			tmp.can_if_ack=0x01;           //需要ACK
-			tmp.can_source=0x03;           //本模块
-			tmp.can_target=0x00;
-			tmp.can_priority=0x03;         //命令结束返回帧
-			tmp.can_if_last=0x00;
-			tmp.can_if_return=0x00;
-			tmp.length=4;
-			tmp.data[0]=0x00;
-			tmp.data[1]=0x00;
-			tmp.data[2]=0x00;
-			tmp.data[3]=ERROR_COMMAND_7_FAIL;
-			portBASE_TYPE status = xQueueSendToBack(send_queueHandle, &tmp, 0);
-			if(status!=pdPASS)
-			{
-				#ifdef DEBUG_OUTPUT
-				printf("%s\n","queue overflow");
-				#endif
-			}
-			else
-			{
-				#ifdef DEBUG_OUTPUT
-				printf("%s\n","send command 7 error to queue already");
-				#endif
-			}
+		  xTimerStart(broadcast_timer,0);
 		}
-		return ERROR_COMMAND_7_FAIL;
+		//if(xTimerIsTimerActive(broadcast_timer)!=NULL)
+		{
+			//xTimerStart(broadcast_timer,0);
+		}
+		
+		if(xTimerChangePeriod(broadcast_timer,period/portTICK_PERIOD_MS,50)!=pdPASS)
+		{
+			if(if_return==1)
+			{
+				QUEUE_STRUCT tmp;
+				tmp.property=0x00;             //can send
+				tmp.can_command=0x07;          //停止指令
+				tmp.can_if_ack=0x01;           //需要ACK
+				tmp.can_source=0x03;           //本模块
+				tmp.can_target=0x00;
+				tmp.can_priority=0x03;         //命令结束返回帧
+				tmp.can_if_last=0x00;
+				tmp.can_if_return=0x00;
+				tmp.length=4;
+				tmp.data[0]=0x00;
+				tmp.data[1]=0x00;
+				tmp.data[2]=0x00;
+				tmp.data[3]=ERROR_COMMAND_7_FAIL;
+				portBASE_TYPE status = xQueueSendToBack(send_queueHandle, &tmp, 0);
+				if(status!=pdPASS)
+				{
+					#ifdef DEBUG_OUTPUT
+					printf("%s\n","queue overflow");
+					#endif
+				}
+				else
+				{
+					#ifdef DEBUG_OUTPUT
+					printf("%s\n","send command 7 error to queue already");
+					#endif
+				}
+			}
+			return ERROR_COMMAND_7_FAIL;
+	  }
 	}
+	else
+	{
+		//period为0时停止广播定时器
+	  xTimerStop(broadcast_timer,0);
+		//更新timer period
+	  timer_period=period;
+	}
+	
 	//timeperiod 写入EEPROM
 	uint8_t data_iic[4]={0};
 	data_iic[0]=(uint8_t)((period>>24) & 0xFF);
@@ -1027,6 +1047,8 @@ int command_7(uint8_t* data,uint32_t para)
 	{
 		vTaskDelay(1);
 	}
+	//更新timer period
+	timer_period=period;
 	if(if_return==1)
 	{
 		QUEUE_STRUCT tmp;
