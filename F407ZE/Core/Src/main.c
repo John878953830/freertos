@@ -989,10 +989,6 @@ int command_7(uint8_t* data,uint32_t para)
 		{
 		  xTimerStart(broadcast_timer,0);
 		}
-		//if(xTimerIsTimerActive(broadcast_timer)!=NULL)
-		{
-			//xTimerStart(broadcast_timer,0);
-		}
 		
 		if(xTimerChangePeriod(broadcast_timer,period/portTICK_PERIOD_MS,50)!=pdPASS)
 		{

@@ -492,7 +492,6 @@ void start_soft_timer(void)
 	{
 		xTimerStart(broadcast_timer,0);
 		xTimerChangePeriod(broadcast_timer,timer_period/portTICK_PERIOD_MS,50);
-		
 	}
 	xTimerStart(motor_status_timer,0);
 	;
