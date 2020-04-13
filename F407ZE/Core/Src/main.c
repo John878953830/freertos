@@ -50,7 +50,7 @@ uint8_t modbus_read_status;     //modbus 读取指令完成标志， 0： 空闲 1：读取进行
 uint8_t modbus_act_status;      //modbus 电机动作完成标志， 0：空闲， 1：动作指令交互中 2： 动作指令交互完成
 uint8_t modbus_time_status;     //modbus 超时标志， 0：空闲， 1：交互超时 2：交互完成
 uint8_t modbus_time_flag=0;       //modbus  定时时间标志  1： 第一次3.5T定时  1：第二次3.5T定时
-uint8_t self_check_counter_6=0;   //6号自检指令标志位    
+static uint8_t self_check_counter_6=0;   //6号自检指令标志位    
 uint8_t cmd6_if_return=0;
 
 MODBUS_LIST* modbus_list_head=NULL;  //head 指向寻找到的第一个不为空的节点
@@ -4077,6 +4077,7 @@ void result_parse_2(uint8_t* data, uint8_t num)
 		{
 			//执行完成标志置位
 			motor_array[num].command.command_status=0x02;
+			
 			//普通动作的执行完成判定
 			if(motor_array[num].command.command_id==0x08 || 
 				 motor_array[num].command.command_id==0x0B ||
@@ -4084,7 +4085,7 @@ void result_parse_2(uint8_t* data, uint8_t num)
 			   motor_array[num].command.command_id==0x0D ||
 			   motor_array[num].command.command_id==0x0E)
 			{
-				if(motor_array[num].command.command_union!=0x14)
+				if(motor_array[num].command.command_union!=0x14 && motor_array[num].command.command_union!=0x06)
 				{
 					//发送返回帧
 					QUEUE_STRUCT frame_return;
@@ -4129,6 +4130,7 @@ void result_parse_2(uint8_t* data, uint8_t num)
 				
 				if(motor_array[num].command.command_union!=0x06)
 				{
+					motor_array[num].command.command_id=0x00;
 					//返回帧格式声明
 					QUEUE_STRUCT frame_return;
 					frame_return.property=0x00;             //can send
@@ -4170,8 +4172,9 @@ void result_parse_2(uint8_t* data, uint8_t num)
 				}
 				if(motor_array[num].command.command_union == 0x06)
 				{
-					if(num==0)
+					if(num==0 && motor_array[num].command.command_id==15)
 					{
+						motor_array[num].command.command_id=0x00;
 						//返回帧格式声明
 						QUEUE_STRUCT frame_return_cmd6;
 						frame_return_cmd6.property=0x00;             //can send
@@ -4203,7 +4206,7 @@ void result_parse_2(uint8_t* data, uint8_t num)
 						frame_return_cmd6.data[2]=(uint8_t)(CMD6_START_SELFCHECK_OK_0>>8);
 						frame_return_cmd6.data[3]=(uint8_t)(CMD6_START_SELFCHECK_OK_0);
 						//发送返回帧
-						taskENTER_CRITICAL();
+						//taskENTER_CRITICAL();
 						portBASE_TYPE status = xQueueSendToBack(send_queueHandle, &frame_return_cmd6, 0);
 						if(status!=pdPASS)
 						{
@@ -4217,12 +4220,13 @@ void result_parse_2(uint8_t* data, uint8_t num)
 							printf("%s\n","send command 7 error to queue already");
 							#endif
 						}
-						taskEXIT_CRITICAL();
+						//taskEXIT_CRITICAL();
 						//自检计数自增
 						self_check_counter_6++;
 					}
-					if(num==2)
+					if(num==2 && motor_array[num].command.command_id==17)
 					{
+						motor_array[num].command.command_id=0x00;
 						//返回帧格式声明
 						QUEUE_STRUCT frame_return_cmd6;
 						frame_return_cmd6.property=0x00;             //can send
@@ -4254,7 +4258,7 @@ void result_parse_2(uint8_t* data, uint8_t num)
 						frame_return_cmd6.data[2]=(uint8_t)(CMD6_START_SELFCHECK_OK_2>>8);
 						frame_return_cmd6.data[3]=(uint8_t)(CMD6_START_SELFCHECK_OK_2);
 						//发送返回帧
-						taskENTER_CRITICAL();
+						//taskENTER_CRITICAL();
 						portBASE_TYPE status = xQueueSendToBack(send_queueHandle, &frame_return_cmd6, 0);
 						if(status!=pdPASS)
 						{
@@ -4268,12 +4272,13 @@ void result_parse_2(uint8_t* data, uint8_t num)
 							printf("%s\n","send command 7 error to queue already");
 							#endif
 						}
-						taskEXIT_CRITICAL();
+						//taskEXIT_CRITICAL();
 						//自检计数增加
 						self_check_counter_6++;
 					}
-					if(num==3)
+					if(num==3 && motor_array[num].command.command_id==18)
 					{
+						motor_array[num].command.command_id=0x00;
 						//返回帧格式声明
 						QUEUE_STRUCT frame_return_cmd6;
 						frame_return_cmd6.property=0x00;             //can send
@@ -4304,7 +4309,7 @@ void result_parse_2(uint8_t* data, uint8_t num)
 						frame_return_cmd6.data[2]=(uint8_t)(CMD6_START_SELFCHECK_OK_3>>8);
 						frame_return_cmd6.data[3]=(uint8_t)(CMD6_START_SELFCHECK_OK_3);
 						//发送返回帧
-						taskENTER_CRITICAL();
+						//taskENTER_CRITICAL();
 						portBASE_TYPE status = xQueueSendToBack(send_queueHandle, &frame_return_cmd6, 0);
 						if(status!=pdPASS)
 						{
@@ -4318,7 +4323,7 @@ void result_parse_2(uint8_t* data, uint8_t num)
 							printf("%s\n","send command 7 error to queue already");
 							#endif
 						}
-						taskEXIT_CRITICAL();
+						//taskEXIT_CRITICAL();
 						self_check_counter_6++;
 					}
 					
@@ -4345,7 +4350,7 @@ void result_parse_2(uint8_t* data, uint8_t num)
 						tmp.data[1]=(uint8_t)(CMD6_START_SELFCHECK_2>>16);
 						tmp.data[2]=(uint8_t)(CMD6_START_SELFCHECK_2>>8);
 						tmp.data[3]=(uint8_t)(CMD6_START_SELFCHECK_2);
-						taskENTER_CRITICAL();
+						//taskENTER_CRITICAL();
 						BaseType_t status_q = xQueueSendToBack(send_queueHandle, &tmp, 0);
 						if(status_q!=pdPASS)
 						{
@@ -4359,7 +4364,7 @@ void result_parse_2(uint8_t* data, uint8_t num)
 							printf("%s\n","send command 1 success to queue already");
 							#endif
 						}
-						taskEXIT_CRITICAL();
+						//taskEXIT_CRITICAL();
 					}
 					if(self_check_counter_6==0x02)
 					{
@@ -4382,7 +4387,7 @@ void result_parse_2(uint8_t* data, uint8_t num)
 						tmp.data[1]=(uint8_t)(CMD6_START_SELFCHECK_3>>16);
 						tmp.data[2]=(uint8_t)(CMD6_START_SELFCHECK_3>>8);
 						tmp.data[3]=(uint8_t)(CMD6_START_SELFCHECK_3);
-						taskENTER_CRITICAL();
+						//taskENTER_CRITICAL();
 						BaseType_t status_q = xQueueSendToBack(send_queueHandle, &tmp, 0);
 						if(status_q!=pdPASS)
 						{
@@ -4396,7 +4401,7 @@ void result_parse_2(uint8_t* data, uint8_t num)
 							printf("%s\n","send command 1 success to queue already");
 							#endif
 						}
-						taskEXIT_CRITICAL();
+						//taskEXIT_CRITICAL();
 					}
 					//总体自检完成判定
 					if(self_check_counter_6==3 && cmd6_if_return==0x01)
@@ -4419,7 +4424,7 @@ void result_parse_2(uint8_t* data, uint8_t num)
 						tmp.data[1]=0;
 						tmp.data[2]=0;
 						tmp.data[3]=0;
-						taskENTER_CRITICAL();
+						//taskENTER_CRITICAL();
 						BaseType_t status_q = xQueueSendToBack(send_queueHandle, &tmp, 0);
 						if(status_q!=pdPASS)
 						{
@@ -4433,7 +4438,7 @@ void result_parse_2(uint8_t* data, uint8_t num)
 							printf("%s\n","send command 1 success to queue already");
 							#endif
 						}
-						taskEXIT_CRITICAL();
+						//taskEXIT_CRITICAL();
 					}
 				}
 			}

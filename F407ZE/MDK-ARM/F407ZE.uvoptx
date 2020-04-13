@@ -155,9 +155,9 @@
         <Bp>
           <Number>0</Number>
           <Type>0</Type>
-          <LineNumber>4126</LineNumber>
+          <LineNumber>4409</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134258414</Address>
+          <Address>134259062</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
@@ -166,14 +166,14 @@
           <BreakIfRCount>1</BreakIfRCount>
           <Filename>../Core/Src/main.c</Filename>
           <ExecCommand></ExecCommand>
-          <Expression>\\F407ZE\../Core/Src/main.c\4126</Expression>
+          <Expression>\\F407ZE\../Core/Src/main.c\4409</Expression>
         </Bp>
         <Bp>
           <Number>1</Number>
           <Type>0</Type>
-          <LineNumber>4102</LineNumber>
+          <LineNumber>4277</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134258366</Address>
+          <Address>134258726</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
@@ -182,94 +182,14 @@
           <BreakIfRCount>1</BreakIfRCount>
           <Filename>../Core/Src/main.c</Filename>
           <ExecCommand></ExecCommand>
-          <Expression>\\F407ZE\../Core/Src/main.c\4102</Expression>
+          <Expression>\\F407ZE\../Core/Src/main.c\4277</Expression>
         </Bp>
         <Bp>
           <Number>2</Number>
           <Type>0</Type>
-          <LineNumber>1456</LineNumber>
+          <LineNumber>907</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134260224</Address>
-          <ByteObject>0</ByteObject>
-          <HtxType>0</HtxType>
-          <ManyObjects>0</ManyObjects>
-          <SizeOfObject>0</SizeOfObject>
-          <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>1</BreakIfRCount>
-          <Filename>../Core/Src/freertos.c</Filename>
-          <ExecCommand></ExecCommand>
-          <Expression>\\\../Core/Src/freertos.c\1456</Expression>
-        </Bp>
-        <Bp>
-          <Number>3</Number>
-          <Type>0</Type>
-          <LineNumber>347</LineNumber>
-          <EnabledFlag>1</EnabledFlag>
-          <Address>134219282</Address>
-          <ByteObject>0</ByteObject>
-          <HtxType>0</HtxType>
-          <ManyObjects>0</ManyObjects>
-          <SizeOfObject>0</SizeOfObject>
-          <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>1</BreakIfRCount>
-          <Filename>../Core/Src/stm32f4xx_it.c</Filename>
-          <ExecCommand></ExecCommand>
-          <Expression>\\\../Core/Src/stm32f4xx_it.c\347</Expression>
-        </Bp>
-        <Bp>
-          <Number>4</Number>
-          <Type>0</Type>
-          <LineNumber>347</LineNumber>
-          <EnabledFlag>1</EnabledFlag>
-          <Address>134219288</Address>
-          <ByteObject>0</ByteObject>
-          <HtxType>0</HtxType>
-          <ManyObjects>0</ManyObjects>
-          <SizeOfObject>0</SizeOfObject>
-          <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>1</BreakIfRCount>
-          <Filename>../Core/Src/stm32f4xx_it.c</Filename>
-          <ExecCommand></ExecCommand>
-          <Expression>\\\../Core/Src/stm32f4xx_it.c\347</Expression>
-        </Bp>
-        <Bp>
-          <Number>5</Number>
-          <Type>0</Type>
-          <LineNumber>353</LineNumber>
-          <EnabledFlag>1</EnabledFlag>
-          <Address>134219286</Address>
-          <ByteObject>0</ByteObject>
-          <HtxType>0</HtxType>
-          <ManyObjects>0</ManyObjects>
-          <SizeOfObject>0</SizeOfObject>
-          <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>1</BreakIfRCount>
-          <Filename>../Core/Src/stm32f4xx_it.c</Filename>
-          <ExecCommand></ExecCommand>
-          <Expression>\\\../Core/Src/stm32f4xx_it.c\353</Expression>
-        </Bp>
-        <Bp>
-          <Number>6</Number>
-          <Type>0</Type>
-          <LineNumber>343</LineNumber>
-          <EnabledFlag>1</EnabledFlag>
-          <Address>134219266</Address>
-          <ByteObject>0</ByteObject>
-          <HtxType>0</HtxType>
-          <ManyObjects>0</ManyObjects>
-          <SizeOfObject>0</SizeOfObject>
-          <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>1</BreakIfRCount>
-          <Filename>../Core/Src/stm32f4xx_it.c</Filename>
-          <ExecCommand></ExecCommand>
-          <Expression>\\\../Core/Src/stm32f4xx_it.c\343</Expression>
-        </Bp>
-        <Bp>
-          <Number>7</Number>
-          <Type>0</Type>
-          <LineNumber>3103</LineNumber>
-          <EnabledFlag>1</EnabledFlag>
-          <Address>134245638</Address>
+          <Address>134248200</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
@@ -278,7 +198,71 @@
           <BreakIfRCount>1</BreakIfRCount>
           <Filename>../Core/Src/main.c</Filename>
           <ExecCommand></ExecCommand>
-          <Expression>\\F407ZE\../Core/Src/main.c\3103</Expression>
+          <Expression>\\F407ZE\../Core/Src/main.c\907</Expression>
+        </Bp>
+        <Bp>
+          <Number>3</Number>
+          <Type>0</Type>
+          <LineNumber>4313</LineNumber>
+          <EnabledFlag>1</EnabledFlag>
+          <Address>134258824</Address>
+          <ByteObject>0</ByteObject>
+          <HtxType>0</HtxType>
+          <ManyObjects>0</ManyObjects>
+          <SizeOfObject>0</SizeOfObject>
+          <BreakByAccess>0</BreakByAccess>
+          <BreakIfRCount>1</BreakIfRCount>
+          <Filename>../Core/Src/main.c</Filename>
+          <ExecCommand></ExecCommand>
+          <Expression>\\F407ZE\../Core/Src/main.c\4313</Expression>
+        </Bp>
+        <Bp>
+          <Number>4</Number>
+          <Type>0</Type>
+          <LineNumber>4131</LineNumber>
+          <EnabledFlag>1</EnabledFlag>
+          <Address>134258424</Address>
+          <ByteObject>0</ByteObject>
+          <HtxType>0</HtxType>
+          <ManyObjects>0</ManyObjects>
+          <SizeOfObject>0</SizeOfObject>
+          <BreakByAccess>0</BreakByAccess>
+          <BreakIfRCount>1</BreakIfRCount>
+          <Filename>../Core/Src/main.c</Filename>
+          <ExecCommand></ExecCommand>
+          <Expression>\\F407ZE\../Core/Src/main.c\4131</Expression>
+        </Bp>
+        <Bp>
+          <Number>5</Number>
+          <Type>0</Type>
+          <LineNumber>4106</LineNumber>
+          <EnabledFlag>1</EnabledFlag>
+          <Address>134258368</Address>
+          <ByteObject>0</ByteObject>
+          <HtxType>0</HtxType>
+          <ManyObjects>0</ManyObjects>
+          <SizeOfObject>0</SizeOfObject>
+          <BreakByAccess>0</BreakByAccess>
+          <BreakIfRCount>1</BreakIfRCount>
+          <Filename>../Core/Src/main.c</Filename>
+          <ExecCommand></ExecCommand>
+          <Expression>\\F407ZE\../Core/Src/main.c\4106</Expression>
+        </Bp>
+        <Bp>
+          <Number>6</Number>
+          <Type>0</Type>
+          <LineNumber>4206</LineNumber>
+          <EnabledFlag>1</EnabledFlag>
+          <Address>134258618</Address>
+          <ByteObject>0</ByteObject>
+          <HtxType>0</HtxType>
+          <ManyObjects>0</ManyObjects>
+          <SizeOfObject>0</SizeOfObject>
+          <BreakByAccess>0</BreakByAccess>
+          <BreakIfRCount>1</BreakIfRCount>
+          <Filename>../Core/Src/main.c</Filename>
+          <ExecCommand></ExecCommand>
+          <Expression>\\F407ZE\../Core/Src/main.c\4206</Expression>
         </Bp>
       </Breakpoint>
       <WatchWindow1>
@@ -316,6 +300,11 @@
           <count>6</count>
           <WinNumber>1</WinNumber>
           <ItemText>can_rece</ItemText>
+        </Ww>
+        <Ww>
+          <count>7</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>self_check_counter_6</ItemText>
         </Ww>
       </WatchWindow1>
       <WatchWindow2>
