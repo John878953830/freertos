@@ -334,11 +334,6 @@ void CAN1_RX0_IRQHandler(void)
 		if(rece_queueHandle!=NULL)
 		{
 			portBASE_TYPE status;
-			
-			fifo_level=HAL_CAN_GetRxFifoFillLevel(&hcan1,CAN_RX_FIFO0);
-			#ifdef DEBUG_OUTPUT
-			printf("%s%d\n","rx fifo level is",fifo_level);
-			#endif
 			//timer_period=uxQueueSpacesAvailable(rece_queueHandle);
 			status = xQueueSendToBackFromISR(rece_queueHandle, &can_rece, &b_tk_master_order);
 			if(status!=pdPASS)
