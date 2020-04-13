@@ -4075,91 +4075,75 @@ void result_parse_2(uint8_t* data, uint8_t num)
 		if(__fabs(motor_array[num].speed_value.current_speed_pre)>SPEED_JUDGE && __fabs(motor_array[num].speed_value.current_speed)<SPEED_JUDGE
 			 && motor_array[num].command.if_return==0x01)
 		{
-			
+			//执行完成标志置位
 			motor_array[num].command.command_status=0x02;
-			if(motor_array[num].command.command_union!=0x14)
+			//普通动作的执行完成判定
+			if(motor_array[num].command.command_id==0x08 || 
+				 motor_array[num].command.command_id==0x0B ||
+			   motor_array[num].command.command_id==0x0C ||
+			   motor_array[num].command.command_id==0x0D ||
+			   motor_array[num].command.command_id==0x0E)
 			{
-				//发送返回帧
-				QUEUE_STRUCT frame_return;
-				frame_return.property=0x00;             //can send
-				frame_return.can_command=motor_array[num].command.command_id;          
-				frame_return.can_if_ack=0x01;           //需要ACK
-				frame_return.can_source=0x03;           //本模块
-				frame_return.can_target=0x00;
-				frame_return.can_priority=0x03;         //命令结束返回帧
-				frame_return.can_if_last=0x00;          //无需拼接
-				frame_return.can_if_return=0x00;        //无需返回
-				frame_return.length=4;
-				frame_return.data[0]=0xFF;              //错误码，0标识正常
-				frame_return.data[1]=0xFF;              //执行结果， 1代表已完成
-				frame_return.data[2]=0xFF;               //电机号
-				frame_return.data[3]=0xFE;              //保留
-				
-				//自检返回帧结果发送
-				if((motor_array[num].command.command_id==0x0F || motor_array[num].command.command_id==0x10 || motor_array[num].command.command_id==0x11 || motor_array[num].command.command_id==0x12 
-					 || motor_array[num].command.command_id==0x06))
+				if(motor_array[num].command.command_union!=0x14)
 				{
-					if(motor_array[num].command.command_union==0x06)
+					//发送返回帧
+					QUEUE_STRUCT frame_return;
+					frame_return.property=0x00;             //can send
+					frame_return.can_command=motor_array[num].command.command_id;          
+					frame_return.can_if_ack=0x01;           //需要ACK
+					frame_return.can_source=0x03;           //本模块
+					frame_return.can_target=0x00;
+					frame_return.can_priority=0x03;         //命令结束返回帧
+					frame_return.can_if_last=0x00;          //无需拼接
+					frame_return.can_if_return=0x00;        //无需返回
+					frame_return.length=4;
+					frame_return.data[0]=0xFF;              //错误码，0标识正常
+					frame_return.data[1]=0xFF;              //执行结果， 1代表已完成
+					frame_return.data[2]=0xFF;               //电机号
+					frame_return.data[3]=0xFE;              //保留
+					taskENTER_CRITICAL();
+					portBASE_TYPE status = xQueueSendToBack(send_queueHandle, &frame_return, 0);
+					if(status!=pdPASS)
 					{
-						if(num==0)
-						{
-							motor_array[num].command.command_union=0;
-							//发送6号自检结束数据帧
-							frame_return.property=0x00;             //can send
-							frame_return.can_command=0x06;          //停止指令
-							frame_return.can_if_ack=0x01;           //需要ACK
-							frame_return.can_source=0x03;           //本模块
-							frame_return.can_target=0x00;
-							frame_return.can_priority=0x05;         //数据帧
-							frame_return.can_if_last=0x00;          //拼接位置0
-							frame_return.can_if_return=0x00;
-							frame_return.length=4;
-							frame_return.data[0]=(uint8_t)(CMD6_START_SELFCHECK_OK_0>>24);
-							frame_return.data[1]=(uint8_t)(CMD6_START_SELFCHECK_OK_0>>16);
-							frame_return.data[2]=(uint8_t)(CMD6_START_SELFCHECK_OK_0>>8);
-							frame_return.data[3]=(uint8_t)(CMD6_START_SELFCHECK_OK_0);
-							//自检计数自增
-							self_check_counter_6++;
-						}
-						if(num==2)
-						{
-							motor_array[num].command.command_union=0;
-							//发送前后夹紧自检结束数据帧
-							frame_return.property=0x00;             //can send
-							frame_return.can_command=0x06;          //停止指令
-							frame_return.can_if_ack=0x01;           //需要ACK
-							frame_return.can_source=0x03;           //本模块
-							frame_return.can_target=0x00;
-							frame_return.can_priority=0x05;         //数据帧
-							frame_return.can_if_last=0x00;          //拼接位置0
-							frame_return.can_if_return=0x00;
-							frame_return.length=4;
-							frame_return.data[0]=(uint8_t)(CMD6_START_SELFCHECK_OK_2>>24);
-							frame_return.data[1]=(uint8_t)(CMD6_START_SELFCHECK_OK_2>>16);
-							frame_return.data[2]=(uint8_t)(CMD6_START_SELFCHECK_OK_2>>8);
-							frame_return.data[3]=(uint8_t)(CMD6_START_SELFCHECK_OK_2);
-							//自检计数增加
-							self_check_counter_6++;
-						}
-						if(num==3)
-						{
-							motor_array[num].command.command_union=0;
-							frame_return.property=0x00;             //can send
-							frame_return.can_command=0x06;          //停止指令
-							frame_return.can_if_ack=0x01;           //需要ACK
-							frame_return.can_source=0x03;           //本模块
-							frame_return.can_target=0x00;
-							frame_return.can_priority=0x05;         //数据帧
-							frame_return.can_if_last=0x00;          //拼接位置0
-							frame_return.can_if_return=0x00;
-							frame_return.length=4;
-							frame_return.data[0]=(uint8_t)(CMD6_START_SELFCHECK_OK_3>>24);
-							frame_return.data[1]=(uint8_t)(CMD6_START_SELFCHECK_OK_3>>16);
-							frame_return.data[2]=(uint8_t)(CMD6_START_SELFCHECK_OK_3>>8);
-							frame_return.data[3]=(uint8_t)(CMD6_START_SELFCHECK_OK_3);
-							self_check_counter_6++;
-						}
+						#ifdef DEBUG_OUTPUT
+						printf("%s\n","queue overflow");
+						#endif
 					}
+					else
+					{
+						#ifdef DEBUG_OUTPUT
+						printf("%s\n","send command 7 error to queue already");
+						#endif
+					}
+					taskEXIT_CRITICAL();
+				}
+			}
+			
+			//自检动作执行完成判定
+			if((motor_array[num].command.command_id==0x0F || 
+				  motor_array[num].command.command_id==0x10 || 
+			    motor_array[num].command.command_id==0x11 || 
+			    motor_array[num].command.command_id==0x12 || 
+			    motor_array[num].command.command_id==0x06))
+			{
+				
+				if(motor_array[num].command.command_union!=0x06)
+				{
+					//返回帧格式声明
+					QUEUE_STRUCT frame_return;
+					frame_return.property=0x00;             //can send
+					frame_return.can_command=motor_array[num].command.command_id;          
+					frame_return.can_if_ack=0x01;           //需要ACK
+					frame_return.can_source=0x03;           //本模块
+					frame_return.can_target=0x00;
+					frame_return.can_priority=0x03;         //命令结束返回帧
+					frame_return.can_if_last=0x00;          //无需拼接
+					frame_return.can_if_return=0x00;        //无需返回
+					frame_return.length=4;
+					frame_return.data[0]=0xFF;              //错误码，0标识正常
+					frame_return.data[1]=0xFF;              //执行结果， 1代表已完成
+					frame_return.data[2]=0xFF;               //电机号
+					frame_return.data[3]=0xFE;              //保留
 					if(motor_array[num].self_check_counter!=0)
 					{
 						frame_return.data[0]=ERROR_COMMAND_15_FAIL;
@@ -4168,136 +4152,293 @@ void result_parse_2(uint8_t* data, uint8_t num)
 					{
 						;
 					}
+					taskENTER_CRITICAL();
+					portBASE_TYPE status = xQueueSendToBack(send_queueHandle, &frame_return, 0);
+					if(status!=pdPASS)
+					{
+						#ifdef DEBUG_OUTPUT
+						printf("%s\n","queue overflow");
+						#endif
+					}
+					else
+					{
+						#ifdef DEBUG_OUTPUT
+						printf("%s\n","send command 7 error to queue already");
+						#endif
+					}
+					taskEXIT_CRITICAL();
 				}
-				taskENTER_CRITICAL();
-				portBASE_TYPE status = xQueueSendToBack(send_queueHandle, &frame_return, 0);
-				if(status!=pdPASS)
+				if(motor_array[num].command.command_union == 0x06)
 				{
-					#ifdef DEBUG_OUTPUT
-					printf("%s\n","queue overflow");
-					#endif
+					if(num==0)
+					{
+						//返回帧格式声明
+						QUEUE_STRUCT frame_return_cmd6;
+						frame_return_cmd6.property=0x00;             //can send
+						frame_return_cmd6.can_command=motor_array[num].command.command_id;          
+						frame_return_cmd6.can_if_ack=0x01;           //需要ACK
+						frame_return_cmd6.can_source=0x03;           //本模块
+						frame_return_cmd6.can_target=0x00;
+						frame_return_cmd6.can_priority=0x03;         //命令结束返回帧
+						frame_return_cmd6.can_if_last=0x00;          //无需拼接
+						frame_return_cmd6.can_if_return=0x00;        //无需返回
+						frame_return_cmd6.length=4;
+						frame_return_cmd6.data[0]=0xFF;              //错误码，0标识正常
+						frame_return_cmd6.data[1]=0xFF;              //执行结果， 1代表已完成
+						frame_return_cmd6.data[2]=0xFF;               //电机号
+						frame_return_cmd6.data[3]=0xFE;              //保留
+						motor_array[num].command.command_union=0;
+						//发送6号自检结束数据帧
+						frame_return_cmd6.property=0x00;             //can send
+						frame_return_cmd6.can_command=0x06;          //停止指令
+						frame_return_cmd6.can_if_ack=0x01;           //需要ACK
+						frame_return_cmd6.can_source=0x03;           //本模块
+						frame_return_cmd6.can_target=0x00;
+						frame_return_cmd6.can_priority=0x05;         //数据帧
+						frame_return_cmd6.can_if_last=0x00;          //拼接位置0
+						frame_return_cmd6.can_if_return=0x00;
+						frame_return_cmd6.length=4;
+						frame_return_cmd6.data[0]=(uint8_t)(CMD6_START_SELFCHECK_OK_0>>24);
+						frame_return_cmd6.data[1]=(uint8_t)(CMD6_START_SELFCHECK_OK_0>>16);
+						frame_return_cmd6.data[2]=(uint8_t)(CMD6_START_SELFCHECK_OK_0>>8);
+						frame_return_cmd6.data[3]=(uint8_t)(CMD6_START_SELFCHECK_OK_0);
+						//发送返回帧
+						taskENTER_CRITICAL();
+						portBASE_TYPE status = xQueueSendToBack(send_queueHandle, &frame_return_cmd6, 0);
+						if(status!=pdPASS)
+						{
+							#ifdef DEBUG_OUTPUT
+							printf("%s\n","queue overflow");
+							#endif
+						}
+						else
+						{
+							#ifdef DEBUG_OUTPUT
+							printf("%s\n","send command 7 error to queue already");
+							#endif
+						}
+						taskEXIT_CRITICAL();
+						//自检计数自增
+						self_check_counter_6++;
+					}
+					if(num==2)
+					{
+						//返回帧格式声明
+						QUEUE_STRUCT frame_return_cmd6;
+						frame_return_cmd6.property=0x00;             //can send
+						frame_return_cmd6.can_command=motor_array[num].command.command_id;          
+						frame_return_cmd6.can_if_ack=0x01;           //需要ACK
+						frame_return_cmd6.can_source=0x03;           //本模块
+						frame_return_cmd6.can_target=0x00;
+						frame_return_cmd6.can_priority=0x03;         //命令结束返回帧
+						frame_return_cmd6.can_if_last=0x00;          //无需拼接
+						frame_return_cmd6.can_if_return=0x00;        //无需返回
+						frame_return_cmd6.length=4;
+						frame_return_cmd6.data[0]=0xFF;              //错误码，0标识正常
+						frame_return_cmd6.data[1]=0xFF;              //执行结果， 1代表已完成
+						frame_return_cmd6.data[2]=0xFF;               //电机号
+						frame_return_cmd6.data[3]=0xFE;              //保留
+						motor_array[num].command.command_union=0;
+						//发送前后夹紧自检结束数据帧
+						frame_return_cmd6.property=0x00;             //can send
+						frame_return_cmd6.can_command=0x06;          //停止指令
+						frame_return_cmd6.can_if_ack=0x01;           //需要ACK
+						frame_return_cmd6.can_source=0x03;           //本模块
+						frame_return_cmd6.can_target=0x00;
+						frame_return_cmd6.can_priority=0x05;         //数据帧
+						frame_return_cmd6.can_if_last=0x00;          //拼接位置0
+						frame_return_cmd6.can_if_return=0x00;
+						frame_return_cmd6.length=4;
+						frame_return_cmd6.data[0]=(uint8_t)(CMD6_START_SELFCHECK_OK_2>>24);
+						frame_return_cmd6.data[1]=(uint8_t)(CMD6_START_SELFCHECK_OK_2>>16);
+						frame_return_cmd6.data[2]=(uint8_t)(CMD6_START_SELFCHECK_OK_2>>8);
+						frame_return_cmd6.data[3]=(uint8_t)(CMD6_START_SELFCHECK_OK_2);
+						//发送返回帧
+						taskENTER_CRITICAL();
+						portBASE_TYPE status = xQueueSendToBack(send_queueHandle, &frame_return_cmd6, 0);
+						if(status!=pdPASS)
+						{
+							#ifdef DEBUG_OUTPUT
+							printf("%s\n","queue overflow");
+							#endif
+						}
+						else
+						{
+							#ifdef DEBUG_OUTPUT
+							printf("%s\n","send command 7 error to queue already");
+							#endif
+						}
+						taskEXIT_CRITICAL();
+						//自检计数增加
+						self_check_counter_6++;
+					}
+					if(num==3)
+					{
+						//返回帧格式声明
+						QUEUE_STRUCT frame_return_cmd6;
+						frame_return_cmd6.property=0x00;             //can send
+						frame_return_cmd6.can_command=motor_array[num].command.command_id;          
+						frame_return_cmd6.can_if_ack=0x01;           //需要ACK
+						frame_return_cmd6.can_source=0x03;           //本模块
+						frame_return_cmd6.can_target=0x00;
+						frame_return_cmd6.can_priority=0x03;         //命令结束返回帧
+						frame_return_cmd6.can_if_last=0x00;          //无需拼接
+						frame_return_cmd6.can_if_return=0x00;        //无需返回
+						frame_return_cmd6.length=4;
+						frame_return_cmd6.data[0]=0xFF;              //错误码，0标识正常
+						frame_return_cmd6.data[1]=0xFF;              //执行结果， 1代表已完成
+						frame_return_cmd6.data[2]=0xFF;               //电机号
+						frame_return_cmd6.data[3]=0xFE;              //保留
+						motor_array[num].command.command_union=0;
+						frame_return_cmd6.property=0x00;             //can send
+						frame_return_cmd6.can_command=0x06;          //停止指令
+						frame_return_cmd6.can_if_ack=0x01;           //需要ACK
+						frame_return_cmd6.can_source=0x03;           //本模块
+						frame_return_cmd6.can_target=0x00;
+						frame_return_cmd6.can_priority=0x05;         //数据帧
+						frame_return_cmd6.can_if_last=0x00;          //拼接位置0
+						frame_return_cmd6.can_if_return=0x00;
+						frame_return_cmd6.length=4;
+						frame_return_cmd6.data[0]=(uint8_t)(CMD6_START_SELFCHECK_OK_3>>24);
+						frame_return_cmd6.data[1]=(uint8_t)(CMD6_START_SELFCHECK_OK_3>>16);
+						frame_return_cmd6.data[2]=(uint8_t)(CMD6_START_SELFCHECK_OK_3>>8);
+						frame_return_cmd6.data[3]=(uint8_t)(CMD6_START_SELFCHECK_OK_3);
+						//发送返回帧
+						taskENTER_CRITICAL();
+						portBASE_TYPE status = xQueueSendToBack(send_queueHandle, &frame_return_cmd6, 0);
+						if(status!=pdPASS)
+						{
+							#ifdef DEBUG_OUTPUT
+							printf("%s\n","queue overflow");
+							#endif
+						}
+						else
+						{
+							#ifdef DEBUG_OUTPUT
+							printf("%s\n","send command 7 error to queue already");
+							#endif
+						}
+						taskEXIT_CRITICAL();
+						self_check_counter_6++;
+					}
+					
+					
+					//下一段动作帧发送
+					if(self_check_counter_6==0x01)
+					{
+						//发送cmd17自检
+						command_17(data,cmd6_if_return);
+						//填充union为0x06
+						motor_array[2].command.command_union=0x06;
+						//向上位机发送开始自检数据帧
+						QUEUE_STRUCT tmp;
+						tmp.property=0x00;             //can send
+						tmp.can_command=0x06;          //停止指令
+						tmp.can_if_ack=0x01;           //需要ACK
+						tmp.can_source=0x03;           //本模块
+						tmp.can_target=0x00;
+						tmp.can_priority=0x05;         //数据帧
+						tmp.can_if_last=0x01;          //拼接位置1
+						tmp.can_if_return=0x00;
+						tmp.length=4;
+						tmp.data[0]=(uint8_t)(CMD6_START_SELFCHECK_2>>24);
+						tmp.data[1]=(uint8_t)(CMD6_START_SELFCHECK_2>>16);
+						tmp.data[2]=(uint8_t)(CMD6_START_SELFCHECK_2>>8);
+						tmp.data[3]=(uint8_t)(CMD6_START_SELFCHECK_2);
+						taskENTER_CRITICAL();
+						BaseType_t status_q = xQueueSendToBack(send_queueHandle, &tmp, 0);
+						if(status_q!=pdPASS)
+						{
+							#ifdef DEBUG_OUTPUT
+							printf("%s\n","queue overflow");
+							#endif
+						}
+						else
+						{
+							#ifdef DEBUG_OUTPUT
+							printf("%s\n","send command 1 success to queue already");
+							#endif
+						}
+						taskEXIT_CRITICAL();
+					}
+					if(self_check_counter_6==0x02)
+					{
+						//发送cmd18自检
+						command_18(data,cmd6_if_return);
+						//填充union为0x06
+						motor_array[3].command.command_union=0x06;
+						//向上位机发送开始自检数据帧
+						QUEUE_STRUCT tmp;
+						tmp.property=0x00;             //can send
+						tmp.can_command=0x06;          //停止指令
+						tmp.can_if_ack=0x01;           //需要ACK
+						tmp.can_source=0x03;           //本模块
+						tmp.can_target=0x00;
+						tmp.can_priority=0x05;         //数据帧
+						tmp.can_if_last=0x01;          //拼接位置1
+						tmp.can_if_return=0x00;
+						tmp.length=4;
+						tmp.data[0]=(uint8_t)(CMD6_START_SELFCHECK_3>>24);
+						tmp.data[1]=(uint8_t)(CMD6_START_SELFCHECK_3>>16);
+						tmp.data[2]=(uint8_t)(CMD6_START_SELFCHECK_3>>8);
+						tmp.data[3]=(uint8_t)(CMD6_START_SELFCHECK_3);
+						taskENTER_CRITICAL();
+						BaseType_t status_q = xQueueSendToBack(send_queueHandle, &tmp, 0);
+						if(status_q!=pdPASS)
+						{
+							#ifdef DEBUG_OUTPUT
+							printf("%s\n","queue overflow");
+							#endif
+						}
+						else
+						{
+							#ifdef DEBUG_OUTPUT
+							printf("%s\n","send command 1 success to queue already");
+							#endif
+						}
+						taskEXIT_CRITICAL();
+					}
+					//总体自检完成判定
+					if(self_check_counter_6==3 && cmd6_if_return==0x01)
+					{
+						self_check_counter_6=0;
+						cmd6_if_return=0;
+						//向上位机发送cmd6 的总体自检返回帧
+						//向上位机发送开始自检数据帧
+						QUEUE_STRUCT tmp;
+						tmp.property=0x00;             //can send
+						tmp.can_command=0x06;          //停止指令
+						tmp.can_if_ack=0x01;           //需要ACK
+						tmp.can_source=0x03;           //本模块
+						tmp.can_target=0x00;
+						tmp.can_priority=0x03;         //返回帧
+						tmp.can_if_last=0x00;          //拼接位置0
+						tmp.can_if_return=0x00;
+						tmp.length=4;
+						tmp.data[0]=0;
+						tmp.data[1]=0;
+						tmp.data[2]=0;
+						tmp.data[3]=0;
+						taskENTER_CRITICAL();
+						BaseType_t status_q = xQueueSendToBack(send_queueHandle, &tmp, 0);
+						if(status_q!=pdPASS)
+						{
+							#ifdef DEBUG_OUTPUT
+							printf("%s\n","queue overflow");
+							#endif
+						}
+						else
+						{
+							#ifdef DEBUG_OUTPUT
+							printf("%s\n","send command 1 success to queue already");
+							#endif
+						}
+						taskEXIT_CRITICAL();
+					}
 				}
-				else
-				{
-					#ifdef DEBUG_OUTPUT
-					printf("%s\n","send command 7 error to queue already");
-					#endif
-				}
-				taskEXIT_CRITICAL();
-				
-				
 			}
-			if(self_check_counter_6==0x01)
-		{
-			//发送cmd17自检
-			command_17(data,cmd6_if_return);
-			//填充union为0x06
-			motor_array[2].command.command_union=0x06;
-			//向上位机发送开始自检数据帧
-			QUEUE_STRUCT tmp;
-			tmp.property=0x00;             //can send
-			tmp.can_command=0x06;          //停止指令
-			tmp.can_if_ack=0x01;           //需要ACK
-			tmp.can_source=0x03;           //本模块
-			tmp.can_target=0x00;
-			tmp.can_priority=0x05;         //数据帧
-			tmp.can_if_last=0x01;          //拼接位置1
-			tmp.can_if_return=0x00;
-			tmp.length=4;
-			tmp.data[0]=(uint8_t)(CMD6_START_SELFCHECK_2>>24);
-			tmp.data[1]=(uint8_t)(CMD6_START_SELFCHECK_2>>16);
-			tmp.data[2]=(uint8_t)(CMD6_START_SELFCHECK_2>>8);
-			tmp.data[3]=(uint8_t)(CMD6_START_SELFCHECK_2);
-			taskENTER_CRITICAL();
-			BaseType_t status_q = xQueueSendToBack(send_queueHandle, &tmp, 0);
-			if(status_q!=pdPASS)
-			{
-				#ifdef DEBUG_OUTPUT
-				printf("%s\n","queue overflow");
-				#endif
-			}
-			else
-			{
-				#ifdef DEBUG_OUTPUT
-				printf("%s\n","send command 1 success to queue already");
-				#endif
-			}
-			taskEXIT_CRITICAL();
 		}
-		if(self_check_counter_6==0x02)
-		{
-			//发送cmd18自检
-			command_18(data,cmd6_if_return);
-			//填充union为0x06
-			motor_array[3].command.command_union=0x06;
-			//向上位机发送开始自检数据帧
-			QUEUE_STRUCT tmp;
-			tmp.property=0x00;             //can send
-			tmp.can_command=0x06;          //停止指令
-			tmp.can_if_ack=0x01;           //需要ACK
-			tmp.can_source=0x03;           //本模块
-			tmp.can_target=0x00;
-			tmp.can_priority=0x05;         //数据帧
-			tmp.can_if_last=0x01;          //拼接位置1
-			tmp.can_if_return=0x00;
-			tmp.length=4;
-			tmp.data[0]=(uint8_t)(CMD6_START_SELFCHECK_3>>24);
-			tmp.data[1]=(uint8_t)(CMD6_START_SELFCHECK_3>>16);
-			tmp.data[2]=(uint8_t)(CMD6_START_SELFCHECK_3>>8);
-			tmp.data[3]=(uint8_t)(CMD6_START_SELFCHECK_3);
-			taskENTER_CRITICAL();
-			BaseType_t status_q = xQueueSendToBack(send_queueHandle, &tmp, 0);
-			if(status_q!=pdPASS)
-			{
-				#ifdef DEBUG_OUTPUT
-				printf("%s\n","queue overflow");
-				#endif
-			}
-			else
-			{
-				#ifdef DEBUG_OUTPUT
-				printf("%s\n","send command 1 success to queue already");
-				#endif
-			}
-			taskEXIT_CRITICAL();
-		}
-			//总体自检完成判定
-			if(self_check_counter_6==3 && cmd6_if_return==0x01)
-			{
-				cmd6_if_return=0;
-				//向上位机发送cmd6 的总体自检返回帧
-				//向上位机发送开始自检数据帧
-				QUEUE_STRUCT tmp;
-				tmp.property=0x00;             //can send
-				tmp.can_command=0x06;          //停止指令
-				tmp.can_if_ack=0x01;           //需要ACK
-				tmp.can_source=0x03;           //本模块
-				tmp.can_target=0x00;
-				tmp.can_priority=0x03;         //返回帧
-				tmp.can_if_last=0x00;          //拼接位置0
-				tmp.can_if_return=0x00;
-				tmp.length=4;
-				tmp.data[0]=0;
-				tmp.data[1]=0;
-				tmp.data[2]=0;
-				tmp.data[3]=0;
-				taskENTER_CRITICAL();
-				BaseType_t status_q = xQueueSendToBack(send_queueHandle, &tmp, 0);
-				if(status_q!=pdPASS)
-				{
-					#ifdef DEBUG_OUTPUT
-					printf("%s\n","queue overflow");
-					#endif
-				}
-				else
-				{
-					#ifdef DEBUG_OUTPUT
-					printf("%s\n","send command 1 success to queue already");
-					#endif
-				}
-				taskEXIT_CRITICAL();
-			}
-		}
+			
 		
 		//组合命令判定
 		if(motor_array[2].command.command_union==0x14 && motor_array[3].command.command_union==0x14
