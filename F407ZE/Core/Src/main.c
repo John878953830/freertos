@@ -5142,10 +5142,10 @@ uint8_t modbus_send(QUEUE_STRUCT send_struct)
 		if(send_struct.modbus_func == 0x10)
 		{
 			taskENTER_CRITICAL();
-			HAL_GPIO_WritePin(GPIOG,GPIO_PIN_6,GPIO_PIN_SET);
+			//HAL_GPIO_WritePin(GPIOE,GPIO_PIN_0,GPIO_PIN_RESET);
+			HAL_GPIO_WritePin(GPIOE,GPIO_PIN_0,GPIO_PIN_RESET);
 			__NOP();
 		  __NOP();
-			GPIO_PinState tmpread=HAL_GPIO_ReadPin(GPIOG,GPIO_PIN_6);
 			modbus_send_cache[0]=send_struct.modbus_addr;
 			modbus_send_cache[1]=send_struct.modbus_func;
 			modbus_send_cache[2]=send_struct.modbus_addr_h;
@@ -5170,7 +5170,7 @@ uint8_t modbus_send(QUEUE_STRUCT send_struct)
 		if(send_struct.modbus_func==0x03)
 		{
 			taskENTER_CRITICAL();
-			HAL_GPIO_WritePin(GPIOG,GPIO_PIN_6,GPIO_PIN_SET);
+			HAL_GPIO_WritePin(GPIOE,GPIO_PIN_0,GPIO_PIN_RESET);
 			__NOP();
 		  __NOP();
 			modbus_send_cache[0]=send_struct.modbus_addr;
@@ -5214,7 +5214,7 @@ uint8_t modbus_send_sub(QUEUE_STRUCT send_struct)
 	if(send_struct.modbus_func == 0x10)
 	{
 		taskENTER_CRITICAL();
-		HAL_GPIO_WritePin(GPIOG,GPIO_PIN_6,GPIO_PIN_SET);
+		HAL_GPIO_WritePin(GPIOE,GPIO_PIN_0,GPIO_PIN_RESET);
 		__NOP();
 		__NOP();
 		modbus_send_cache[0]=send_struct.modbus_addr;
@@ -5244,7 +5244,7 @@ uint8_t modbus_send_sub(QUEUE_STRUCT send_struct)
 	if(send_struct.modbus_func==0x03)
 	{
 		taskENTER_CRITICAL();
-		HAL_GPIO_WritePin(GPIOG,GPIO_PIN_6,GPIO_PIN_SET);
+		HAL_GPIO_WritePin(GPIOE,GPIO_PIN_0,GPIO_PIN_RESET);
 		__NOP();
 		__NOP();
 		modbus_send_cache[0]=send_struct.modbus_addr;
@@ -5400,7 +5400,6 @@ int main(void)
 	HAL_DMA_DeInit(&hdma_usart2_rx);
 	HAL_DMA_Init(&hdma_usart2_rx);
 	
-	
 	HAL_TIM_Base_DeInit(&htim12);
 	HAL_TIM_Base_Init(&htim12);
 	
@@ -5418,7 +5417,7 @@ int main(void)
 		printf("%s\n","modbus list error");
 	}
 	//Ä¬ÈÏÖÃÓÚ·¢ËÍ×´Ì¬
-	HAL_GPIO_WritePin(GPIOG,GPIO_PIN_6,GPIO_PIN_SET);
+	HAL_GPIO_WritePin(GPIOE,GPIO_PIN_0,GPIO_PIN_RESET);
 	printf("%s\n","start free rtos");
 	
 	

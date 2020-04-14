@@ -1777,7 +1777,7 @@ void start_tk_result_process_send(void *argument)
 		if(notify_use==0x0001)
 		{
 			//变换电平，转为接收模式
-			HAL_GPIO_WritePin(GPIOG,GPIO_PIN_6,GPIO_PIN_RESET);
+			HAL_GPIO_WritePin(GPIOE,GPIO_PIN_0,GPIO_PIN_SET);
 			HAL_UART_Receive_DMA(&huart2,(uint8_t*)rece_cache,rece_count);
 			modbus_time_flag=2;
 			//启动接收超时定时器
