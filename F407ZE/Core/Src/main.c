@@ -5418,6 +5418,8 @@ int main(void)
 	}
 	//Ä¬ÈÏÖÃÓÚ·¢ËÍ×´Ì¬
 	HAL_GPIO_WritePin(GPIOE,GPIO_PIN_0,GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(GPIOE,GPIO_PIN_7,GPIO_PIN_SET);
+	HAL_GPIO_WritePin(GPIOD,GPIO_PIN_3,GPIO_PIN_SET);
 	printf("%s\n","start free rtos");
 	
 	
