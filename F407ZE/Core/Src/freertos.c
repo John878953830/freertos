@@ -30,6 +30,8 @@
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
+typedef StaticTask_t osStaticThreadDef_t;
+typedef StaticQueue_t osStaticMessageQDef_t;
 /* USER CODE BEGIN PTD */
 
 /* USER CODE END PTD */
@@ -502,53 +504,184 @@ void start_soft_timer(void)
 /* USER CODE BEGIN Variables */
 
 /* USER CODE END Variables */
-typedef StaticTask_t osStaticThreadDef_t;
-typedef StaticQueue_t osStaticMessageQDef_t;
+/* Definitions for defaultTask */
 osThreadId_t defaultTaskHandle;
 uint32_t defaultTaskBuffer[ 512 ];
 osStaticThreadDef_t defaultTaskControlBlock;
+const osThreadAttr_t defaultTask_attributes = {
+  .name = "defaultTask",
+  .stack_mem = &defaultTaskBuffer[0],
+  .stack_size = sizeof(defaultTaskBuffer),
+  .cb_mem = &defaultTaskControlBlock,
+  .cb_size = sizeof(defaultTaskControlBlock),
+  .priority = (osPriority_t) osPriorityNormal,
+};
+/* Definitions for pid_output */
 osThreadId_t pid_outputHandle;
 uint32_t pid_outputBuffer[ 512 ];
 osStaticThreadDef_t pid_outputControlBlock;
+const osThreadAttr_t pid_output_attributes = {
+  .name = "pid_output",
+  .stack_mem = &pid_outputBuffer[0],
+  .stack_size = sizeof(pid_outputBuffer),
+  .cb_mem = &pid_outputControlBlock,
+  .cb_size = sizeof(pid_outputControlBlock),
+  .priority = (osPriority_t) osPriorityAboveNormal2,
+};
+/* Definitions for send_order */
 osThreadId_t send_orderHandle;
 uint32_t send_orderBuffer[ 512 ];
 osStaticThreadDef_t send_orderControlBlock;
+const osThreadAttr_t send_order_attributes = {
+  .name = "send_order",
+  .stack_mem = &send_orderBuffer[0],
+  .stack_size = sizeof(send_orderBuffer),
+  .cb_mem = &send_orderControlBlock,
+  .cb_size = sizeof(send_orderControlBlock),
+  .priority = (osPriority_t) osPriorityAboveNormal4,
+};
+/* Definitions for commu_mornitor */
 osThreadId_t commu_mornitorHandle;
 uint32_t commu_mornitorBuffer[ 512 ];
 osStaticThreadDef_t commu_mornitorControlBlock;
+const osThreadAttr_t commu_mornitor_attributes = {
+  .name = "commu_mornitor",
+  .stack_mem = &commu_mornitorBuffer[0],
+  .stack_size = sizeof(commu_mornitorBuffer),
+  .cb_mem = &commu_mornitorControlBlock,
+  .cb_size = sizeof(commu_mornitorControlBlock),
+  .priority = (osPriority_t) osPriorityHigh1,
+};
+/* Definitions for conflict_monitor */
 osThreadId_t conflict_monitorHandle;
 uint32_t conflict_monitorBuffer[ 512 ];
 osStaticThreadDef_t conflict_monitorControlBlock;
+const osThreadAttr_t conflict_monitor_attributes = {
+  .name = "conflict_monitor",
+  .stack_mem = &conflict_monitorBuffer[0],
+  .stack_size = sizeof(conflict_monitorBuffer),
+  .cb_mem = &conflict_monitorControlBlock,
+  .cb_size = sizeof(conflict_monitorControlBlock),
+  .priority = (osPriority_t) osPriorityHigh3,
+};
+/* Definitions for sensor_monitor */
 osThreadId_t sensor_monitorHandle;
 uint32_t sensor_monitorBuffer[ 512 ];
 osStaticThreadDef_t sensor_monitorControlBlock;
+const osThreadAttr_t sensor_monitor_attributes = {
+  .name = "sensor_monitor",
+  .stack_mem = &sensor_monitorBuffer[0],
+  .stack_size = sizeof(sensor_monitorBuffer),
+  .cb_mem = &sensor_monitorControlBlock,
+  .cb_size = sizeof(sensor_monitorControlBlock),
+  .priority = (osPriority_t) osPriorityHigh5,
+};
+/* Definitions for grating_monitor */
 osThreadId_t grating_monitorHandle;
 uint32_t grating_monitorBuffer[ 128 ];
 osStaticThreadDef_t grating_monitorControlBlock;
+const osThreadAttr_t grating_monitor_attributes = {
+  .name = "grating_monitor",
+  .stack_mem = &grating_monitorBuffer[0],
+  .stack_size = sizeof(grating_monitorBuffer),
+  .cb_mem = &grating_monitorControlBlock,
+  .cb_size = sizeof(grating_monitorControlBlock),
+  .priority = (osPriority_t) osPriorityHigh7,
+};
+/* Definitions for posture_monitor */
 osThreadId_t posture_monitorHandle;
 uint32_t posture_monitorBuffer[ 128 ];
 osStaticThreadDef_t posture_monitorControlBlock;
+const osThreadAttr_t posture_monitor_attributes = {
+  .name = "posture_monitor",
+  .stack_mem = &posture_monitorBuffer[0],
+  .stack_size = sizeof(posture_monitorBuffer),
+  .cb_mem = &posture_monitorControlBlock,
+  .cb_size = sizeof(posture_monitorControlBlock),
+  .priority = (osPriority_t) osPriorityRealtime,
+};
+/* Definitions for zero_sw */
 osThreadId_t zero_swHandle;
 uint32_t zero_swBuffer[ 128 ];
 osStaticThreadDef_t zero_swControlBlock;
+const osThreadAttr_t zero_sw_attributes = {
+  .name = "zero_sw",
+  .stack_mem = &zero_swBuffer[0],
+  .stack_size = sizeof(zero_swBuffer),
+  .cb_mem = &zero_swControlBlock,
+  .cb_size = sizeof(zero_swControlBlock),
+  .priority = (osPriority_t) osPriorityRealtime1,
+};
+/* Definitions for co_order */
 osThreadId_t co_orderHandle;
 uint32_t co_orderBuffer[ 128 ];
 osStaticThreadDef_t co_orderControlBlock;
+const osThreadAttr_t co_order_attributes = {
+  .name = "co_order",
+  .stack_mem = &co_orderBuffer[0],
+  .stack_size = sizeof(co_orderBuffer),
+  .cb_mem = &co_orderControlBlock,
+  .cb_size = sizeof(co_orderControlBlock),
+  .priority = (osPriority_t) osPriorityRealtime2,
+};
+/* Definitions for master_order */
 osThreadId_t master_orderHandle;
 uint32_t master_orderBuffer[ 512 ];
 osStaticThreadDef_t master_orderControlBlock;
+const osThreadAttr_t master_order_attributes = {
+  .name = "master_order",
+  .stack_mem = &master_orderBuffer[0],
+  .stack_size = sizeof(master_orderBuffer),
+  .cb_mem = &master_orderControlBlock,
+  .cb_size = sizeof(master_orderControlBlock),
+  .priority = (osPriority_t) osPriorityRealtime3,
+};
+/* Definitions for limit_sw */
 osThreadId_t limit_swHandle;
 uint32_t limit_swBuffer[ 256 ];
 osStaticThreadDef_t limit_swControlBlock;
+const osThreadAttr_t limit_sw_attributes = {
+  .name = "limit_sw",
+  .stack_mem = &limit_swBuffer[0],
+  .stack_size = sizeof(limit_swBuffer),
+  .cb_mem = &limit_swControlBlock,
+  .cb_size = sizeof(limit_swControlBlock),
+  .priority = (osPriority_t) osPriorityRealtime5,
+};
+/* Definitions for result_process */
 osThreadId_t result_processHandle;
 uint32_t result_processBuffer[ 128 ];
 osStaticThreadDef_t result_processControlBlock;
+const osThreadAttr_t result_process_attributes = {
+  .name = "result_process",
+  .stack_mem = &result_processBuffer[0],
+  .stack_size = sizeof(result_processBuffer),
+  .cb_mem = &result_processControlBlock,
+  .cb_size = sizeof(result_processControlBlock),
+  .priority = (osPriority_t) osPriorityAboveNormal3,
+};
+/* Definitions for send_queue */
 osMessageQueueId_t send_queueHandle;
 uint8_t send_queueBuffer[ 256 * sizeof( QUEUE_STRUCT ) ];
 osStaticMessageQDef_t send_queueControlBlock;
+const osMessageQueueAttr_t send_queue_attributes = {
+  .name = "send_queue",
+  .cb_mem = &send_queueControlBlock,
+  .cb_size = sizeof(send_queueControlBlock),
+  .mq_mem = &send_queueBuffer,
+  .mq_size = sizeof(send_queueBuffer)
+};
+/* Definitions for rece_queue */
 osMessageQueueId_t rece_queueHandle;
 uint8_t rece_queueBuffer[ 256 * sizeof( QUEUE_STRUCT ) ];
 osStaticMessageQDef_t rece_queueControlBlock;
+const osMessageQueueAttr_t rece_queue_attributes = {
+  .name = "rece_queue",
+  .cb_mem = &rece_queueControlBlock,
+  .cb_size = sizeof(rece_queueControlBlock),
+  .mq_mem = &rece_queueBuffer,
+  .mq_size = sizeof(rece_queueBuffer)
+};
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
@@ -561,6 +694,21 @@ osThreadId_t result_processHandle_send;
 uint32_t result_processBuffer_send[ 128 ];
 osStaticThreadDef_t result_processControlBlock_send;
 void start_tk_result_process_send(void *argument);
+
+osThreadId_t result_processHandle_rece_5;
+uint32_t result_processBuffer_rece_5[ 128 ];
+osStaticThreadDef_t result_processControlBlock_rece_5;
+void start_tk_result_process_rece_5(void *argument);
+
+osThreadId_t result_processHandle_rece_5_timeout;
+uint32_t result_processBuffer_rece_5_timeout[ 128 ];
+osStaticThreadDef_t result_processControlBlock_rece_5_timeout;
+void start_tk_result_process_rece_5_timeout(void *argument);
+
+osThreadId_t result_processHandle_rece_5_sendover;
+uint32_t result_processBuffer_rece_5_sendover[ 128 ];
+osStaticThreadDef_t result_processControlBlock_rece_5_sendover;
+void start_tk_result_process_rece_5_sendover(void *argument);
 
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 {
@@ -639,7 +787,6 @@ void MX_FREERTOS_Init(void) {
   /* USER CODE BEGIN Init */
        
   /* USER CODE END Init */
-osKernelInitialize();
 
   /* USER CODE BEGIN RTOS_MUTEX */
   /* add mutexes, ... */
@@ -654,24 +801,10 @@ osKernelInitialize();
   /* USER CODE END RTOS_TIMERS */
 
   /* Create the queue(s) */
-  /* definition and creation of send_queue */
-  const osMessageQueueAttr_t send_queue_attributes = {
-    .name = "send_queue",
-    .cb_mem = &send_queueControlBlock,
-    .cb_size = sizeof(send_queueControlBlock),
-    .mq_mem = &send_queueBuffer,
-    .mq_size = sizeof(send_queueBuffer)
-  };
+  /* creation of send_queue */
   send_queueHandle = osMessageQueueNew (256, sizeof(QUEUE_STRUCT), &send_queue_attributes);
 
-  /* definition and creation of rece_queue */
-  const osMessageQueueAttr_t rece_queue_attributes = {
-    .name = "rece_queue",
-    .cb_mem = &rece_queueControlBlock,
-    .cb_size = sizeof(rece_queueControlBlock),
-    .mq_mem = &rece_queueBuffer,
-    .mq_size = sizeof(rece_queueBuffer)
-  };
+  /* creation of rece_queue */
   rece_queueHandle = osMessageQueueNew (256, sizeof(QUEUE_STRUCT), &rece_queue_attributes);
 
   /* USER CODE BEGIN RTOS_QUEUES */
@@ -679,147 +812,43 @@ osKernelInitialize();
   /* USER CODE END RTOS_QUEUES */
 
   /* Create the thread(s) */
-  /* definition and creation of defaultTask */
-  const osThreadAttr_t defaultTask_attributes = {
-    .name = "defaultTask",
-    .stack_mem = &defaultTaskBuffer[0],
-    .stack_size = sizeof(defaultTaskBuffer),
-    .cb_mem = &defaultTaskControlBlock,
-    .cb_size = sizeof(defaultTaskControlBlock),
-    .priority = (osPriority_t) osPriorityNormal,
-  };
+  /* creation of defaultTask */
   defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
 
-  /* definition and creation of pid_output */
-  const osThreadAttr_t pid_output_attributes = {
-    .name = "pid_output",
-    .stack_mem = &pid_outputBuffer[0],
-    .stack_size = sizeof(pid_outputBuffer),
-    .cb_mem = &pid_outputControlBlock,
-    .cb_size = sizeof(pid_outputControlBlock),
-    .priority = (osPriority_t) osPriorityAboveNormal2,
-  };
+  /* creation of pid_output */
   pid_outputHandle = osThreadNew(start_tk_pidoutput, NULL, &pid_output_attributes);
 
-  /* definition and creation of send_order */
-  const osThreadAttr_t send_order_attributes = {
-    .name = "send_order",
-    .stack_mem = &send_orderBuffer[0],
-    .stack_size = sizeof(send_orderBuffer),
-    .cb_mem = &send_orderControlBlock,
-    .cb_size = sizeof(send_orderControlBlock),
-    .priority = (osPriority_t) osPriorityAboveNormal4,
-  };
+  /* creation of send_order */
   send_orderHandle = osThreadNew(start_tk_send_order, NULL, &send_order_attributes);
 
-  /* definition and creation of commu_mornitor */
-  const osThreadAttr_t commu_mornitor_attributes = {
-    .name = "commu_mornitor",
-    .stack_mem = &commu_mornitorBuffer[0],
-    .stack_size = sizeof(commu_mornitorBuffer),
-    .cb_mem = &commu_mornitorControlBlock,
-    .cb_size = sizeof(commu_mornitorControlBlock),
-    .priority = (osPriority_t) osPriorityHigh1,
-  };
+  /* creation of commu_mornitor */
   commu_mornitorHandle = osThreadNew(start_tk_commu_monitor, NULL, &commu_mornitor_attributes);
 
-  /* definition and creation of conflict_monitor */
-  const osThreadAttr_t conflict_monitor_attributes = {
-    .name = "conflict_monitor",
-    .stack_mem = &conflict_monitorBuffer[0],
-    .stack_size = sizeof(conflict_monitorBuffer),
-    .cb_mem = &conflict_monitorControlBlock,
-    .cb_size = sizeof(conflict_monitorControlBlock),
-    .priority = (osPriority_t) osPriorityHigh3,
-  };
+  /* creation of conflict_monitor */
   conflict_monitorHandle = osThreadNew(start_tk_conflict_monitor, NULL, &conflict_monitor_attributes);
 
-  /* definition and creation of sensor_monitor */
-  const osThreadAttr_t sensor_monitor_attributes = {
-    .name = "sensor_monitor",
-    .stack_mem = &sensor_monitorBuffer[0],
-    .stack_size = sizeof(sensor_monitorBuffer),
-    .cb_mem = &sensor_monitorControlBlock,
-    .cb_size = sizeof(sensor_monitorControlBlock),
-    .priority = (osPriority_t) osPriorityHigh5,
-  };
+  /* creation of sensor_monitor */
   sensor_monitorHandle = osThreadNew(start_tk_sensor_monitor, NULL, &sensor_monitor_attributes);
 
-  /* definition and creation of grating_monitor */
-  const osThreadAttr_t grating_monitor_attributes = {
-    .name = "grating_monitor",
-    .stack_mem = &grating_monitorBuffer[0],
-    .stack_size = sizeof(grating_monitorBuffer),
-    .cb_mem = &grating_monitorControlBlock,
-    .cb_size = sizeof(grating_monitorControlBlock),
-    .priority = (osPriority_t) osPriorityHigh7,
-  };
+  /* creation of grating_monitor */
   grating_monitorHandle = osThreadNew(start_tk_grating_monitor, NULL, &grating_monitor_attributes);
 
-  /* definition and creation of posture_monitor */
-  const osThreadAttr_t posture_monitor_attributes = {
-    .name = "posture_monitor",
-    .stack_mem = &posture_monitorBuffer[0],
-    .stack_size = sizeof(posture_monitorBuffer),
-    .cb_mem = &posture_monitorControlBlock,
-    .cb_size = sizeof(posture_monitorControlBlock),
-    .priority = (osPriority_t) osPriorityRealtime,
-  };
+  /* creation of posture_monitor */
   posture_monitorHandle = osThreadNew(start_tk_posture_monitor, NULL, &posture_monitor_attributes);
 
-  /* definition and creation of zero_sw */
-  const osThreadAttr_t zero_sw_attributes = {
-    .name = "zero_sw",
-    .stack_mem = &zero_swBuffer[0],
-    .stack_size = sizeof(zero_swBuffer),
-    .cb_mem = &zero_swControlBlock,
-    .cb_size = sizeof(zero_swControlBlock),
-    .priority = (osPriority_t) osPriorityRealtime1,
-  };
+  /* creation of zero_sw */
   zero_swHandle = osThreadNew(start_tk_zero_monitor, NULL, &zero_sw_attributes);
 
-  /* definition and creation of co_order */
-  const osThreadAttr_t co_order_attributes = {
-    .name = "co_order",
-    .stack_mem = &co_orderBuffer[0],
-    .stack_size = sizeof(co_orderBuffer),
-    .cb_mem = &co_orderControlBlock,
-    .cb_size = sizeof(co_orderControlBlock),
-    .priority = (osPriority_t) osPriorityRealtime2,
-  };
+  /* creation of co_order */
   co_orderHandle = osThreadNew(start_tk_co_order, NULL, &co_order_attributes);
 
-  /* definition and creation of master_order */
-  const osThreadAttr_t master_order_attributes = {
-    .name = "master_order",
-    .stack_mem = &master_orderBuffer[0],
-    .stack_size = sizeof(master_orderBuffer),
-    .cb_mem = &master_orderControlBlock,
-    .cb_size = sizeof(master_orderControlBlock),
-    .priority = (osPriority_t) osPriorityRealtime3,
-  };
+  /* creation of master_order */
   master_orderHandle = osThreadNew(start_tk_master_order, NULL, &master_order_attributes);
 
-  /* definition and creation of limit_sw */
-  const osThreadAttr_t limit_sw_attributes = {
-    .name = "limit_sw",
-    .stack_mem = &limit_swBuffer[0],
-    .stack_size = sizeof(limit_swBuffer),
-    .cb_mem = &limit_swControlBlock,
-    .cb_size = sizeof(limit_swControlBlock),
-    .priority = (osPriority_t) osPriorityRealtime5,
-  };
+  /* creation of limit_sw */
   limit_swHandle = osThreadNew(start_tk_limit_sw, NULL, &limit_sw_attributes);
 
-  /* definition and creation of result_process */
-  const osThreadAttr_t result_process_attributes = {
-    .name = "result_process",
-    .stack_mem = &result_processBuffer[0],
-    .stack_size = sizeof(result_processBuffer),
-    .cb_mem = &result_processControlBlock,
-    .cb_size = sizeof(result_processControlBlock),
-    .priority = (osPriority_t) osPriorityAboveNormal3,
-  };
+  /* creation of result_process */
   result_processHandle = osThreadNew(start_tk_result_process, NULL, &result_process_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
@@ -842,6 +871,36 @@ osKernelInitialize();
     .priority = (osPriority_t) osPriorityAboveNormal3,
   };
   result_processHandle_send = osThreadNew(start_tk_result_process_send, NULL, &result_process_send_attributes);
+	
+	const osThreadAttr_t result_process_rece_attributes_5 = {
+    .name = "result_process_rece_5",
+    .stack_mem = &result_processBuffer_rece_5[0],
+    .stack_size = sizeof(result_processBuffer_rece_5),
+    .cb_mem = &result_processControlBlock_rece_5,
+    .cb_size = sizeof(result_processControlBlock_rece_5),
+    .priority = (osPriority_t) osPriorityAboveNormal2,
+  };
+  result_processHandle_rece_5 = osThreadNew(start_tk_result_process_rece_5, NULL, &result_process_rece_attributes_5);
+	
+	const osThreadAttr_t result_process_rece_attributes_5_timeout = {
+    .name = "result_process_rece_5_timeout",
+    .stack_mem = &result_processBuffer_rece_5_timeout[0],
+    .stack_size = sizeof(result_processBuffer_rece_5_timeout),
+    .cb_mem = &result_processControlBlock_rece_5_timeout,
+    .cb_size = sizeof(result_processControlBlock_rece_5_timeout),
+    .priority = (osPriority_t) osPriorityAboveNormal2,
+  };
+  result_processHandle_rece_5_timeout = osThreadNew(start_tk_result_process_rece_5_timeout, NULL, &result_process_rece_attributes_5_timeout);
+	
+	const osThreadAttr_t result_process_rece_attributes_5_sendover = {
+    .name = "result_process_rece_5_sendover",
+    .stack_mem = &result_processBuffer_rece_5_sendover[0],
+    .stack_size = sizeof(result_processBuffer_rece_5_sendover),
+    .cb_mem = &result_processControlBlock_rece_5_sendover,
+    .cb_size = sizeof(result_processControlBlock_rece_5_sendover),
+    .priority = (osPriority_t) osPriorityAboveNormal2,
+  };
+  result_processHandle_rece_5_sendover = osThreadNew(start_tk_result_process_rece_5_sendover, NULL, &result_process_rece_attributes_5_sendover);
   /* add threads, ... */
 	
 	//初始化电机中的位置和一些其他的关键变量
@@ -952,7 +1011,10 @@ void StartDefaultTask(void *argument)
                          2000 );
 		if(notify_use!=0)
 		{
+			
 			notify_use=0;
+			QUEUE_STRUCT tmp_5;
+			modbus_send_5(tmp_5);
 			//打印线程执行情况
 			vTaskList((char *)&tklog);
 	    printf("%s\n",tklog);
@@ -1783,6 +1845,113 @@ void start_tk_result_process_send(void *argument)
 			//启动接收超时定时器
 			__HAL_TIM_CLEAR_FLAG(&htim12,TIM_FLAG_UPDATE);
 			HAL_TIM_Base_Start_IT(&htim12);
+		}
+    osDelay(1);
+  }
+  /* USER CODE END start_tk_result_process */
+}
+
+void start_tk_result_process_rece_5(void *argument)
+{
+  /* USER CODE BEGIN start_tk_result_process */
+	uint32_t notify_use=0;
+  /* Infinite loop */
+  for(;;)
+  {
+		xTaskNotifyWait( 0x00,               /* Don't clear any bits on entry. */
+                         0xffffffff,          /* Clear all bits on exit. */
+                         &notify_use, /* Receives the notification value. */
+                         portMAX_DELAY );
+		if(notify_use==0x0002)
+		{
+			//HAL_UART_DMAStop(&huart2);
+			//HAL_TIM_Base_Stop(&htim12);
+			//dma 接收完成
+			//CRC数据校验
+			uint8_t crch=0;
+			uint8_t crcl=0;
+			uint16_t crc_tmp=usMBCRC16(rece_cache_5,rece_count_5 - 2);
+			crcl=(uint8_t)(crc_tmp & 0xFF);
+			crch=(uint8_t)(crc_tmp >> 8);
+			
+			if(crcl==rece_cache_5[rece_count_5-2] && crch==rece_cache_5[rece_count_5-1])
+			{
+				if(modbus_act_status_5!=NULL && modbus_list_head_5->next!=NULL)
+				{
+					//解析收到的数据放入光栅结构体中
+					memcpy(grating_value.data,&(rece_cache_5[3]),6);
+					modbus_list_head_5->if_over=0;
+					modbus_list_head_5=modbus_list_head_5->next;
+					if(modbus_list_head_5->if_over==1)
+					{
+						modbus_send_5(modbus_list_head_5->modbus_element);
+					}
+					else
+					{
+						HAL_GPIO_WritePin(GPIOE,GPIO_PIN_1,GPIO_PIN_RESET);
+						modbus_status_5=0;
+						modbus_time_flag_5=0;
+					}
+					;
+				}
+			}
+			else
+			{
+				//收到的数据不对
+				__nop();
+				__nop();
+				modbus_send_sub_5(modbus_list_head_5->modbus_element);
+				;
+			}
+		}
+    osDelay(1);
+  }
+  /* USER CODE END start_tk_result_process */
+}
+
+void start_tk_result_process_rece_5_timeout(void *argument)
+{
+  /* USER CODE BEGIN start_tk_result_process */
+	uint32_t notify_use=0;
+  /* Infinite loop */
+  for(;;)
+  {
+		xTaskNotifyWait( 0x00,               /* Don't clear any bits on entry. */
+                         0xffffffff,          /* Clear all bits on exit. */
+                         &notify_use, /* Receives the notification value. */
+                         portMAX_DELAY );
+		if(notify_use==0x0021)
+		{
+			if(modbus_list_head_5!=NULL)
+			{
+				modbus_send_sub_5(modbus_list_head_5->modbus_element);
+			}
+		}
+    osDelay(1);
+  }
+  /* USER CODE END start_tk_result_process */
+}
+
+void start_tk_result_process_rece_5_sendover(void *argument)
+{
+  /* USER CODE BEGIN start_tk_result_process */
+	uint32_t notify_use=0;
+  /* Infinite loop */
+  for(;;)
+  {
+		xTaskNotifyWait( 0x00,               /* Don't clear any bits on entry. */
+                         0xffffffff,          /* Clear all bits on exit. */
+                         &notify_use, /* Receives the notification value. */
+                         portMAX_DELAY );
+		if(notify_use==0x0001)
+		{
+			//变换电平，转为接收模式
+			HAL_GPIO_WritePin(GPIOE,GPIO_PIN_1,GPIO_PIN_SET);
+			HAL_UART_Receive_DMA(&huart6,(uint8_t*)rece_cache_5,rece_count_5);
+			modbus_time_flag_5=2;
+			//启动接收超时定时器
+			__HAL_TIM_CLEAR_FLAG(&htim13,TIM_FLAG_UPDATE);
+			HAL_TIM_Base_Start_IT(&htim13);
 		}
     osDelay(1);
   }

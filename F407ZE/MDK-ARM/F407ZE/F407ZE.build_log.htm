@@ -22,16 +22,21 @@ Dialog DLL:      TCM.DLL V1.27.0.0
  
 <h2>Project:</h2>
 D:\F407ZE\F407ZE\MDK-ARM\F407ZE.uvprojx
-Project File Date:  04/14/2020
+Project File Date:  04/15/2020
 
 <h2>Output:</h2>
 *** Using Compiler 'V5.06 update 4 (build 422)', folder: 'D:\Keil_v5\ARM\ARMCC\Bin'
 Build target 'F407ZE'
-compiling usart.c...
+compiling main.c...
+../Core/Src/main.c(174): warning:  #177-D: variable "addr"  was declared but never referenced
+  	uint8_t rw_flag=0,addr=0,length=0;
+../Core/Src/main.c(175): warning:  #177-D: variable "j"  was declared but never referenced
+  	uint16_t i=0,j=0;
+../Core/Src/main.c: 2 warnings, 0 errors
 linking...
-Program Size: Code=50224 RO-data=5068 RW-data=740 ZI-data=83172  
+Program Size: Code=51408 RO-data=5264 RW-data=764 ZI-data=82828  
 FromELF: creating hex file...
-"F407ZE\F407ZE.axf" - 0 Error(s), 0 Warning(s).
+"F407ZE\F407ZE.axf" - 0 Error(s), 2 Warning(s).
 
 <h2>Software Packages used:</h2>
 

@@ -50,11 +50,28 @@ uint8_t modbus_read_status;     //modbus 读取指令完成标志， 0： 空闲 1：读取进行
 uint8_t modbus_act_status;      //modbus 电机动作完成标志， 0：空闲， 1：动作指令交互中 2： 动作指令交互完成
 uint8_t modbus_time_status;     //modbus 超时标志， 0：空闲， 1：交互超时 2：交互完成
 uint8_t modbus_time_flag=0;       //modbus  定时时间标志  1： 第一次3.5T定时  1：第二次3.5T定时
+
+//modbus cache
+uint8_t modbus_send_cache_5[16];
+uint8_t rece_cache_5[16];
+uint8_t rece_count_5=0;
+uint8_t modbus_status_5=0;        //modbus 状态参量， 0： 空闲 1：传输中
+uint8_t modbus_read_status_5;     //modbus 读取指令完成标志， 0： 空闲 1：读取进行中 2：读取完成
+uint8_t modbus_act_status_5;      //modbus 电机动作完成标志， 0：空闲， 1：动作指令交互中 2： 动作指令交互完成
+uint8_t modbus_time_status_5;     //modbus 超时标志， 0：空闲， 1：交互超时 2：交互完成
+uint8_t modbus_time_flag_5=0;       //modbus  定时时间标志  1： 第一次3.5T定时  1：第二次3.5T定时
+
 static uint8_t self_check_counter_6=0;   //6号自检指令标志位    
 uint8_t cmd6_if_return=0;
 
 MODBUS_LIST* modbus_list_head=NULL;  //head 指向寻找到的第一个不为空的节点
 MODBUS_LIST* modbus_list_tail=NULL;  //tail 指向不为空的节点的下一个节点
+
+MODBUS_LIST* modbus_list_head_5=NULL;  //head 指向寻找到的第一个不为空的节点
+MODBUS_LIST* modbus_list_tail_5=NULL;  //tail 指向不为空的节点的下一个节点
+
+GRATING grating_value;                 //存放光栅数据
+
 uint16_t modbus_period=89;
 /* USER CODE END PTD */
 
@@ -4713,7 +4730,9 @@ void timer_start()
 	
 	//开启任务统计定时器14
 	HAL_TIM_Base_Start_IT(&htim14);
+	
 	HAL_TIM_Base_Stop(&htim12);
+	HAL_TIM_Base_Stop(&htim13);
 	//HAL_TIM_Base_Start_IT(&htim12);
 	return;
 }
@@ -5268,7 +5287,85 @@ uint8_t modbus_send_sub(QUEUE_STRUCT send_struct)
 	return 0;
 }
 
+//485 发送
+uint8_t modbus_send_5(QUEUE_STRUCT send_struct)
+{
+	if(modbus_status_5==0)
+	{
+		if(modbus_list_tail_5!=NULL && modbus_list_tail_5->if_over==0)
+		{
+			memcpy(&(modbus_list_tail_5->modbus_element),&send_struct,sizeof(QUEUE_STRUCT));
+			modbus_list_tail_5->if_over=1;
+			modbus_list_tail_5=modbus_list_tail_5->next;
+		}
+		else{
+			return MODBUS_LIST_ERROR;
+		}
+		//读取光栅内容
+		taskENTER_CRITICAL();
+		HAL_GPIO_WritePin(GPIOE,GPIO_PIN_1,GPIO_PIN_RESET);
+		__NOP();
+		__NOP();
+		modbus_send_cache_5[0]=0x01;
+		modbus_send_cache_5[1]=0x03;
+		modbus_send_cache_5[2]=0x00;
+		modbus_send_cache_5[3]=0x00;
+		modbus_send_cache_5[4]=0x00;
+		modbus_send_cache_5[5]=0x03;
+		modbus_send_cache_5[6]=0x05;
+		modbus_send_cache_5[7]=0xCB;
+		HAL_UART_Transmit_DMA(&huart6,(uint8_t*)modbus_send_cache_5,8);
+		modbus_time_flag_5=1;
+		rece_count_5=11;
+		modbus_status_5=1;
+		taskEXIT_CRITICAL();
+		
+	}
+	else
+	{
+		//modbus数据压入链表
+		if(modbus_list_tail_5!=NULL && modbus_list_tail_5->if_over==0)
+		{
+			memcpy(&(modbus_list_tail_5->modbus_element),&send_struct,sizeof(QUEUE_STRUCT));
+			modbus_list_tail_5->if_over=1;
+			modbus_list_tail_5=modbus_list_tail_5->next;
+			return MODBUS_BUSY;
+		}
+		else
+		{
+			return MODBUS_LIST_ERROR;
+		}
+	}
+	return 0;
+}
 
+//485组回调函数
+uint8_t modbus_send_sub_5(QUEUE_STRUCT send_struct)
+{
+	//读光栅
+	taskENTER_CRITICAL();
+	//HAL_GPIO_WritePin(GPIOE,GPIO_PIN_0,GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(GPIOE,GPIO_PIN_1,GPIO_PIN_RESET);
+	__NOP();
+	__NOP();
+	modbus_send_cache_5[0]=0x01;
+	modbus_send_cache_5[1]=0x03;
+	modbus_send_cache_5[2]=0x00;
+	modbus_send_cache_5[3]=0x00;
+	modbus_send_cache_5[4]=0x00;
+	modbus_send_cache_5[5]=0x03;
+	modbus_send_cache_5[6]=0x05;
+	modbus_send_cache_5[7]=0xCB;
+	if(HAL_UART_Transmit_DMA(&huart6,(uint8_t*)modbus_send_cache_5,8)==HAL_BUSY)
+	{
+		__NOP();
+		HAL_UART_Transmit_DMA(&huart6,(uint8_t*)modbus_send_cache_5,8);
+	}
+	modbus_time_flag_5=1;
+	rece_count_5=11;
+	taskEXIT_CRITICAL();
+	return 0;
+}
 //电机目标设置
 uint8_t positionSet(uint8_t motorId, int32_t * position)
 {
@@ -5346,7 +5443,6 @@ int main(void)
   /* USER CODE BEGIN 1 */
 
   /* USER CODE END 1 */
-  
 
   /* MCU Configuration--------------------------------------------------------*/
 
@@ -5361,13 +5457,12 @@ int main(void)
   SystemClock_Config();
 
   /* USER CODE BEGIN SysInit */
-
+  MX_GPIO_Init();
   /* USER CODE END SysInit */
 
   /* Initialize all configured peripherals */
-  MX_GPIO_Init();
+  MX_DMA_Init();
   MX_CAN1_Init();
-  MX_CAN2_Init();
   MX_CRC_Init();
   MX_I2C1_Init();
   MX_TIM1_Init();
@@ -5383,13 +5478,11 @@ int main(void)
   MX_TIM12_Init();
   MX_TIM13_Init();
   MX_TIM14_Init();
-	MX_DMA_Init();
   MX_UART4_Init();
   MX_USART1_UART_Init();
   MX_USART2_UART_Init();
   MX_USART3_UART_Init();
   MX_USART6_UART_Init();
-  
   /* USER CODE BEGIN 2 */
 	
 	//初始化信号量
@@ -5400,10 +5493,19 @@ int main(void)
 	HAL_DMA_DeInit(&hdma_usart2_rx);
 	HAL_DMA_Init(&hdma_usart2_rx);
 	
+	HAL_DMA_DeInit(&hdma_usart6_tx);
+	HAL_DMA_Init(&hdma_usart6_tx);
+	HAL_DMA_DeInit(&hdma_usart6_rx);
+	HAL_DMA_Init(&hdma_usart6_rx);
+	
 	HAL_TIM_Base_DeInit(&htim12);
 	HAL_TIM_Base_Init(&htim12);
 	
+	HAL_TIM_Base_DeInit(&htim13);
+	HAL_TIM_Base_Init(&htim13);
+	
 	modbus_list_head=modbus_list_gen(96);
+	modbus_list_head_5=modbus_list_gen(32);
 	
 	//HAL_TIM_Base_Start_IT(&htim12);
 	
@@ -5416,24 +5518,35 @@ int main(void)
 	{
 		printf("%s\n","modbus list error");
 	}
+	
+	if(modbus_list_head_5!=NULL)
+	{
+		modbus_list_tail_5=modbus_list_head_5;
+	}
+	else
+	{
+		printf("%s\n","modbus list 5 error");
+	}
 	//默认置于发送状态
 	HAL_GPIO_WritePin(GPIOE,GPIO_PIN_0,GPIO_PIN_RESET);
-	HAL_GPIO_WritePin(GPIOE,GPIO_PIN_7,GPIO_PIN_SET);
-	HAL_GPIO_WritePin(GPIOD,GPIO_PIN_3,GPIO_PIN_SET);
+	HAL_GPIO_WritePin(GPIOE,GPIO_PIN_1,GPIO_PIN_RESET);
+	
+	//继电器引脚
+	//HAL_GPIO_WritePin(GPIOE,GPIO_PIN_7,GPIO_PIN_SET);
+	//HAL_GPIO_WritePin(GPIOD,GPIO_PIN_3,GPIO_PIN_SET);
 	printf("%s\n","start free rtos");
 	
 	
 	
   /* USER CODE END 2 */
 
-  /* Call init function for freertos objects (in freertos.c) */
+  /* Init scheduler */
+  osKernelInitialize();  /* Call init function for freertos objects (in freertos.c) */
   MX_FREERTOS_Init(); 
-
   /* Start scheduler */
   osKernelStart();
-  
+ 
   /* We should never get here as control is now taken by the scheduler */
-
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
@@ -5492,7 +5605,7 @@ void SystemClock_Config(void)
 
 /* USER CODE END 4 */
 
-/**
+ /**
   * @brief  Period elapsed callback in non blocking mode
   * @note   This function is called  when TIM6 interrupt took place, inside
   * HAL_TIM_IRQHandler(). It makes a direct call to HAL_IncTick() to increment

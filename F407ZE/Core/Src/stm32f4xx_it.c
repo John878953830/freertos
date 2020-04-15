@@ -68,7 +68,6 @@ BaseType_t b_tk_rece_result=pdTRUE;
 
 /* External variables --------------------------------------------------------*/
 extern CAN_HandleTypeDef hcan1;
-extern CAN_HandleTypeDef hcan2;
 extern I2C_HandleTypeDef hi2c1;
 extern TIM_HandleTypeDef htim1;
 extern TIM_HandleTypeDef htim2;
@@ -83,8 +82,14 @@ extern TIM_HandleTypeDef htim11;
 extern TIM_HandleTypeDef htim12;
 extern TIM_HandleTypeDef htim13;
 extern TIM_HandleTypeDef htim14;
+extern DMA_HandleTypeDef hdma_uart4_rx;
+extern DMA_HandleTypeDef hdma_uart4_tx;
 extern DMA_HandleTypeDef hdma_usart2_tx;
 extern DMA_HandleTypeDef hdma_usart2_rx;
+extern DMA_HandleTypeDef hdma_usart3_rx;
+extern DMA_HandleTypeDef hdma_usart3_tx;
+extern DMA_HandleTypeDef hdma_usart6_tx;
+extern DMA_HandleTypeDef hdma_usart6_rx;
 extern UART_HandleTypeDef huart4;
 extern UART_HandleTypeDef huart2;
 extern UART_HandleTypeDef huart3;
@@ -105,6 +110,10 @@ extern TaskHandle_t master_orderHandle;
 extern TaskHandle_t result_processHandle;
 extern TaskHandle_t result_processHandle_rece;
 extern TaskHandle_t result_processHandle_send;
+
+extern TaskHandle_t result_processHandle_rece_5;
+extern TaskHandle_t result_processHandle_rece_5_sendover;
+extern TaskHandle_t result_processHandle_rece_5_timeout;
 extern uint16_t modbus_period;
 extern uint32_t fifo_level;
 /* USER CODE END EV */
@@ -273,6 +282,62 @@ void EXTI4_IRQHandler(void)
   /* USER CODE BEGIN EXTI4_IRQn 1 */
 
   /* USER CODE END EXTI4_IRQn 1 */
+}
+
+/**
+  * @brief This function handles DMA1 stream1 global interrupt.
+  */
+void DMA1_Stream1_IRQHandler(void)
+{
+  /* USER CODE BEGIN DMA1_Stream1_IRQn 0 */
+
+  /* USER CODE END DMA1_Stream1_IRQn 0 */
+  HAL_DMA_IRQHandler(&hdma_usart3_rx);
+  /* USER CODE BEGIN DMA1_Stream1_IRQn 1 */
+
+  /* USER CODE END DMA1_Stream1_IRQn 1 */
+}
+
+/**
+  * @brief This function handles DMA1 stream2 global interrupt.
+  */
+void DMA1_Stream2_IRQHandler(void)
+{
+  /* USER CODE BEGIN DMA1_Stream2_IRQn 0 */
+
+  /* USER CODE END DMA1_Stream2_IRQn 0 */
+  HAL_DMA_IRQHandler(&hdma_uart4_rx);
+  /* USER CODE BEGIN DMA1_Stream2_IRQn 1 */
+
+  /* USER CODE END DMA1_Stream2_IRQn 1 */
+}
+
+/**
+  * @brief This function handles DMA1 stream3 global interrupt.
+  */
+void DMA1_Stream3_IRQHandler(void)
+{
+  /* USER CODE BEGIN DMA1_Stream3_IRQn 0 */
+
+  /* USER CODE END DMA1_Stream3_IRQn 0 */
+  HAL_DMA_IRQHandler(&hdma_usart3_tx);
+  /* USER CODE BEGIN DMA1_Stream3_IRQn 1 */
+
+  /* USER CODE END DMA1_Stream3_IRQn 1 */
+}
+
+/**
+  * @brief This function handles DMA1 stream4 global interrupt.
+  */
+void DMA1_Stream4_IRQHandler(void)
+{
+  /* USER CODE BEGIN DMA1_Stream4_IRQn 0 */
+
+  /* USER CODE END DMA1_Stream4_IRQn 0 */
+  HAL_DMA_IRQHandler(&hdma_uart4_tx);
+  /* USER CODE BEGIN DMA1_Stream4_IRQn 1 */
+
+  /* USER CODE END DMA1_Stream4_IRQn 1 */
 }
 
 /**
@@ -673,12 +738,21 @@ void TIM8_UP_TIM13_IRQHandler(void)
 		xTaskNotifyFromISR(conflict_monitorHandle,0x0001,eSetBits,&b_tk_conflict_monitor);
 		portYIELD_FROM_ISR(b_tk_conflict_monitor);
 	}
-
+	if(__HAL_TIM_GET_FLAG(&htim13, TIM_FLAG_UPDATE) != RESET)
+	{
+		if(result_processHandle_rece_5_timeout!=NULL)
+		{
+			xTaskNotifyFromISR(result_processHandle_rece_5_timeout,0x0021,eSetBits,&b_tk_rece_result);
+			portYIELD_FROM_ISR( b_tk_rece_result );
+		}
+		__HAL_TIM_CLEAR_FLAG(&htim13,TIM_FLAG_UPDATE);
+		TIM13->CNT=0;
+	}
   /* USER CODE END TIM8_UP_TIM13_IRQn 0 */
   HAL_TIM_IRQHandler(&htim8);
   HAL_TIM_IRQHandler(&htim13);
   /* USER CODE BEGIN TIM8_UP_TIM13_IRQn 1 */
-
+	HAL_TIM_Base_Stop(&htim13);
   /* USER CODE END TIM8_UP_TIM13_IRQn 1 */
 }
 
@@ -781,59 +855,31 @@ void TIM7_IRQHandler(void)
 }
 
 /**
-  * @brief This function handles CAN2 TX interrupts.
+  * @brief This function handles DMA2 stream1 global interrupt.
   */
-void CAN2_TX_IRQHandler(void)
+void DMA2_Stream1_IRQHandler(void)
 {
-  /* USER CODE BEGIN CAN2_TX_IRQn 0 */
+  /* USER CODE BEGIN DMA2_Stream1_IRQn 0 */
 
-  /* USER CODE END CAN2_TX_IRQn 0 */
-  HAL_CAN_IRQHandler(&hcan2);
-  /* USER CODE BEGIN CAN2_TX_IRQn 1 */
+  /* USER CODE END DMA2_Stream1_IRQn 0 */
+  HAL_DMA_IRQHandler(&hdma_usart6_rx);
+  /* USER CODE BEGIN DMA2_Stream1_IRQn 1 */
 
-  /* USER CODE END CAN2_TX_IRQn 1 */
+  /* USER CODE END DMA2_Stream1_IRQn 1 */
 }
 
 /**
-  * @brief This function handles CAN2 RX0 interrupts.
+  * @brief This function handles DMA2 stream6 global interrupt.
   */
-void CAN2_RX0_IRQHandler(void)
+void DMA2_Stream6_IRQHandler(void)
 {
-  /* USER CODE BEGIN CAN2_RX0_IRQn 0 */
+  /* USER CODE BEGIN DMA2_Stream6_IRQn 0 */
 
-  /* USER CODE END CAN2_RX0_IRQn 0 */
-  HAL_CAN_IRQHandler(&hcan2);
-  /* USER CODE BEGIN CAN2_RX0_IRQn 1 */
+  /* USER CODE END DMA2_Stream6_IRQn 0 */
+  HAL_DMA_IRQHandler(&hdma_usart6_tx);
+  /* USER CODE BEGIN DMA2_Stream6_IRQn 1 */
 
-  /* USER CODE END CAN2_RX0_IRQn 1 */
-}
-
-/**
-  * @brief This function handles CAN2 RX1 interrupt.
-  */
-void CAN2_RX1_IRQHandler(void)
-{
-  /* USER CODE BEGIN CAN2_RX1_IRQn 0 */
-
-  /* USER CODE END CAN2_RX1_IRQn 0 */
-  HAL_CAN_IRQHandler(&hcan2);
-  /* USER CODE BEGIN CAN2_RX1_IRQn 1 */
-
-  /* USER CODE END CAN2_RX1_IRQn 1 */
-}
-
-/**
-  * @brief This function handles CAN2 SCE interrupt.
-  */
-void CAN2_SCE_IRQHandler(void)
-{
-  /* USER CODE BEGIN CAN2_SCE_IRQn 0 */
-
-  /* USER CODE END CAN2_SCE_IRQn 0 */
-  HAL_CAN_IRQHandler(&hcan2);
-  /* USER CODE BEGIN CAN2_SCE_IRQn 1 */
-
-  /* USER CODE END CAN2_SCE_IRQn 1 */
+  /* USER CODE END DMA2_Stream6_IRQn 1 */
 }
 
 /**
@@ -842,7 +888,32 @@ void CAN2_SCE_IRQHandler(void)
 void USART6_IRQHandler(void)
 {
   /* USER CODE BEGIN USART6_IRQn 0 */
-
+	if(__HAL_UART_GET_FLAG(&huart6,UART_FLAG_TC)!=RESET && modbus_time_flag_5==1)
+	{
+		modbus_time_flag_5=0;
+		if(result_processHandle_rece_5_sendover !=NULL)
+		{
+			xTaskNotifyFromISR(result_processHandle_rece_5_sendover,0x0001,eSetBits,&b_tk_rece_result);
+			portYIELD_FROM_ISR( b_tk_rece_result );
+		}
+		HAL_UART_DMAStop(&huart6);
+	}
+	if(__HAL_UART_GET_FLAG(&huart6,UART_FLAG_IDLE)!=RESET)
+	{
+		if(modbus_time_flag_5!=0)
+		{
+			if(result_processHandle_rece_5 !=NULL)
+			{
+				xTaskNotifyFromISR(result_processHandle_rece_5,0x0002,eSetBits,&b_tk_rece_result);
+				portYIELD_FROM_ISR( b_tk_rece_result );
+			}
+			__HAL_UART_CLEAR_IDLEFLAG(&huart6);
+			modbus_time_flag_5=0;
+			HAL_UART_DMAStop(&huart6);
+			HAL_TIM_Base_Stop(&htim13);
+			TIM13->CNT=0;
+		}
+	}
   /* USER CODE END USART6_IRQn 0 */
   HAL_UART_IRQHandler(&huart6);
   /* USER CODE BEGIN USART6_IRQn 1 */

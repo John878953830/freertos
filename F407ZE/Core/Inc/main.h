@@ -71,6 +71,8 @@ extern uint16_t iic_cache;
 //´®¿ÚDMA¾ä±ú
 extern DMA_HandleTypeDef hdma_usart2_tx;
 extern DMA_HandleTypeDef hdma_usart2_rx;
+extern DMA_HandleTypeDef hdma_usart6_tx;
+extern DMA_HandleTypeDef hdma_usart6_rx;
 //modbus cache
 extern uint8_t modbus_send_cache[16];
 extern uint8_t rece_cache[16];
@@ -80,6 +82,15 @@ extern uint8_t modbus_read_status;     //modbus ¶ÁÈ¡Ö¸ÁîÍê³É±êÖ¾£¬ 0£º ¿ÕÏĞ 1£º¶
 extern uint8_t modbus_act_status;      //modbus µç»ú¶¯×÷Íê³É±êÖ¾£¬ 0£º¿ÕÏĞ£¬ 1£º¶¯×÷Ö¸Áî½»»¥ÖĞ 2£º ¶¯×÷Ö¸Áî½»»¥Íê³É
 extern uint8_t modbus_time_status;     //modbus ³¬Ê±±êÖ¾£¬ 0£º¿ÕÏĞ£¬ 1£º½»»¥³¬Ê± 2£º½»»¥Íê³É
 extern uint8_t modbus_time_flag;       //modbus  ¶¨Ê±Ê±¼ä±êÖ¾  1£º µÚÒ»´Î3.5T¶¨Ê±  1£ºµÚ¶ş´Î3.5T¶¨Ê±
+
+extern uint8_t modbus_send_cache_5[16];
+extern uint8_t rece_cache_5[16];
+extern uint8_t rece_count_5; 
+extern uint8_t modbus_status_5;
+extern uint8_t modbus_read_status_5;     //modbus ¶ÁÈ¡Ö¸ÁîÍê³É±êÖ¾£¬ 0£º ¿ÕÏĞ 1£º¶ÁÈ¡½øĞĞÖĞ 2£º¶ÁÈ¡Íê³É
+extern uint8_t modbus_act_status_5;      //modbus µç»ú¶¯×÷Íê³É±êÖ¾£¬ 0£º¿ÕÏĞ£¬ 1£º¶¯×÷Ö¸Áî½»»¥ÖĞ 2£º ¶¯×÷Ö¸Áî½»»¥Íê³É
+extern uint8_t modbus_time_status_5;     //modbus ³¬Ê±±êÖ¾£¬ 0£º¿ÕÏĞ£¬ 1£º½»»¥³¬Ê± 2£º½»»¥Íê³É
+extern uint8_t modbus_time_flag_5;       //modbus  ¶¨Ê±Ê±¼ä±êÖ¾  1£º µÚÒ»´Î3.5T¶¨Ê±  1£ºµÚ¶ş´Î3.5T¶¨Ê±
 
 extern uint8_t self_check_counter_6;           //6ºÅ×Ô¼ìÖ¸ÁîµÄ¼ÆÊıÖµ
 extern uint8_t cmd6_if_return;                 //6ºÅ×ÜÌå×Ô¼ìÍê³ÉÊÇ·ñ·µ»Ø
@@ -235,7 +246,7 @@ int command_24(uint8_t* data,uint32_t para);
 int command_25(uint8_t* data,uint32_t para);
 int command_26(uint8_t* data,uint32_t para);
 
-//½á¹û½âÎöº¯Êı£¬¹²6×é£¬ ¶ÔÓ¦Î»ÖÃ£¬ËÙ¶È£3£¬ Å¤¾Ø£¬ 4£º´íÎóÂë£¬ 5£ºÎÂ¶È£¬ 6£ºÖÍÁôÂö³åÊı¬
+//½á¹û½âÎöº¯Êı£¬¹²6×é£¬ ¶ÔÓ¦Î»ÖÃ£¬ËÙ¶È?3£¬ Å¤¾Ø£¬ 4£º´íÎóÂë£¬ 5£ºÎÂ¶È£¬ 6£ºÖÍÁôÂö³åÊı?
 void result_parse_1(uint8_t* data, uint8_t num);
 void result_parse_2(uint8_t* data, uint8_t num);
 void result_parse_3(uint8_t* data, uint8_t num);
@@ -388,6 +399,7 @@ typedef struct grating_struct{
 	uint32_t distance_max;                      //·É»úµÄÔÊĞí×î´ó¾àÀë
 	uint8_t status;                             //¹âÕ¤¼ì²â·É»ú¼Ğ½ÇÊÇ·ñ½Ó½ü45¶È£¬0£º²»½Ó½ü 1£º ½Ó½ü45¶È£¬ĞèÒªĞı×ªĞ­×÷´¦Àí
 	uint8_t if_have_target;                     //¹âÕ¤¼ì²â·É»úÊÇ·ñ´æÔÚ£¬ 0£º ²»´æÔÚ£¬ 1£º ´æÔÚ
+	uint8_t data[6];                            //´æ·Å¹âÕ¤Ô­Ê¼Êı¾İ
 }GRATING;
 	
 
@@ -438,6 +450,10 @@ extern MOTOR_STRUCT motor_array[4];
 uint8_t can_send(QUEUE_STRUCT send_struct);
 uint8_t modbus_send(QUEUE_STRUCT send_struct);
 uint8_t modbus_send_sub(QUEUE_STRUCT send_struct);
+uint8_t modbus_send_5(QUEUE_STRUCT send_struct);
+uint8_t modbus_send_sub_5(QUEUE_STRUCT send_struct);
+
+
 uint8_t iic_rw(uint8_t rw_flag, uint8_t addr,uint8_t* data,uint8_t length);
 extern int(*command_to_function[27])(uint8_t*,uint32_t);
 extern void(*result_to_parameter[10])(uint8_t*, uint8_t);
@@ -446,6 +462,11 @@ extern uint8_t motor_array_init(void);
 extern uint16_t usMBCRC16( uint8_t * pucFrame, uint16_t usLen );
 extern MODBUS_LIST* modbus_list_head;
 extern MODBUS_LIST* modbus_list_tail;
+
+extern MODBUS_LIST* modbus_list_head_5;
+extern MODBUS_LIST* modbus_list_tail_5;
+
+extern GRATING grating_value;
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus
