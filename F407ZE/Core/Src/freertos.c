@@ -710,6 +710,21 @@ uint32_t result_processBuffer_rece_5_sendover[ 128 ];
 osStaticThreadDef_t result_processControlBlock_rece_5_sendover;
 void start_tk_result_process_rece_5_sendover(void *argument);
 
+osThreadId_t result_processHandle_rece_2;
+uint32_t result_processBuffer_rece_2[ 128 ];
+osStaticThreadDef_t result_processControlBlock_rece_2;
+void start_tk_result_process_rece_2(void *argument);
+
+osThreadId_t result_processHandle_rece_2_timeout;
+uint32_t result_processBuffer_rece_2_timeout[ 128 ];
+osStaticThreadDef_t result_processControlBlock_rece_2_timeout;
+void start_tk_result_process_rece_2_timeout(void *argument);
+
+osThreadId_t result_processHandle_rece_2_sendover;
+uint32_t result_processBuffer_rece_2_sendover[ 128 ];
+osStaticThreadDef_t result_processControlBlock_rece_2_sendover;
+void start_tk_result_process_rece_2_sendover(void *argument);
+
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 {
 	//QUEUE_STRUCT can_rece;
@@ -901,6 +916,36 @@ void MX_FREERTOS_Init(void) {
     .priority = (osPriority_t) osPriorityAboveNormal2,
   };
   result_processHandle_rece_5_sendover = osThreadNew(start_tk_result_process_rece_5_sendover, NULL, &result_process_rece_attributes_5_sendover);
+	
+	const osThreadAttr_t result_process_rece_attributes_2 = {
+    .name = "result_process_rece_2",
+    .stack_mem = &result_processBuffer_rece_2[0],
+    .stack_size = sizeof(result_processBuffer_rece_2),
+    .cb_mem = &result_processControlBlock_rece_2,
+    .cb_size = sizeof(result_processControlBlock_rece_2),
+    .priority = (osPriority_t) osPriorityAboveNormal3,
+  };
+  result_processHandle_rece_2 = osThreadNew(start_tk_result_process_rece_2, NULL, &result_process_rece_attributes_2);
+	
+	const osThreadAttr_t result_process_rece_attributes_2_timeout = {
+    .name = "result_process_rece_2_timeout",
+    .stack_mem = &result_processBuffer_rece_2_timeout[0],
+    .stack_size = sizeof(result_processBuffer_rece_2_timeout),
+    .cb_mem = &result_processControlBlock_rece_2_timeout,
+    .cb_size = sizeof(result_processControlBlock_rece_2_timeout),
+    .priority = (osPriority_t) osPriorityAboveNormal3,
+  };
+  result_processHandle_rece_2_timeout = osThreadNew(start_tk_result_process_rece_2_timeout, NULL, &result_process_rece_attributes_2_timeout);
+	
+	const osThreadAttr_t result_process_rece_attributes_2_sendover = {
+    .name = "result_process_rece_2_sendover",
+    .stack_mem = &result_processBuffer_rece_2_sendover[0],
+    .stack_size = sizeof(result_processBuffer_rece_2_sendover),
+    .cb_mem = &result_processControlBlock_rece_2_sendover,
+    .cb_size = sizeof(result_processControlBlock_rece_2_sendover),
+    .priority = (osPriority_t) osPriorityAboveNormal3,
+  };
+  result_processHandle_rece_2_sendover = osThreadNew(start_tk_result_process_rece_2_sendover, NULL, &result_process_rece_attributes_2_sendover);
   /* add threads, ... */
 	
 	//初始化电机中的位置和一些其他的关键变量
@@ -1804,7 +1849,7 @@ void start_tk_result_process_rece(void *argument)
 					}
 					else
 					{
-						HAL_GPIO_WritePin(GPIOG,GPIO_PIN_6,GPIO_PIN_SET);
+						HAL_GPIO_WritePin(GPIOE,GPIO_PIN_0,GPIO_PIN_SET);
 						modbus_status=0;
 						modbus_time_flag=0;
 					}
@@ -1953,6 +1998,133 @@ void start_tk_result_process_rece_5_sendover(void *argument)
 			//启动接收超时定时器
 			__HAL_TIM_CLEAR_FLAG(&htim13,TIM_FLAG_UPDATE);
 			HAL_TIM_Base_Start_IT(&htim13);
+		}
+    osDelay(1);
+  }
+  /* USER CODE END start_tk_result_process */
+}
+
+void start_tk_result_process_rece_2(void *argument)
+{
+  /* USER CODE BEGIN start_tk_result_process */
+	uint32_t notify_use=0;
+  /* Infinite loop */
+  for(;;)
+  {
+		xTaskNotifyWait( 0x00,               /* Don't clear any bits on entry. */
+                         0xffffffff,          /* Clear all bits on exit. */
+                         &notify_use, /* Receives the notification value. */
+                         portMAX_DELAY );
+		if(notify_use==0x0002)
+		{
+			//HAL_UART_DMAStop(&huart2);
+			//HAL_TIM_Base_Stop(&htim12);
+			//dma 接收完成
+			//CRC数据校验
+			uint8_t crch=0;
+			uint8_t crcl=0;
+			uint16_t crc_tmp=usMBCRC16(rece_cache_2,rece_count_2 - 2);
+			crcl=(uint8_t)(crc_tmp & 0xFF);
+			crch=(uint8_t)(crc_tmp >> 8);
+			
+			if(crcl==rece_cache_2[rece_count_2-2] && crch==rece_cache_2[rece_count_2-1])
+			{
+				if(modbus_list_head_2!=NULL && modbus_list_head_2->next!=NULL)
+				{
+					//解析收到的数据放入电机结构体中
+					if(rece_cache_2[1]==0x03)              //读取命令
+					{
+						result_to_parameter_2[modbus_list_head_2->modbus_element.modbus_property](&rece_cache_2[3],2);
+					}
+					int32_t tmp_offset=0;
+					//8号命令处理程序段
+					if(modbus_list_head_2->modbus_element.can_command==0x08 && rece_cache_2[1]==0x03)
+					{
+						tmp_offset=((uint32_t)rece_cache_2[3]<<8) | (uint32_t)rece_cache_2[4] | ((uint32_t)rece_cache_2[5] << 24) | ((uint32_t)rece_cache_2[6] << 16);
+						modbus_list_head_2->modbus_element.can_command=0x00;
+						MODBUS_LIST* tmp_refill=modbus_list_head_2->next;
+						int32_t tmp_current=((uint32_t)tmp_refill->modbus_element.modbus_data_1<<8) | (uint32_t)tmp_refill->modbus_element.modbus_data_2 | ((uint32_t)tmp_refill->modbus_element.modbus_data_3 << 24) | ((uint32_t)tmp_refill->modbus_element.modbus_data_4 << 16);
+						tmp_offset+=tmp_current;
+						//重构
+						tmp_refill->modbus_element.modbus_data_1=(uint8_t)((tmp_offset>>8) & 0xFF);
+						tmp_refill->modbus_element.modbus_data_2=(uint8_t)(tmp_offset & 0xFF);
+						tmp_refill->modbus_element.modbus_data_3=(uint8_t)((tmp_offset>>24) & 0xFF);
+						tmp_refill->modbus_element.modbus_data_4=(uint8_t)((tmp_offset>>16) & 0xFF);
+						//填充目标位置
+						motor_array[2].position_value.target_position=tmp_offset;
+					}
+					modbus_list_head_2->if_over=0;
+					modbus_list_head_2=modbus_list_head_2->next;
+					if(modbus_list_head_2->if_over==1)
+					{
+						modbus_send_sub_2(modbus_list_head_2->modbus_element);
+					}
+					else
+					{
+						HAL_GPIO_WritePin(GPIOB,GPIO_PIN_7,GPIO_PIN_SET);
+						modbus_status_2=0;
+						modbus_time_flag_2=0;
+					}
+					;
+				}
+			}
+			else
+			{
+				//收到的数据不对
+				__nop();
+				__nop();
+				modbus_send_sub_2(modbus_list_head_2->modbus_element);
+				;
+			}
+		}
+    osDelay(1);
+  }
+  /* USER CODE END start_tk_result_process */
+}
+
+void start_tk_result_process_rece_2_timeout(void *argument)
+{
+  /* USER CODE BEGIN start_tk_result_process */
+	uint32_t notify_use=0;
+  /* Infinite loop */
+  for(;;)
+  {
+		xTaskNotifyWait( 0x00,               /* Don't clear any bits on entry. */
+                         0xffffffff,          /* Clear all bits on exit. */
+                         &notify_use, /* Receives the notification value. */
+                         portMAX_DELAY );
+		if(notify_use==0x0021)
+		{
+			if(modbus_list_head_2!=NULL)
+			{
+				modbus_send_sub_2(modbus_list_head_2->modbus_element);
+			}
+		}
+    osDelay(1);
+  }
+  /* USER CODE END start_tk_result_process */
+}
+
+void start_tk_result_process_rece_2_sendover(void *argument)
+{
+  /* USER CODE BEGIN start_tk_result_process */
+	uint32_t notify_use=0;
+  /* Infinite loop */
+  for(;;)
+  {
+		xTaskNotifyWait( 0x00,               /* Don't clear any bits on entry. */
+                         0xffffffff,          /* Clear all bits on exit. */
+                         &notify_use, /* Receives the notification value. */
+                         portMAX_DELAY );
+		if(notify_use==0x0001)
+		{
+			//变换电平，转为接收模式
+			HAL_GPIO_WritePin(GPIOB,GPIO_PIN_7,GPIO_PIN_SET);
+			HAL_UART_Receive_DMA(&huart4,(uint8_t*)rece_cache_2,rece_count_2);
+			modbus_time_flag_2=2;
+			//启动接收超时定时器
+			//__HAL_TIM_CLEAR_FLAG(&htim13,TIM_FLAG_UPDATE);
+			//HAL_TIM_Base_Start_IT(&htim13);
 		}
     osDelay(1);
   }

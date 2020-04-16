@@ -96,6 +96,24 @@ extern uint8_t modbus_act_status_5;      //modbus 电机动作完成标志， 0：空闲， 1
 extern uint8_t modbus_time_status_5;     //modbus 超时标志， 0：空闲， 1：交互超时 2：交互完成
 extern uint8_t modbus_time_flag_5;       //modbus  定时时间标志  1： 第一次3.5T定时  1：第二次3.5T定时
 
+extern uint8_t modbus_send_cache_2[16];
+extern uint8_t rece_cache_2[16];
+extern uint8_t rece_count_2; 
+extern uint8_t modbus_status_2;
+extern uint8_t modbus_read_status_2;     //modbus 读取指令完成标志， 0： 空闲 1：读取进行中 2：读取完成
+extern uint8_t modbus_act_status_2;      //modbus 电机动作完成标志， 0：空闲， 1：动作指令交互中 2： 动作指令交互完成
+extern uint8_t modbus_time_status_2;     //modbus 超时标志， 0：空闲， 1：交互超时 2：交互完成
+extern uint8_t modbus_time_flag_2;       //modbus  定时时间标志  1： 第一次3.5T定时  1：第二次3.5T定时
+
+extern uint8_t modbus_send_cache_3[16];
+extern uint8_t rece_cache_3[16];
+extern uint8_t rece_count_3; 
+extern uint8_t modbus_status_3;
+extern uint8_t modbus_read_status_3;     //modbus 读取指令完成标志， 0： 空闲 1：读取进行中 2：读取完成
+extern uint8_t modbus_act_status_3;      //modbus 电机动作完成标志， 0：空闲， 1：动作指令交互中 2： 动作指令交互完成
+extern uint8_t modbus_time_status_3;     //modbus 超时标志， 0：空闲， 1：交互超时 2：交互完成
+extern uint8_t modbus_time_flag_3;       //modbus  定时时间标志  1： 第一次3.5T定时  1：第二次3.5T定时
+
 extern uint8_t self_check_counter_6;           //6号自检指令的计数值
 extern uint8_t cmd6_if_return;                 //6号总体自检完成是否返回
 
@@ -456,11 +474,13 @@ uint8_t modbus_send(QUEUE_STRUCT send_struct);
 uint8_t modbus_send_sub(QUEUE_STRUCT send_struct);
 uint8_t modbus_send_5(QUEUE_STRUCT send_struct);
 uint8_t modbus_send_sub_5(QUEUE_STRUCT send_struct);
-
+uint8_t modbus_send_2(QUEUE_STRUCT send_struct);
+uint8_t modbus_send_sub_2(QUEUE_STRUCT send_struct);
 
 uint8_t iic_rw(uint8_t rw_flag, uint8_t addr,uint8_t* data,uint8_t length);
 extern int(*command_to_function[27])(uint8_t*,uint32_t);
 extern void(*result_to_parameter[10])(uint8_t*, uint8_t);
+extern void(*result_to_parameter_2[10])(uint8_t*, uint8_t);
 extern void enable_motor(void);
 extern uint8_t motor_array_init(void);
 extern uint16_t usMBCRC16( uint8_t * pucFrame, uint16_t usLen );
@@ -469,6 +489,12 @@ extern MODBUS_LIST* modbus_list_tail;
 
 extern MODBUS_LIST* modbus_list_head_5;
 extern MODBUS_LIST* modbus_list_tail_5;
+
+extern MODBUS_LIST* modbus_list_head_2;
+extern MODBUS_LIST* modbus_list_tail_2;
+
+extern MODBUS_LIST* modbus_list_head_3;
+extern MODBUS_LIST* modbus_list_tail_3;
 
 extern GRATING grating_value;
 /* USER CODE END Private defines */

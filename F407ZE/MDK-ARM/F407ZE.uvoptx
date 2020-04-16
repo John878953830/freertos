@@ -133,7 +133,7 @@
         <SetRegEntry>
           <Number>0</Number>
           <Key>DLGUARM</Key>
-          <Name>d</Name>
+          <Name>&gt;</Name>
         </SetRegEntry>
         <SetRegEntry>
           <Number>0</Number>
@@ -266,8 +266,16 @@
           <WinId>35903</WinId>
         </Entry>
         <Entry>
+          <Name>System Viewer\UART4</Name>
+          <WinId>35900</WinId>
+        </Entry>
+        <Entry>
           <Name>System Viewer\USART2</Name>
           <WinId>35905</WinId>
+        </Entry>
+        <Entry>
+          <Name>System Viewer\USART3</Name>
+          <WinId>35899</WinId>
         </Entry>
         <Entry>
           <Name>System Viewer\USART6</Name>

@@ -71,6 +71,16 @@ uint8_t modbus_act_status_2;      //modbus µç»ú¶¯×÷Íê³É±êÖ¾£¬ 0£º¿ÕÏÐ£¬ 1£º¶¯×÷Ö
 uint8_t modbus_time_status_2;     //modbus ³¬Ê±±êÖ¾£¬ 0£º¿ÕÏÐ£¬ 1£º½»»¥³¬Ê± 2£º½»»¥Íê³É
 uint8_t modbus_time_flag_2=0;       //modbus  ¶¨Ê±Ê±¼ä±êÖ¾  1£º µÚÒ»´Î3.5T¶¨Ê±  1£ºµÚ¶þ´Î3.5T¶¨Ê±
 
+//modbus cache, 4 ºÅµç»ú
+uint8_t modbus_send_cache_3[16];
+uint8_t rece_cache_3[16];
+uint8_t rece_count_3=0;
+uint8_t modbus_status_3=0;        //modbus ×´Ì¬²ÎÁ¿£¬ 0£º ¿ÕÏÐ 1£º´«ÊäÖÐ
+uint8_t modbus_read_status_3;     //modbus ¶ÁÈ¡Ö¸ÁîÍê³É±êÖ¾£¬ 0£º ¿ÕÏÐ 1£º¶ÁÈ¡½øÐÐÖÐ 2£º¶ÁÈ¡Íê³É
+uint8_t modbus_act_status_3;      //modbus µç»ú¶¯×÷Íê³É±êÖ¾£¬ 0£º¿ÕÏÐ£¬ 1£º¶¯×÷Ö¸Áî½»»¥ÖÐ 2£º ¶¯×÷Ö¸Áî½»»¥Íê³É
+uint8_t modbus_time_status_3;     //modbus ³¬Ê±±êÖ¾£¬ 0£º¿ÕÏÐ£¬ 1£º½»»¥³¬Ê± 2£º½»»¥Íê³É
+uint8_t modbus_time_flag_3=0;       //modbus  ¶¨Ê±Ê±¼ä±êÖ¾  1£º µÚÒ»´Î3.5T¶¨Ê±  1£ºµÚ¶þ´Î3.5T¶¨Ê±
+
 static uint8_t self_check_counter_6=0;   //6ºÅ×Ô¼ìÖ¸Áî±êÖ¾Î»    
 uint8_t cmd6_if_return=0;
 
@@ -82,6 +92,9 @@ MODBUS_LIST* modbus_list_tail_5=NULL;  //tail Ö¸Ïò²»Îª¿ÕµÄ½ÚµãµÄÏÂÒ»¸ö½Úµã
 
 MODBUS_LIST* modbus_list_head_2=NULL;  //head Ö¸ÏòÑ°ÕÒµ½µÄµÚÒ»¸ö²»Îª¿ÕµÄ½Úµã
 MODBUS_LIST* modbus_list_tail_2=NULL;  //tail Ö¸Ïò²»Îª¿ÕµÄ½ÚµãµÄÏÂÒ»¸ö½Úµã
+
+MODBUS_LIST* modbus_list_head_3=NULL;  //head Ö¸ÏòÑ°ÕÒµ½µÄµÚÒ»¸ö²»Îª¿ÕµÄ½Úµã
+MODBUS_LIST* modbus_list_tail_3=NULL;  //tail Ö¸Ïò²»Îª¿ÕµÄ½ÚµãµÄÏÂÒ»¸ö½Úµã
 
 GRATING grating_value;                 //´æ·Å¹âÕ¤Êý¾Ý
 const uint8_t grating_send_buf[8]={0x01,0x03,0x00,0x00,0x00,0x03,0x05,0xCB};
@@ -4582,6 +4595,520 @@ void result_parse_7(uint8_t* data,uint8_t num)
 	}
 	return;
 }
+
+//½á¹û½âÎöº¯Êý
+void result_parse_2_1(uint8_t* data, uint8_t num)
+{
+	//µç»úÎ»ÖÃ¶ÁÈ¡
+	if(num==1 || num>4)//ÆÁ±Îµô2ºÅµç»ú
+	{
+		;
+	}
+	else
+	{
+		motor_array[num].position_value.current_position=((uint32_t)data[0]<<8) | (uint32_t)data[1] | ((uint32_t)data[2] << 24) | ((uint32_t)data[3] << 16);
+	}
+	return;
+}
+void result_parse_2_2(uint8_t* data, uint8_t num)
+{
+	//µç»úËÙ¶È¶ÁÈ¡
+	if(num==1 || num>4)
+	{
+		;
+	}
+	else
+	{
+		motor_array[num].speed_value.current_speed=((uint32_t)data[0]<<8) | (uint32_t)data[1] | ((uint32_t)data[2] << 24) | ((uint32_t)data[3] << 16);
+		if(__fabs(motor_array[num].speed_value.current_speed>SPEED_JUDGE))
+		{
+			motor_array[num].current_status=1;
+		}
+		else
+		{
+			motor_array[num].current_status=0;
+		}
+		//Ö´ÐÐÍê³ÉÅÐ¶¨
+		if(__fabs(motor_array[num].speed_value.current_speed_pre)>SPEED_JUDGE && __fabs(motor_array[num].speed_value.current_speed)<SPEED_JUDGE
+			 && motor_array[num].command.if_return==0x01)
+		{
+			//Ö´ÐÐÍê³É±êÖ¾ÖÃÎ»
+			motor_array[num].command.command_status=0x02;
+			
+			//ÆÕÍ¨¶¯×÷µÄÖ´ÐÐÍê³ÉÅÐ¶¨
+			if(motor_array[num].command.command_id==0x08 || 
+				 motor_array[num].command.command_id==0x0B ||
+			   motor_array[num].command.command_id==0x0C ||
+			   motor_array[num].command.command_id==0x0D ||
+			   motor_array[num].command.command_id==0x0E)
+			{
+				if(motor_array[num].command.command_union!=0x14 && motor_array[num].command.command_union!=0x06)
+				{
+					//·¢ËÍ·µ»ØÖ¡
+					QUEUE_STRUCT frame_return;
+					frame_return.property=0x00;             //can send
+					frame_return.can_command=motor_array[num].command.command_id;          
+					frame_return.can_if_ack=0x01;           //ÐèÒªACK
+					frame_return.can_source=0x03;           //±¾Ä£¿é
+					frame_return.can_target=0x00;
+					frame_return.can_priority=0x03;         //ÃüÁî½áÊø·µ»ØÖ¡
+					frame_return.can_if_last=0x00;          //ÎÞÐèÆ´½Ó
+					frame_return.can_if_return=0x00;        //ÎÞÐè·µ»Ø
+					frame_return.length=4;
+					frame_return.data[0]=0xFF;              //´íÎóÂë£¬0±êÊ¶Õý³£
+					frame_return.data[1]=0xFF;              //Ö´ÐÐ½á¹û£¬ 1´ú±íÒÑÍê³É
+					frame_return.data[2]=0xFF;               //µç»úºÅ
+					frame_return.data[3]=0xFE;              //±£Áô
+					taskENTER_CRITICAL();
+					portBASE_TYPE status = xQueueSendToBack(send_queueHandle, &frame_return, 0);
+					if(status!=pdPASS)
+					{
+						#ifdef DEBUG_OUTPUT
+						printf("%s\n","queue overflow");
+						#endif
+					}
+					else
+					{
+						#ifdef DEBUG_OUTPUT
+						printf("%s\n","send command 7 error to queue already");
+						#endif
+					}
+					taskEXIT_CRITICAL();
+				}
+			}
+			
+			//×Ô¼ì¶¯×÷Ö´ÐÐÍê³ÉÅÐ¶¨
+			if((motor_array[num].command.command_id==0x0F || 
+				  motor_array[num].command.command_id==0x10 || 
+			    motor_array[num].command.command_id==0x11 || 
+			    motor_array[num].command.command_id==0x12 || 
+			    motor_array[num].command.command_id==0x06))
+			{
+				
+				if(motor_array[num].command.command_union!=0x06)
+				{
+					motor_array[num].command.command_id=0x00;
+					//·µ»ØÖ¡¸ñÊ½ÉùÃ÷
+					QUEUE_STRUCT frame_return;
+					frame_return.property=0x00;             //can send
+					frame_return.can_command=motor_array[num].command.command_id;          
+					frame_return.can_if_ack=0x01;           //ÐèÒªACK
+					frame_return.can_source=0x03;           //±¾Ä£¿é
+					frame_return.can_target=0x00;
+					frame_return.can_priority=0x03;         //ÃüÁî½áÊø·µ»ØÖ¡
+					frame_return.can_if_last=0x00;          //ÎÞÐèÆ´½Ó
+					frame_return.can_if_return=0x00;        //ÎÞÐè·µ»Ø
+					frame_return.length=4;
+					frame_return.data[0]=0xFF;              //´íÎóÂë£¬0±êÊ¶Õý³£
+					frame_return.data[1]=0xFF;              //Ö´ÐÐ½á¹û£¬ 1´ú±íÒÑÍê³É
+					frame_return.data[2]=0xFF;               //µç»úºÅ
+					frame_return.data[3]=0xFE;              //±£Áô
+					if(motor_array[num].self_check_counter!=0)
+					{
+						frame_return.data[0]=ERROR_COMMAND_15_FAIL;
+					}
+					else
+					{
+						;
+					}
+					taskENTER_CRITICAL();
+					portBASE_TYPE status = xQueueSendToBack(send_queueHandle, &frame_return, 0);
+					if(status!=pdPASS)
+					{
+						#ifdef DEBUG_OUTPUT
+						printf("%s\n","queue overflow");
+						#endif
+					}
+					else
+					{
+						#ifdef DEBUG_OUTPUT
+						printf("%s\n","send command 7 error to queue already");
+						#endif
+					}
+					taskEXIT_CRITICAL();
+				}
+				if(motor_array[num].command.command_union == 0x06)
+				{
+					if(num==0 && motor_array[num].command.command_id==15)
+					{
+						motor_array[num].command.command_id=0x00;
+						//·µ»ØÖ¡¸ñÊ½ÉùÃ÷
+						QUEUE_STRUCT frame_return_cmd6;
+						frame_return_cmd6.property=0x00;             //can send
+						frame_return_cmd6.can_command=motor_array[num].command.command_id;          
+						frame_return_cmd6.can_if_ack=0x01;           //ÐèÒªACK
+						frame_return_cmd6.can_source=0x03;           //±¾Ä£¿é
+						frame_return_cmd6.can_target=0x00;
+						frame_return_cmd6.can_priority=0x03;         //ÃüÁî½áÊø·µ»ØÖ¡
+						frame_return_cmd6.can_if_last=0x00;          //ÎÞÐèÆ´½Ó
+						frame_return_cmd6.can_if_return=0x00;        //ÎÞÐè·µ»Ø
+						frame_return_cmd6.length=4;
+						frame_return_cmd6.data[0]=0xFF;              //´íÎóÂë£¬0±êÊ¶Õý³£
+						frame_return_cmd6.data[1]=0xFF;              //Ö´ÐÐ½á¹û£¬ 1´ú±íÒÑÍê³É
+						frame_return_cmd6.data[2]=0xFF;               //µç»úºÅ
+						frame_return_cmd6.data[3]=0xFE;              //±£Áô
+						motor_array[num].command.command_union=0;
+						//·¢ËÍ6ºÅ×Ô¼ì½áÊøÊý¾ÝÖ¡
+						frame_return_cmd6.property=0x00;             //can send
+						frame_return_cmd6.can_command=0x06;          //Í£Ö¹Ö¸Áî
+						frame_return_cmd6.can_if_ack=0x01;           //ÐèÒªACK
+						frame_return_cmd6.can_source=0x03;           //±¾Ä£¿é
+						frame_return_cmd6.can_target=0x00;
+						frame_return_cmd6.can_priority=0x05;         //Êý¾ÝÖ¡
+						frame_return_cmd6.can_if_last=0x00;          //Æ´½ÓÎ»ÖÃ0
+						frame_return_cmd6.can_if_return=0x00;
+						frame_return_cmd6.length=4;
+						frame_return_cmd6.data[0]=(uint8_t)(CMD6_START_SELFCHECK_OK_0>>24);
+						frame_return_cmd6.data[1]=(uint8_t)(CMD6_START_SELFCHECK_OK_0>>16);
+						frame_return_cmd6.data[2]=(uint8_t)(CMD6_START_SELFCHECK_OK_0>>8);
+						frame_return_cmd6.data[3]=(uint8_t)(CMD6_START_SELFCHECK_OK_0);
+						//·¢ËÍ·µ»ØÖ¡
+						//taskENTER_CRITICAL();
+						portBASE_TYPE status = xQueueSendToBack(send_queueHandle, &frame_return_cmd6, 0);
+						if(status!=pdPASS)
+						{
+							#ifdef DEBUG_OUTPUT
+							printf("%s\n","queue overflow");
+							#endif
+						}
+						else
+						{
+							#ifdef DEBUG_OUTPUT
+							printf("%s\n","send command 7 error to queue already");
+							#endif
+						}
+						//taskEXIT_CRITICAL();
+						//×Ô¼ì¼ÆÊý×ÔÔö
+						self_check_counter_6++;
+					}
+					if(num==2 && motor_array[num].command.command_id==17)
+					{
+						motor_array[num].command.command_id=0x00;
+						//·µ»ØÖ¡¸ñÊ½ÉùÃ÷
+						QUEUE_STRUCT frame_return_cmd6;
+						frame_return_cmd6.property=0x00;             //can send
+						frame_return_cmd6.can_command=motor_array[num].command.command_id;          
+						frame_return_cmd6.can_if_ack=0x01;           //ÐèÒªACK
+						frame_return_cmd6.can_source=0x03;           //±¾Ä£¿é
+						frame_return_cmd6.can_target=0x00;
+						frame_return_cmd6.can_priority=0x03;         //ÃüÁî½áÊø·µ»ØÖ¡
+						frame_return_cmd6.can_if_last=0x00;          //ÎÞÐèÆ´½Ó
+						frame_return_cmd6.can_if_return=0x00;        //ÎÞÐè·µ»Ø
+						frame_return_cmd6.length=4;
+						frame_return_cmd6.data[0]=0xFF;              //´íÎóÂë£¬0±êÊ¶Õý³£
+						frame_return_cmd6.data[1]=0xFF;              //Ö´ÐÐ½á¹û£¬ 1´ú±íÒÑÍê³É
+						frame_return_cmd6.data[2]=0xFF;               //µç»úºÅ
+						frame_return_cmd6.data[3]=0xFE;              //±£Áô
+						motor_array[num].command.command_union=0;
+						//·¢ËÍÇ°ºó¼Ð½ô×Ô¼ì½áÊøÊý¾ÝÖ¡
+						frame_return_cmd6.property=0x00;             //can send
+						frame_return_cmd6.can_command=0x06;          //Í£Ö¹Ö¸Áî
+						frame_return_cmd6.can_if_ack=0x01;           //ÐèÒªACK
+						frame_return_cmd6.can_source=0x03;           //±¾Ä£¿é
+						frame_return_cmd6.can_target=0x00;
+						frame_return_cmd6.can_priority=0x05;         //Êý¾ÝÖ¡
+						frame_return_cmd6.can_if_last=0x00;          //Æ´½ÓÎ»ÖÃ0
+						frame_return_cmd6.can_if_return=0x00;
+						frame_return_cmd6.length=4;
+						frame_return_cmd6.data[0]=(uint8_t)(CMD6_START_SELFCHECK_OK_2>>24);
+						frame_return_cmd6.data[1]=(uint8_t)(CMD6_START_SELFCHECK_OK_2>>16);
+						frame_return_cmd6.data[2]=(uint8_t)(CMD6_START_SELFCHECK_OK_2>>8);
+						frame_return_cmd6.data[3]=(uint8_t)(CMD6_START_SELFCHECK_OK_2);
+						//·¢ËÍ·µ»ØÖ¡
+						//taskENTER_CRITICAL();
+						portBASE_TYPE status = xQueueSendToBack(send_queueHandle, &frame_return_cmd6, 0);
+						if(status!=pdPASS)
+						{
+							#ifdef DEBUG_OUTPUT
+							printf("%s\n","queue overflow");
+							#endif
+						}
+						else
+						{
+							#ifdef DEBUG_OUTPUT
+							printf("%s\n","send command 7 error to queue already");
+							#endif
+						}
+						//taskEXIT_CRITICAL();
+						//×Ô¼ì¼ÆÊýÔö¼Ó
+						self_check_counter_6++;
+					}
+					if(num==3 && motor_array[num].command.command_id==18)
+					{
+						motor_array[num].command.command_id=0x00;
+						//·µ»ØÖ¡¸ñÊ½ÉùÃ÷
+						QUEUE_STRUCT frame_return_cmd6;
+						frame_return_cmd6.property=0x00;             //can send
+						frame_return_cmd6.can_command=motor_array[num].command.command_id;          
+						frame_return_cmd6.can_if_ack=0x01;           //ÐèÒªACK
+						frame_return_cmd6.can_source=0x03;           //±¾Ä£¿é
+						frame_return_cmd6.can_target=0x00;
+						frame_return_cmd6.can_priority=0x03;         //ÃüÁî½áÊø·µ»ØÖ¡
+						frame_return_cmd6.can_if_last=0x00;          //ÎÞÐèÆ´½Ó
+						frame_return_cmd6.can_if_return=0x00;        //ÎÞÐè·µ»Ø
+						frame_return_cmd6.length=4;
+						frame_return_cmd6.data[0]=0xFF;              //´íÎóÂë£¬0±êÊ¶Õý³£
+						frame_return_cmd6.data[1]=0xFF;              //Ö´ÐÐ½á¹û£¬ 1´ú±íÒÑÍê³É
+						frame_return_cmd6.data[2]=0xFF;               //µç»úºÅ
+						frame_return_cmd6.data[3]=0xFE;              //±£Áô
+						motor_array[num].command.command_union=0;
+						frame_return_cmd6.property=0x00;             //can send
+						frame_return_cmd6.can_command=0x06;          //Í£Ö¹Ö¸Áî
+						frame_return_cmd6.can_if_ack=0x01;           //ÐèÒªACK
+						frame_return_cmd6.can_source=0x03;           //±¾Ä£¿é
+						frame_return_cmd6.can_target=0x00;
+						frame_return_cmd6.can_priority=0x05;         //Êý¾ÝÖ¡
+						frame_return_cmd6.can_if_last=0x00;          //Æ´½ÓÎ»ÖÃ0
+						frame_return_cmd6.can_if_return=0x00;
+						frame_return_cmd6.length=4;
+						frame_return_cmd6.data[0]=(uint8_t)(CMD6_START_SELFCHECK_OK_3>>24);
+						frame_return_cmd6.data[1]=(uint8_t)(CMD6_START_SELFCHECK_OK_3>>16);
+						frame_return_cmd6.data[2]=(uint8_t)(CMD6_START_SELFCHECK_OK_3>>8);
+						frame_return_cmd6.data[3]=(uint8_t)(CMD6_START_SELFCHECK_OK_3);
+						//·¢ËÍ·µ»ØÖ¡
+						//taskENTER_CRITICAL();
+						portBASE_TYPE status = xQueueSendToBack(send_queueHandle, &frame_return_cmd6, 0);
+						if(status!=pdPASS)
+						{
+							#ifdef DEBUG_OUTPUT
+							printf("%s\n","queue overflow");
+							#endif
+						}
+						else
+						{
+							#ifdef DEBUG_OUTPUT
+							printf("%s\n","send command 7 error to queue already");
+							#endif
+						}
+						//taskEXIT_CRITICAL();
+						self_check_counter_6++;
+					}
+					
+					
+					//ÏÂÒ»¶Î¶¯×÷Ö¡·¢ËÍ
+					if(self_check_counter_6==0x01)
+					{
+						//·¢ËÍcmd17×Ô¼ì
+						command_17(data,cmd6_if_return);
+						//Ìî³äunionÎª0x06
+						motor_array[2].command.command_union=0x06;
+						//ÏòÉÏÎ»»ú·¢ËÍ¿ªÊ¼×Ô¼ìÊý¾ÝÖ¡
+						QUEUE_STRUCT tmp;
+						tmp.property=0x00;             //can send
+						tmp.can_command=0x06;          //Í£Ö¹Ö¸Áî
+						tmp.can_if_ack=0x01;           //ÐèÒªACK
+						tmp.can_source=0x03;           //±¾Ä£¿é
+						tmp.can_target=0x00;
+						tmp.can_priority=0x05;         //Êý¾ÝÖ¡
+						tmp.can_if_last=0x01;          //Æ´½ÓÎ»ÖÃ1
+						tmp.can_if_return=0x00;
+						tmp.length=4;
+						tmp.data[0]=(uint8_t)(CMD6_START_SELFCHECK_2>>24);
+						tmp.data[1]=(uint8_t)(CMD6_START_SELFCHECK_2>>16);
+						tmp.data[2]=(uint8_t)(CMD6_START_SELFCHECK_2>>8);
+						tmp.data[3]=(uint8_t)(CMD6_START_SELFCHECK_2);
+						//taskENTER_CRITICAL();
+						BaseType_t status_q = xQueueSendToBack(send_queueHandle, &tmp, 0);
+						if(status_q!=pdPASS)
+						{
+							#ifdef DEBUG_OUTPUT
+							printf("%s\n","queue overflow");
+							#endif
+						}
+						else
+						{
+							#ifdef DEBUG_OUTPUT
+							printf("%s\n","send command 1 success to queue already");
+							#endif
+						}
+						//taskEXIT_CRITICAL();
+					}
+					if(self_check_counter_6==0x02)
+					{
+						//·¢ËÍcmd18×Ô¼ì
+						command_18(data,cmd6_if_return);
+						//Ìî³äunionÎª0x06
+						motor_array[3].command.command_union=0x06;
+						//ÏòÉÏÎ»»ú·¢ËÍ¿ªÊ¼×Ô¼ìÊý¾ÝÖ¡
+						QUEUE_STRUCT tmp;
+						tmp.property=0x00;             //can send
+						tmp.can_command=0x06;          //Í£Ö¹Ö¸Áî
+						tmp.can_if_ack=0x01;           //ÐèÒªACK
+						tmp.can_source=0x03;           //±¾Ä£¿é
+						tmp.can_target=0x00;
+						tmp.can_priority=0x05;         //Êý¾ÝÖ¡
+						tmp.can_if_last=0x01;          //Æ´½ÓÎ»ÖÃ1
+						tmp.can_if_return=0x00;
+						tmp.length=4;
+						tmp.data[0]=(uint8_t)(CMD6_START_SELFCHECK_3>>24);
+						tmp.data[1]=(uint8_t)(CMD6_START_SELFCHECK_3>>16);
+						tmp.data[2]=(uint8_t)(CMD6_START_SELFCHECK_3>>8);
+						tmp.data[3]=(uint8_t)(CMD6_START_SELFCHECK_3);
+						//taskENTER_CRITICAL();
+						BaseType_t status_q = xQueueSendToBack(send_queueHandle, &tmp, 0);
+						if(status_q!=pdPASS)
+						{
+							#ifdef DEBUG_OUTPUT
+							printf("%s\n","queue overflow");
+							#endif
+						}
+						else
+						{
+							#ifdef DEBUG_OUTPUT
+							printf("%s\n","send command 1 success to queue already");
+							#endif
+						}
+						//taskEXIT_CRITICAL();
+					}
+					//×ÜÌå×Ô¼ìÍê³ÉÅÐ¶¨
+					if(self_check_counter_6==3 && cmd6_if_return==0x01)
+					{
+						self_check_counter_6=0;
+						cmd6_if_return=0;
+						//ÏòÉÏÎ»»ú·¢ËÍcmd6 µÄ×ÜÌå×Ô¼ì·µ»ØÖ¡
+						//ÏòÉÏÎ»»ú·¢ËÍ¿ªÊ¼×Ô¼ìÊý¾ÝÖ¡
+						QUEUE_STRUCT tmp;
+						tmp.property=0x00;             //can send
+						tmp.can_command=0x06;          //Í£Ö¹Ö¸Áî
+						tmp.can_if_ack=0x01;           //ÐèÒªACK
+						tmp.can_source=0x03;           //±¾Ä£¿é
+						tmp.can_target=0x00;
+						tmp.can_priority=0x03;         //·µ»ØÖ¡
+						tmp.can_if_last=0x00;          //Æ´½ÓÎ»ÖÃ0
+						tmp.can_if_return=0x00;
+						tmp.length=4;
+						tmp.data[0]=0;
+						tmp.data[1]=0;
+						tmp.data[2]=0;
+						tmp.data[3]=0;
+						//taskENTER_CRITICAL();
+						BaseType_t status_q = xQueueSendToBack(send_queueHandle, &tmp, 0);
+						if(status_q!=pdPASS)
+						{
+							#ifdef DEBUG_OUTPUT
+							printf("%s\n","queue overflow");
+							#endif
+						}
+						else
+						{
+							#ifdef DEBUG_OUTPUT
+							printf("%s\n","send command 1 success to queue already");
+							#endif
+						}
+						//taskEXIT_CRITICAL();
+					}
+				}
+			}
+		}
+			
+		
+		//×éºÏÃüÁîÅÐ¶¨
+		if(motor_array[2].command.command_union==0x14 && motor_array[3].command.command_union==0x14
+			&& motor_array[2].command.if_return==0x01 && motor_array[3].command.if_return==0x01 
+			&& motor_array[2].command.command_status==0x02 && motor_array[3].command.command_status==0x02)
+		{
+			motor_array[2].command.command_union=0x00;
+			motor_array[3].command.command_union=0x00;
+			//·¢ËÍ·µ»ØÖ¡
+			QUEUE_STRUCT frame_return;
+			frame_return.property=0x00;             //can send
+			frame_return.can_command=0x14;          
+			frame_return.can_if_ack=0x01;           //ÐèÒªACK
+			frame_return.can_source=0x03;           //±¾Ä£¿é
+			frame_return.can_target=0x00;
+			frame_return.can_priority=0x03;         //ÃüÁî½áÊø·µ»ØÖ¡
+			frame_return.can_if_last=0x00;          //ÎÞÐèÆ´½Ó
+			frame_return.can_if_return=0x00;        //ÎÞÐè·µ»Ø
+			frame_return.length=4;
+			frame_return.data[0]=0x00;              //´íÎóÂë£¬0±êÊ¶Õý³£
+			frame_return.data[1]=0x00;              //Ö´ÐÐ½á¹û£¬ 1´ú±íÒÑÍê³É
+			frame_return.data[2]=0x00;               //µç»úºÅ
+			frame_return.data[3]=0x00;              //±£Áô
+			taskENTER_CRITICAL();
+			portBASE_TYPE status = xQueueSendToBack(send_queueHandle, &frame_return, 0);
+			if(status!=pdPASS)
+			{
+				#ifdef DEBUG_OUTPUT
+				printf("%s\n","queue overflow");
+				#endif
+			}
+			else
+			{
+				#ifdef DEBUG_OUTPUT
+				printf("%s\n","send command 7 error to queue already");
+				#endif
+			}
+			taskEXIT_CRITICAL();
+		}
+	}
+	return;
+}
+void result_parse_2_3(uint8_t* data, uint8_t num)
+{
+	//µç»úÅ¤¾Ø¶ÁÈ¡
+	if(num==1 || num>4)
+	{
+		;
+	}
+	else
+	{
+		motor_array[num].torque_value.current_torque=((uint32_t)data[0]<<8) | (uint32_t)data[1] | ((uint32_t)data[2] << 24) | ((uint32_t)data[3] << 16);
+	}
+	return;
+}
+void result_parse_2_4(uint8_t* data, uint8_t num)
+{
+	//µç»ú¹ÊÕÏÂë
+	if(num==1 || num>4)
+	{
+		;
+	}
+	else
+	{
+		motor_array[num].motor_error_code=((uint32_t)data[0]<<8) | (uint32_t)data[1] | ((uint32_t)data[2] << 24) | ((uint32_t)data[3] << 16);
+	}
+	return;
+}
+void result_parse_2_5(uint8_t* data, uint8_t num)
+{
+	//µç»úÎÂ¶È
+	if(num==1 || num>4)
+	{
+		;
+	}
+	else
+	{
+		motor_array[num].temperature=((uint32_t)data[0]<<8) | (uint32_t)data[1] | ((uint32_t)data[2] << 24) | ((uint32_t)data[3] << 16);
+	}
+	return;
+}
+void result_parse_2_6(uint8_t* data, uint8_t num)
+{
+	//µç»úÖÍÁôÂö³åÊý
+	if(num==1 || num>4)
+	{
+		;
+	}
+	else
+	{
+		motor_array[num].position_value.remain_position=((uint32_t)data[0]<<8) | (uint32_t)data[1] | ((uint32_t)data[2] << 24) | ((uint32_t)data[3] << 16);
+	}
+	return;
+}
+void result_parse_2_7(uint8_t* data,uint8_t num)
+{
+	//µç»úÄ¿±êÎ»ÖÃ
+	if(num==1 || num>4)
+	{
+		;
+	}
+	else
+	{
+		motor_array[num].position_value.target_position=((uint32_t)data[0]<<8) | (uint32_t)data[1] | ((uint32_t)data[2] << 24) | ((uint32_t)data[3] << 16);
+		
+	}
+	return;
+}
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -4696,7 +5223,16 @@ void(*result_to_parameter[10])(uint8_t*, uint8_t) = {
 	result_parse_7,
 };
 
-
+void(*result_to_parameter_2[10])(uint8_t*, uint8_t) = {
+	NULL,
+	result_parse_2_1,
+	result_parse_2_2,
+	result_parse_2_3,
+	result_parse_2_4,
+	result_parse_2_5,
+	result_parse_2_6,
+	result_parse_2_7,
+};
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -5502,6 +6038,149 @@ uint8_t modbus_send_sub_2(QUEUE_STRUCT send_struct)
 	return 0;
 }
 
+//485 ·¢ËÍ
+uint8_t modbus_send_3(QUEUE_STRUCT send_struct)
+{
+	if(modbus_status_3==0)
+	{
+		if(modbus_list_tail_3!=NULL && modbus_list_tail_3->if_over==0)
+		{
+			memcpy(&(modbus_list_tail_3->modbus_element),&send_struct,sizeof(QUEUE_STRUCT));
+			modbus_list_tail_3->if_over=1;
+			modbus_list_tail_3=modbus_list_tail_3->next;
+		}
+		else{
+			return MODBUS_LIST_ERROR;
+		}
+		//Ð´¼Ä´æÆ÷
+		if(send_struct.modbus_func == 0x10)
+		{
+			taskENTER_CRITICAL();
+			HAL_GPIO_WritePin(GPIOB,GPIO_PIN_6,GPIO_PIN_RESET);
+			__NOP();
+		  __NOP();
+			modbus_send_cache_3[0]=send_struct.modbus_addr;
+			modbus_send_cache_3[1]=send_struct.modbus_func;
+			modbus_send_cache_3[2]=send_struct.modbus_addr_h;
+			modbus_send_cache_3[3]=send_struct.modbus_addr_l;
+			modbus_send_cache_3[4]=send_struct.modbus_data_len_h;
+			modbus_send_cache_3[5]=send_struct.modbus_data_len_l;
+			modbus_send_cache_3[6]=send_struct.modbus_data_byte;
+			modbus_send_cache_3[7]=send_struct.modbus_data_1;
+			modbus_send_cache_3[8]=send_struct.modbus_data_2;
+			modbus_send_cache_3[9]=send_struct.modbus_data_3;
+			modbus_send_cache_3[10]=send_struct.modbus_data_4;
+			send_struct.modbus_crc=usMBCRC16(modbus_send_cache_3,11);
+			modbus_send_cache_3[11]=(uint8_t)(send_struct.modbus_crc & 0xFF);
+			modbus_send_cache_3[12]=(uint8_t)(send_struct.modbus_crc >> 8);
+			HAL_UART_Transmit_DMA(&huart3,(uint8_t*)modbus_send_cache_3,13);
+			modbus_time_flag_3=1;
+			rece_count_3=8;
+			modbus_status_3=1;
+			taskEXIT_CRITICAL();
+		}
+		//¶Á¼Ä´æÆ÷
+		if(send_struct.modbus_func==0x03)
+		{
+			taskENTER_CRITICAL();
+			HAL_GPIO_WritePin(GPIOB,GPIO_PIN_6,GPIO_PIN_RESET);
+			__NOP();
+		  __NOP();
+			modbus_send_cache_3[0]=send_struct.modbus_addr;
+			modbus_send_cache_3[1]=send_struct.modbus_func;
+			modbus_send_cache_3[2]=send_struct.modbus_addr_h;
+			modbus_send_cache_3[3]=send_struct.modbus_addr_l;
+			modbus_send_cache_3[4]=send_struct.modbus_data_len_h;
+			modbus_send_cache_3[5]=send_struct.modbus_data_len_l;
+			send_struct.modbus_crc=usMBCRC16(modbus_send_cache_3,6);
+			modbus_send_cache_3[6]=(uint8_t)(send_struct.modbus_crc & 0xFF);
+			modbus_send_cache_3[7]=(uint8_t)(send_struct.modbus_crc >> 8);
+			HAL_UART_Transmit_DMA(&huart3,(uint8_t*)modbus_send_cache_3,8);
+			modbus_time_flag_3=1;
+			rece_count_3=9;
+			modbus_status_3=1;
+			taskEXIT_CRITICAL();
+		}
+	}
+	else
+	{
+		//modbusÊý¾ÝÑ¹ÈëÁ´±í
+		if(modbus_list_tail_3!=NULL && modbus_list_tail_3->if_over==0)
+		{
+			memcpy(&(modbus_list_tail_3->modbus_element),&send_struct,sizeof(QUEUE_STRUCT));
+			modbus_list_tail_3->if_over=1;
+			modbus_list_tail_3=modbus_list_tail_3->next;
+			return MODBUS_BUSY;
+		}
+		else
+		{
+			return MODBUS_LIST_ERROR;
+		}
+	}
+	return 0;
+}
+
+//485×é»Øµ÷º¯Êý
+uint8_t modbus_send_sub_3(QUEUE_STRUCT send_struct)
+{
+	//Ð´¼Ä´æÆ÷
+	if(send_struct.modbus_func == 0x10)
+	{
+		taskENTER_CRITICAL();
+		HAL_GPIO_WritePin(GPIOB,GPIO_PIN_6,GPIO_PIN_RESET);
+		__NOP();
+		__NOP();
+		modbus_send_cache_3[0]=send_struct.modbus_addr;
+		modbus_send_cache_3[1]=send_struct.modbus_func;
+		modbus_send_cache_3[2]=send_struct.modbus_addr_h;
+		modbus_send_cache_3[3]=send_struct.modbus_addr_l;
+		modbus_send_cache_3[4]=send_struct.modbus_data_len_h;
+		modbus_send_cache_3[5]=send_struct.modbus_data_len_l;
+		modbus_send_cache_3[6]=send_struct.modbus_data_byte;
+		modbus_send_cache_3[7]=send_struct.modbus_data_1;
+		modbus_send_cache_3[8]=send_struct.modbus_data_2;
+		modbus_send_cache_3[9]=send_struct.modbus_data_3;
+		modbus_send_cache_3[10]=send_struct.modbus_data_4;
+		send_struct.modbus_crc=usMBCRC16(modbus_send_cache_3,11);
+		modbus_send_cache_3[11]=(uint8_t)(send_struct.modbus_crc & 0xFF);
+		modbus_send_cache_3[12]=(uint8_t)(send_struct.modbus_crc >> 8);
+		if(HAL_UART_Transmit_DMA(&huart3,(uint8_t*)modbus_send_cache_3,13)==HAL_BUSY)
+		{
+			__NOP();
+			HAL_UART_Transmit_DMA(&huart3,(uint8_t*)modbus_send_cache_3,13);
+		}
+		modbus_time_flag_3=1;
+		rece_count_3=8;
+		taskEXIT_CRITICAL();
+	}
+	//¶Á¼Ä´æÆ÷
+	if(send_struct.modbus_func==0x03)
+	{
+		taskENTER_CRITICAL();
+		HAL_GPIO_WritePin(GPIOB,GPIO_PIN_6,GPIO_PIN_RESET);
+		__NOP();
+		__NOP();
+		modbus_send_cache_3[0]=send_struct.modbus_addr;
+		modbus_send_cache_3[1]=send_struct.modbus_func;
+		modbus_send_cache_3[2]=send_struct.modbus_addr_h;
+		modbus_send_cache_3[3]=send_struct.modbus_addr_l;
+		modbus_send_cache_3[4]=send_struct.modbus_data_len_h;
+		modbus_send_cache_3[5]=send_struct.modbus_data_len_l;
+		send_struct.modbus_crc=usMBCRC16(modbus_send_cache_3,6);
+		modbus_send_cache_3[6]=(uint8_t)(send_struct.modbus_crc & 0xFF);
+		modbus_send_cache_3[7]=(uint8_t)(send_struct.modbus_crc >> 8);
+		if(HAL_UART_Transmit_DMA(&huart3,(uint8_t*)modbus_send_cache_3,8)==HAL_BUSY)
+		{
+			__nop();
+			HAL_UART_Transmit_DMA(&huart3,(uint8_t*)modbus_send_cache_3,8);
+		}
+		modbus_time_flag_3=1;
+		rece_count_3=9;
+		taskEXIT_CRITICAL();
+	}
+	return 0;
+}
+
 //µç»úÄ¿±êÉèÖÃ
 uint8_t positionSet(uint8_t motorId, int32_t * position)
 {
@@ -5639,16 +6318,22 @@ int main(void)
 	HAL_DMA_DeInit(&hdma_uart4_rx);
 	HAL_DMA_Init(&hdma_uart4_rx);
 	
+	HAL_DMA_DeInit(&hdma_usart3_tx);
+	HAL_DMA_Init(&hdma_usart3_tx);
+	HAL_DMA_DeInit(&hdma_usart3_rx);
+	HAL_DMA_Init(&hdma_usart3_rx);
+	
+	//1ºÅµç»ú³¬Ê±¶¨Ê±Æ÷
 	HAL_TIM_Base_DeInit(&htim12);
 	HAL_TIM_Base_Init(&htim12);
-	
+	//¹âÕ¤³¬Ê±¶¨Ê±Æ÷
 	HAL_TIM_Base_DeInit(&htim13);
 	HAL_TIM_Base_Init(&htim13);
 	
-	modbus_list_head=modbus_list_gen(96);
+	modbus_list_head=modbus_list_gen(64);
 	modbus_list_head_5=modbus_list_gen(32);
-	//modbus_list_head_2=modbus_list_gen(64);
-	
+	modbus_list_head_2=modbus_list_gen(64);
+	modbus_list_head_3=modbus_list_gen(64);
 	
 	//HAL_TIM_Base_Start_IT(&htim12);
 	
@@ -5679,15 +6364,26 @@ int main(void)
 	{
 		printf("%s\n","modbus list 2 error");
 	}
+	
+	if(modbus_list_head_3!=NULL)
+	{
+		modbus_list_tail_3=modbus_list_head_3;
+	}
+	else
+	{
+		printf("%s\n","modbus list 3 error");
+	}
 	//Ä¬ÈÏÖÃÓÚ·¢ËÍ×´Ì¬
 	HAL_GPIO_WritePin(GPIOE,GPIO_PIN_0,GPIO_PIN_RESET);
 	HAL_GPIO_WritePin(GPIOE,GPIO_PIN_1,GPIO_PIN_RESET);
 	HAL_GPIO_WritePin(GPIOB,GPIO_PIN_7,GPIO_PIN_RESET);
 	HAL_GPIO_WritePin(GPIOB,GPIO_PIN_6,GPIO_PIN_RESET);
 	
+	
+	
 	//¼ÌµçÆ÷Òý½Å
 	//HAL_GPIO_WritePin(GPIOE,GPIO_PIN_7,GPIO_PIN_SET);
-	//HAL_GPIO_WritePin(GPIOD,GPIO_PIN_3,GPIO_PIN_SET);
+	HAL_GPIO_WritePin(GPIOD,GPIO_PIN_3,GPIO_PIN_SET);
 	printf("%s\n","start free rtos");
 	
 	
