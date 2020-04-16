@@ -71,7 +71,7 @@ MODBUS_LIST* modbus_list_head_5=NULL;  //head 指向寻找到的第一个不为空的节点
 MODBUS_LIST* modbus_list_tail_5=NULL;  //tail 指向不为空的节点的下一个节点
 
 GRATING grating_value;                 //存放光栅数据
-
+const uint8_t grating_send_buf[8]={0x01,0x03,0x00,0x00,0x00,0x03,0x05,0xCB};
 uint16_t modbus_period=89;
 /* USER CODE END PTD */
 
@@ -5302,23 +5302,15 @@ uint8_t modbus_send_5(QUEUE_STRUCT send_struct)
 			return MODBUS_LIST_ERROR;
 		}
 		//读取光栅内容
-		taskENTER_CRITICAL();
+		//taskENTER_CRITICAL();
 		HAL_GPIO_WritePin(GPIOE,GPIO_PIN_1,GPIO_PIN_RESET);
 		__NOP();
 		__NOP();
-		modbus_send_cache_5[0]=0x01;
-		modbus_send_cache_5[1]=0x03;
-		modbus_send_cache_5[2]=0x00;
-		modbus_send_cache_5[3]=0x00;
-		modbus_send_cache_5[4]=0x00;
-		modbus_send_cache_5[5]=0x03;
-		modbus_send_cache_5[6]=0x05;
-		modbus_send_cache_5[7]=0xCB;
-		HAL_UART_Transmit_DMA(&huart6,(uint8_t*)modbus_send_cache_5,8);
+		HAL_UART_Transmit_DMA(&huart6,(uint8_t*)grating_send_buf,8);
 		modbus_time_flag_5=1;
 		rece_count_5=11;
 		modbus_status_5=1;
-		taskEXIT_CRITICAL();
+		//taskEXIT_CRITICAL();
 		
 	}
 	else
@@ -5343,27 +5335,14 @@ uint8_t modbus_send_5(QUEUE_STRUCT send_struct)
 uint8_t modbus_send_sub_5(QUEUE_STRUCT send_struct)
 {
 	//读光栅
-	taskENTER_CRITICAL();
-	//HAL_GPIO_WritePin(GPIOE,GPIO_PIN_0,GPIO_PIN_RESET);
+	//taskENTER_CRITICAL();
 	HAL_GPIO_WritePin(GPIOE,GPIO_PIN_1,GPIO_PIN_RESET);
 	__NOP();
 	__NOP();
-	modbus_send_cache_5[0]=0x01;
-	modbus_send_cache_5[1]=0x03;
-	modbus_send_cache_5[2]=0x00;
-	modbus_send_cache_5[3]=0x00;
-	modbus_send_cache_5[4]=0x00;
-	modbus_send_cache_5[5]=0x03;
-	modbus_send_cache_5[6]=0x05;
-	modbus_send_cache_5[7]=0xCB;
-	if(HAL_UART_Transmit_DMA(&huart6,(uint8_t*)modbus_send_cache_5,8)==HAL_BUSY)
-	{
-		__NOP();
-		HAL_UART_Transmit_DMA(&huart6,(uint8_t*)modbus_send_cache_5,8);
-	}
+	HAL_UART_Transmit_DMA(&huart6,(uint8_t*)grating_send_buf,8);
 	modbus_time_flag_5=1;
 	rece_count_5=11;
-	taskEXIT_CRITICAL();
+	//taskEXIT_CRITICAL();
 	return 0;
 }
 //电机目标设置

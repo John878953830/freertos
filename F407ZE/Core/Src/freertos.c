@@ -1013,8 +1013,8 @@ void StartDefaultTask(void *argument)
 		{
 			
 			notify_use=0;
-			QUEUE_STRUCT tmp_5;
-			modbus_send_5(tmp_5);
+			//QUEUE_STRUCT tmp_5;
+			//modbus_send_sub_5(tmp_5);
 			//打印线程执行情况
 			vTaskList((char *)&tklog);
 	    printf("%s\n",tklog);
@@ -1409,7 +1409,8 @@ void start_tk_grating_monitor(void *argument)
 			#ifdef DEBUG_OUTPUT
 			printf("%s\n","start tk grating monitor");
 			#endif
-			
+			QUEUE_STRUCT tmp_5;
+			modbus_send_sub_5(tmp_5);
 			notify_use=0;
 		}
     osDelay(1);
@@ -1876,7 +1877,7 @@ void start_tk_result_process_rece_5(void *argument)
 			
 			if(crcl==rece_cache_5[rece_count_5-2] && crch==rece_cache_5[rece_count_5-1])
 			{
-				if(modbus_act_status_5!=NULL && modbus_list_head_5->next!=NULL)
+				if(modbus_list_head_5!=NULL && modbus_list_head_5->next!=NULL)
 				{
 					//解析收到的数据放入光栅结构体中
 					memcpy(grating_value.data,&(rece_cache_5[3]),6);
@@ -1884,7 +1885,7 @@ void start_tk_result_process_rece_5(void *argument)
 					modbus_list_head_5=modbus_list_head_5->next;
 					if(modbus_list_head_5->if_over==1)
 					{
-						modbus_send_5(modbus_list_head_5->modbus_element);
+						modbus_send_sub_5(modbus_list_head_5->modbus_element);
 					}
 					else
 					{
