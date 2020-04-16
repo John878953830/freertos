@@ -198,7 +198,7 @@ void HAL_UART_MspInit(UART_HandleTypeDef* uartHandle)
     HAL_NVIC_SetPriority(UART4_IRQn, 5, 0);
     HAL_NVIC_EnableIRQ(UART4_IRQn);
   /* USER CODE BEGIN UART4_MspInit 1 */
-
+		__HAL_UART_ENABLE_IT(&huart4,UART_IT_IDLE);
   /* USER CODE END UART4_MspInit 1 */
   }
   else if(uartHandle->Instance==USART1)
