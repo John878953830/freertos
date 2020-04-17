@@ -61,26 +61,6 @@ uint8_t modbus_act_status_5;      //modbus µç»ú¶¯×÷Íê³É±êÖ¾£¬ 0£º¿ÕÏÐ£¬ 1£º¶¯×÷Ö
 uint8_t modbus_time_status_5;     //modbus ³¬Ê±±êÖ¾£¬ 0£º¿ÕÏÐ£¬ 1£º½»»¥³¬Ê± 2£º½»»¥Íê³É
 uint8_t modbus_time_flag_5=0;       //modbus  ¶¨Ê±Ê±¼ä±êÖ¾  1£º µÚÒ»´Î3.5T¶¨Ê±  1£ºµÚ¶þ´Î3.5T¶¨Ê±
 
-//modbus cache, 3 ºÅµç»ú
-uint8_t modbus_send_cache_2[16];
-uint8_t rece_cache_2[16];
-uint8_t rece_count_2=0;
-uint8_t modbus_status_2=0;        //modbus ×´Ì¬²ÎÁ¿£¬ 0£º ¿ÕÏÐ 1£º´«ÊäÖÐ
-uint8_t modbus_read_status_2;     //modbus ¶ÁÈ¡Ö¸ÁîÍê³É±êÖ¾£¬ 0£º ¿ÕÏÐ 1£º¶ÁÈ¡½øÐÐÖÐ 2£º¶ÁÈ¡Íê³É
-uint8_t modbus_act_status_2;      //modbus µç»ú¶¯×÷Íê³É±êÖ¾£¬ 0£º¿ÕÏÐ£¬ 1£º¶¯×÷Ö¸Áî½»»¥ÖÐ 2£º ¶¯×÷Ö¸Áî½»»¥Íê³É
-uint8_t modbus_time_status_2;     //modbus ³¬Ê±±êÖ¾£¬ 0£º¿ÕÏÐ£¬ 1£º½»»¥³¬Ê± 2£º½»»¥Íê³É
-uint8_t modbus_time_flag_2=0;       //modbus  ¶¨Ê±Ê±¼ä±êÖ¾  1£º µÚÒ»´Î3.5T¶¨Ê±  1£ºµÚ¶þ´Î3.5T¶¨Ê±
-
-//modbus cache, 4 ºÅµç»ú
-uint8_t modbus_send_cache_3[16];
-uint8_t rece_cache_3[16];
-uint8_t rece_count_3=0;
-uint8_t modbus_status_3=0;        //modbus ×´Ì¬²ÎÁ¿£¬ 0£º ¿ÕÏÐ 1£º´«ÊäÖÐ
-uint8_t modbus_read_status_3;     //modbus ¶ÁÈ¡Ö¸ÁîÍê³É±êÖ¾£¬ 0£º ¿ÕÏÐ 1£º¶ÁÈ¡½øÐÐÖÐ 2£º¶ÁÈ¡Íê³É
-uint8_t modbus_act_status_3;      //modbus µç»ú¶¯×÷Íê³É±êÖ¾£¬ 0£º¿ÕÏÐ£¬ 1£º¶¯×÷Ö¸Áî½»»¥ÖÐ 2£º ¶¯×÷Ö¸Áî½»»¥Íê³É
-uint8_t modbus_time_status_3;     //modbus ³¬Ê±±êÖ¾£¬ 0£º¿ÕÏÐ£¬ 1£º½»»¥³¬Ê± 2£º½»»¥Íê³É
-uint8_t modbus_time_flag_3=0;       //modbus  ¶¨Ê±Ê±¼ä±êÖ¾  1£º µÚÒ»´Î3.5T¶¨Ê±  1£ºµÚ¶þ´Î3.5T¶¨Ê±
-
 static uint8_t self_check_counter_6=0;   //6ºÅ×Ô¼ìÖ¸Áî±êÖ¾Î»    
 uint8_t cmd6_if_return=0;
 
@@ -89,12 +69,6 @@ MODBUS_LIST* modbus_list_tail=NULL;  //tail Ö¸Ïò²»Îª¿ÕµÄ½ÚµãµÄÏÂÒ»¸ö½Úµã
 
 MODBUS_LIST* modbus_list_head_5=NULL;  //head Ö¸ÏòÑ°ÕÒµ½µÄµÚÒ»¸ö²»Îª¿ÕµÄ½Úµã
 MODBUS_LIST* modbus_list_tail_5=NULL;  //tail Ö¸Ïò²»Îª¿ÕµÄ½ÚµãµÄÏÂÒ»¸ö½Úµã
-
-MODBUS_LIST* modbus_list_head_2=NULL;  //head Ö¸ÏòÑ°ÕÒµ½µÄµÚÒ»¸ö²»Îª¿ÕµÄ½Úµã
-MODBUS_LIST* modbus_list_tail_2=NULL;  //tail Ö¸Ïò²»Îª¿ÕµÄ½ÚµãµÄÏÂÒ»¸ö½Úµã
-
-MODBUS_LIST* modbus_list_head_3=NULL;  //head Ö¸ÏòÑ°ÕÒµ½µÄµÚÒ»¸ö²»Îª¿ÕµÄ½Úµã
-MODBUS_LIST* modbus_list_tail_3=NULL;  //tail Ö¸Ïò²»Îª¿ÕµÄ½ÚµãµÄÏÂÒ»¸ö½Úµã
 
 GRATING grating_value;                 //´æ·Å¹âÕ¤Êý¾Ý
 const uint8_t grating_send_buf[8]={0x01,0x03,0x00,0x00,0x00,0x03,0x05,0xCB};
@@ -383,16 +357,17 @@ uint8_t motor_array_init(void)
 	
 	
 	//³õÊ¼»¯Åö×²¼ì²â½á¹¹ÌåµÄÒ»Ð©Á¿
-	motor_array[0].conflict_value.conflict_counter=1;
-	motor_array[0].conflict_value.conflict_number[0]=1;
+	motor_array[0].conflict_value.conflict_counter=2;
+	motor_array[0].conflict_value.conflict_number[0]=2;
+	motor_array[0].conflict_value.conflict_number[1]=3;
 	
 	motor_array[2].conflict_value.conflict_counter=2;
-	motor_array[2].conflict_value.conflict_number[0]=4;
-	motor_array[2].conflict_value.conflict_number[1]=9;
+	motor_array[2].conflict_value.conflict_number[0]=2;
+	motor_array[2].conflict_value.conflict_number[1]=3;
 	
 	motor_array[3].conflict_value.conflict_counter=2;
-	motor_array[3].conflict_value.conflict_number[0]=4;
-	motor_array[3].conflict_value.conflict_number[1]=9;
+	motor_array[3].conflict_value.conflict_number[0]=2;
+	motor_array[3].conflict_value.conflict_number[1]=3;
 	
 	return 0;
 }
@@ -5359,31 +5334,26 @@ uint8_t can_start(void)
 }
 
 
-uint8_t iic_rw(uint8_t rw_flag, uint8_t addr,uint8_t* data,uint8_t length) //addr Ê×µØÖ· £¬µØÖ·Á¬Ðø £¬ data£º Êý¾ÝÖ¸Õë£¬ length£º Êý¾Ý³¤¶È
+uint8_t iic_rw(uint8_t rw_flag, uint16_t addr,uint8_t* data,uint8_t length) //addr Ê×µØÖ· £¬µØÖ·Á¬Ðø £¬ data£º Êý¾ÝÖ¸Õë£¬ length£º Êý¾Ý³¤¶È
 {
 	//uint8_t* txdata=(uint8_t*)pvPortMalloc(2*length);
 	uint8_t txdata[2*EEPROM_CONFIG_LENGTH]={0};
 	uint8_t rxdata[2*EEPROM_CONFIG_LENGTH]={0};
-	uint8_t tmp_addr=addr;
+	uint8_t tmp_addr_l=(uint8_t)(addr & 0xFF);
+	uint8_t tmp_addr_h=(uint8_t)((addr >> 8) & 0xFF);
 	uint16_t i=0;
-	for(i=0;i<length;i++)
-	{
-		txdata[i]=tmp_addr++;
-	}
-	for(i=0;i<length;i++)
-	{
-		txdata[i+length]=data[i];
-	}
+	
 		
 	if(rw_flag==1)
 	{
 		//write one by one
 		for(i=0;i<length;i++)
 		{
-			uint8_t txcache[2];
-			txcache[0]=txdata[i];
-			txcache[1]=txdata[i+length];
-			if(HAL_I2C_Master_Transmit(&hi2c1,IIC_ADDRESS,txcache,2,100)!=HAL_OK)
+			uint8_t txcache[3];
+			txcache[0]=tmp_addr_h;
+			txcache[1]=tmp_addr_l;
+			txcache[2]=data[0];
+			if(HAL_I2C_Master_Transmit(&hi2c1,IIC_ADDRESS,txcache,3,100)!=HAL_OK)
 			{
 				#ifdef DEBUG_OUTPUT
 				printf("%s\n","start tk iic send error");
@@ -5406,11 +5376,12 @@ uint8_t iic_rw(uint8_t rw_flag, uint8_t addr,uint8_t* data,uint8_t length) //add
 	{
 		//read
 		//uint8_t* rxdata=pvPortMalloc(length);
-		uint8_t txcache;
+		uint8_t txcache[2];
 		for(i=0;i<length;i++)
 		{
-			txcache=txdata[i];
-			if(HAL_I2C_Master_Transmit(&hi2c1,IIC_ADDRESS,(uint8_t*)&txcache,1,100)!=HAL_OK)
+			txcache[0]=tmp_addr_h;
+			txcache[1]=tmp_addr_l;
+			if(HAL_I2C_Master_Transmit(&hi2c1,IIC_ADDRESS,(uint8_t*)&txcache,2,100)!=HAL_OK)
 			{
 				#ifdef DEBUG_OUTPUT
 				printf("%s\n","start tk iic send 2 error");
@@ -5895,291 +5866,7 @@ uint8_t modbus_send_sub_5(QUEUE_STRUCT send_struct)
 	return 0;
 }
 
-//485 ·¢ËÍ
-uint8_t modbus_send_2(QUEUE_STRUCT send_struct)
-{
-	if(modbus_status_2==0)
-	{
-		if(modbus_list_tail_2!=NULL && modbus_list_tail_2->if_over==0)
-		{
-			memcpy(&(modbus_list_tail_2->modbus_element),&send_struct,sizeof(QUEUE_STRUCT));
-			modbus_list_tail_2->if_over=1;
-			modbus_list_tail_2=modbus_list_tail_2->next;
-		}
-		else{
-			return MODBUS_LIST_ERROR;
-		}
-		//Ð´¼Ä´æÆ÷
-		if(send_struct.modbus_func == 0x10)
-		{
-			taskENTER_CRITICAL();
-			HAL_GPIO_WritePin(GPIOB,GPIO_PIN_7,GPIO_PIN_RESET);
-			__NOP();
-		  __NOP();
-			modbus_send_cache_2[0]=send_struct.modbus_addr;
-			modbus_send_cache_2[1]=send_struct.modbus_func;
-			modbus_send_cache_2[2]=send_struct.modbus_addr_h;
-			modbus_send_cache_2[3]=send_struct.modbus_addr_l;
-			modbus_send_cache_2[4]=send_struct.modbus_data_len_h;
-			modbus_send_cache_2[5]=send_struct.modbus_data_len_l;
-			modbus_send_cache_2[6]=send_struct.modbus_data_byte;
-			modbus_send_cache_2[7]=send_struct.modbus_data_1;
-			modbus_send_cache_2[8]=send_struct.modbus_data_2;
-			modbus_send_cache_2[9]=send_struct.modbus_data_3;
-			modbus_send_cache_2[10]=send_struct.modbus_data_4;
-			send_struct.modbus_crc=usMBCRC16(modbus_send_cache_2,11);
-			modbus_send_cache_2[11]=(uint8_t)(send_struct.modbus_crc & 0xFF);
-			modbus_send_cache_2[12]=(uint8_t)(send_struct.modbus_crc >> 8);
-			HAL_UART_Transmit_DMA(&huart4,(uint8_t*)modbus_send_cache_2,13);
-			modbus_time_flag_2=1;
-			rece_count_2=8;
-			modbus_status_2=1;
-			taskEXIT_CRITICAL();
-		}
-		//¶Á¼Ä´æÆ÷
-		if(send_struct.modbus_func==0x03)
-		{
-			taskENTER_CRITICAL();
-			HAL_GPIO_WritePin(GPIOB,GPIO_PIN_7,GPIO_PIN_RESET);
-			__NOP();
-		  __NOP();
-			modbus_send_cache_2[0]=send_struct.modbus_addr;
-			modbus_send_cache_2[1]=send_struct.modbus_func;
-			modbus_send_cache_2[2]=send_struct.modbus_addr_h;
-			modbus_send_cache_2[3]=send_struct.modbus_addr_l;
-			modbus_send_cache_2[4]=send_struct.modbus_data_len_h;
-			modbus_send_cache_2[5]=send_struct.modbus_data_len_l;
-			send_struct.modbus_crc=usMBCRC16(modbus_send_cache_2,6);
-			modbus_send_cache_2[6]=(uint8_t)(send_struct.modbus_crc & 0xFF);
-			modbus_send_cache_2[7]=(uint8_t)(send_struct.modbus_crc >> 8);
-			HAL_UART_Transmit_DMA(&huart4,(uint8_t*)modbus_send_cache_2,8);
-			modbus_time_flag_2=1;
-			rece_count_2=9;
-			modbus_status_2=1;
-			taskEXIT_CRITICAL();
-		}
-	}
-	else
-	{
-		//modbusÊý¾ÝÑ¹ÈëÁ´±í
-		if(modbus_list_tail_2!=NULL && modbus_list_tail_2->if_over==0)
-		{
-			memcpy(&(modbus_list_tail_2->modbus_element),&send_struct,sizeof(QUEUE_STRUCT));
-			modbus_list_tail_2->if_over=1;
-			modbus_list_tail_2=modbus_list_tail_2->next;
-			return MODBUS_BUSY;
-		}
-		else
-		{
-			return MODBUS_LIST_ERROR;
-		}
-	}
-	return 0;
-}
 
-//485×é»Øµ÷º¯Êý
-uint8_t modbus_send_sub_2(QUEUE_STRUCT send_struct)
-{
-	//Ð´¼Ä´æÆ÷
-	if(send_struct.modbus_func == 0x10)
-	{
-		taskENTER_CRITICAL();
-		HAL_GPIO_WritePin(GPIOB,GPIO_PIN_7,GPIO_PIN_RESET);
-		__NOP();
-		__NOP();
-		modbus_send_cache_2[0]=send_struct.modbus_addr;
-		modbus_send_cache_2[1]=send_struct.modbus_func;
-		modbus_send_cache_2[2]=send_struct.modbus_addr_h;
-		modbus_send_cache_2[3]=send_struct.modbus_addr_l;
-		modbus_send_cache_2[4]=send_struct.modbus_data_len_h;
-		modbus_send_cache_2[5]=send_struct.modbus_data_len_l;
-		modbus_send_cache_2[6]=send_struct.modbus_data_byte;
-		modbus_send_cache_2[7]=send_struct.modbus_data_1;
-		modbus_send_cache_2[8]=send_struct.modbus_data_2;
-		modbus_send_cache_2[9]=send_struct.modbus_data_3;
-		modbus_send_cache_2[10]=send_struct.modbus_data_4;
-		send_struct.modbus_crc=usMBCRC16(modbus_send_cache_2,11);
-		modbus_send_cache_2[11]=(uint8_t)(send_struct.modbus_crc & 0xFF);
-		modbus_send_cache_2[12]=(uint8_t)(send_struct.modbus_crc >> 8);
-		if(HAL_UART_Transmit_DMA(&huart4,(uint8_t*)modbus_send_cache_2,13)==HAL_BUSY)
-		{
-			__NOP();
-			HAL_UART_Transmit_DMA(&huart4,(uint8_t*)modbus_send_cache_2,13);
-		}
-		modbus_time_flag_2=1;
-		rece_count_2=8;
-		taskEXIT_CRITICAL();
-	}
-	//¶Á¼Ä´æÆ÷
-	if(send_struct.modbus_func==0x03)
-	{
-		taskENTER_CRITICAL();
-		HAL_GPIO_WritePin(GPIOB,GPIO_PIN_7,GPIO_PIN_RESET);
-		__NOP();
-		__NOP();
-		modbus_send_cache_2[0]=send_struct.modbus_addr;
-		modbus_send_cache_2[1]=send_struct.modbus_func;
-		modbus_send_cache_2[2]=send_struct.modbus_addr_h;
-		modbus_send_cache_2[3]=send_struct.modbus_addr_l;
-		modbus_send_cache_2[4]=send_struct.modbus_data_len_h;
-		modbus_send_cache_2[5]=send_struct.modbus_data_len_l;
-		send_struct.modbus_crc=usMBCRC16(modbus_send_cache_2,6);
-		modbus_send_cache_2[6]=(uint8_t)(send_struct.modbus_crc & 0xFF);
-		modbus_send_cache_2[7]=(uint8_t)(send_struct.modbus_crc >> 8);
-		if(HAL_UART_Transmit_DMA(&huart4,(uint8_t*)modbus_send_cache_2,8)==HAL_BUSY)
-		{
-			__nop();
-			HAL_UART_Transmit_DMA(&huart4,(uint8_t*)modbus_send_cache_2,8);
-		}
-		modbus_time_flag_2=1;
-		rece_count_2=9;
-		taskEXIT_CRITICAL();
-	}
-	return 0;
-}
-
-//485 ·¢ËÍ
-uint8_t modbus_send_3(QUEUE_STRUCT send_struct)
-{
-	if(modbus_status_3==0)
-	{
-		if(modbus_list_tail_3!=NULL && modbus_list_tail_3->if_over==0)
-		{
-			memcpy(&(modbus_list_tail_3->modbus_element),&send_struct,sizeof(QUEUE_STRUCT));
-			modbus_list_tail_3->if_over=1;
-			modbus_list_tail_3=modbus_list_tail_3->next;
-		}
-		else{
-			return MODBUS_LIST_ERROR;
-		}
-		//Ð´¼Ä´æÆ÷
-		if(send_struct.modbus_func == 0x10)
-		{
-			taskENTER_CRITICAL();
-			HAL_GPIO_WritePin(GPIOB,GPIO_PIN_6,GPIO_PIN_RESET);
-			__NOP();
-		  __NOP();
-			modbus_send_cache_3[0]=send_struct.modbus_addr;
-			modbus_send_cache_3[1]=send_struct.modbus_func;
-			modbus_send_cache_3[2]=send_struct.modbus_addr_h;
-			modbus_send_cache_3[3]=send_struct.modbus_addr_l;
-			modbus_send_cache_3[4]=send_struct.modbus_data_len_h;
-			modbus_send_cache_3[5]=send_struct.modbus_data_len_l;
-			modbus_send_cache_3[6]=send_struct.modbus_data_byte;
-			modbus_send_cache_3[7]=send_struct.modbus_data_1;
-			modbus_send_cache_3[8]=send_struct.modbus_data_2;
-			modbus_send_cache_3[9]=send_struct.modbus_data_3;
-			modbus_send_cache_3[10]=send_struct.modbus_data_4;
-			send_struct.modbus_crc=usMBCRC16(modbus_send_cache_3,11);
-			modbus_send_cache_3[11]=(uint8_t)(send_struct.modbus_crc & 0xFF);
-			modbus_send_cache_3[12]=(uint8_t)(send_struct.modbus_crc >> 8);
-			HAL_UART_Transmit_DMA(&huart3,(uint8_t*)modbus_send_cache_3,13);
-			modbus_time_flag_3=1;
-			rece_count_3=8;
-			modbus_status_3=1;
-			taskEXIT_CRITICAL();
-		}
-		//¶Á¼Ä´æÆ÷
-		if(send_struct.modbus_func==0x03)
-		{
-			taskENTER_CRITICAL();
-			HAL_GPIO_WritePin(GPIOB,GPIO_PIN_6,GPIO_PIN_RESET);
-			__NOP();
-		  __NOP();
-			modbus_send_cache_3[0]=send_struct.modbus_addr;
-			modbus_send_cache_3[1]=send_struct.modbus_func;
-			modbus_send_cache_3[2]=send_struct.modbus_addr_h;
-			modbus_send_cache_3[3]=send_struct.modbus_addr_l;
-			modbus_send_cache_3[4]=send_struct.modbus_data_len_h;
-			modbus_send_cache_3[5]=send_struct.modbus_data_len_l;
-			send_struct.modbus_crc=usMBCRC16(modbus_send_cache_3,6);
-			modbus_send_cache_3[6]=(uint8_t)(send_struct.modbus_crc & 0xFF);
-			modbus_send_cache_3[7]=(uint8_t)(send_struct.modbus_crc >> 8);
-			HAL_UART_Transmit_DMA(&huart3,(uint8_t*)modbus_send_cache_3,8);
-			modbus_time_flag_3=1;
-			rece_count_3=9;
-			modbus_status_3=1;
-			taskEXIT_CRITICAL();
-		}
-	}
-	else
-	{
-		//modbusÊý¾ÝÑ¹ÈëÁ´±í
-		if(modbus_list_tail_3!=NULL && modbus_list_tail_3->if_over==0)
-		{
-			memcpy(&(modbus_list_tail_3->modbus_element),&send_struct,sizeof(QUEUE_STRUCT));
-			modbus_list_tail_3->if_over=1;
-			modbus_list_tail_3=modbus_list_tail_3->next;
-			return MODBUS_BUSY;
-		}
-		else
-		{
-			return MODBUS_LIST_ERROR;
-		}
-	}
-	return 0;
-}
-
-//485×é»Øµ÷º¯Êý
-uint8_t modbus_send_sub_3(QUEUE_STRUCT send_struct)
-{
-	//Ð´¼Ä´æÆ÷
-	if(send_struct.modbus_func == 0x10)
-	{
-		taskENTER_CRITICAL();
-		HAL_GPIO_WritePin(GPIOB,GPIO_PIN_6,GPIO_PIN_RESET);
-		__NOP();
-		__NOP();
-		modbus_send_cache_3[0]=send_struct.modbus_addr;
-		modbus_send_cache_3[1]=send_struct.modbus_func;
-		modbus_send_cache_3[2]=send_struct.modbus_addr_h;
-		modbus_send_cache_3[3]=send_struct.modbus_addr_l;
-		modbus_send_cache_3[4]=send_struct.modbus_data_len_h;
-		modbus_send_cache_3[5]=send_struct.modbus_data_len_l;
-		modbus_send_cache_3[6]=send_struct.modbus_data_byte;
-		modbus_send_cache_3[7]=send_struct.modbus_data_1;
-		modbus_send_cache_3[8]=send_struct.modbus_data_2;
-		modbus_send_cache_3[9]=send_struct.modbus_data_3;
-		modbus_send_cache_3[10]=send_struct.modbus_data_4;
-		send_struct.modbus_crc=usMBCRC16(modbus_send_cache_3,11);
-		modbus_send_cache_3[11]=(uint8_t)(send_struct.modbus_crc & 0xFF);
-		modbus_send_cache_3[12]=(uint8_t)(send_struct.modbus_crc >> 8);
-		if(HAL_UART_Transmit_DMA(&huart3,(uint8_t*)modbus_send_cache_3,13)==HAL_BUSY)
-		{
-			__NOP();
-			HAL_UART_Transmit_DMA(&huart3,(uint8_t*)modbus_send_cache_3,13);
-		}
-		modbus_time_flag_3=1;
-		rece_count_3=8;
-		taskEXIT_CRITICAL();
-	}
-	//¶Á¼Ä´æÆ÷
-	if(send_struct.modbus_func==0x03)
-	{
-		taskENTER_CRITICAL();
-		HAL_GPIO_WritePin(GPIOB,GPIO_PIN_6,GPIO_PIN_RESET);
-		__NOP();
-		__NOP();
-		modbus_send_cache_3[0]=send_struct.modbus_addr;
-		modbus_send_cache_3[1]=send_struct.modbus_func;
-		modbus_send_cache_3[2]=send_struct.modbus_addr_h;
-		modbus_send_cache_3[3]=send_struct.modbus_addr_l;
-		modbus_send_cache_3[4]=send_struct.modbus_data_len_h;
-		modbus_send_cache_3[5]=send_struct.modbus_data_len_l;
-		send_struct.modbus_crc=usMBCRC16(modbus_send_cache_3,6);
-		modbus_send_cache_3[6]=(uint8_t)(send_struct.modbus_crc & 0xFF);
-		modbus_send_cache_3[7]=(uint8_t)(send_struct.modbus_crc >> 8);
-		if(HAL_UART_Transmit_DMA(&huart3,(uint8_t*)modbus_send_cache_3,8)==HAL_BUSY)
-		{
-			__nop();
-			HAL_UART_Transmit_DMA(&huart3,(uint8_t*)modbus_send_cache_3,8);
-		}
-		modbus_time_flag_3=1;
-		rece_count_3=9;
-		taskEXIT_CRITICAL();
-	}
-	return 0;
-}
 
 //µç»úÄ¿±êÉèÖÃ
 uint8_t positionSet(uint8_t motorId, int32_t * position)
@@ -6313,15 +6000,7 @@ int main(void)
 	HAL_DMA_DeInit(&hdma_usart6_rx);
 	HAL_DMA_Init(&hdma_usart6_rx);
 	
-	HAL_DMA_DeInit(&hdma_uart4_tx);
-	HAL_DMA_Init(&hdma_uart4_tx);
-	HAL_DMA_DeInit(&hdma_uart4_rx);
-	HAL_DMA_Init(&hdma_uart4_rx);
-	
-	HAL_DMA_DeInit(&hdma_usart3_tx);
-	HAL_DMA_Init(&hdma_usart3_tx);
-	HAL_DMA_DeInit(&hdma_usart3_rx);
-	HAL_DMA_Init(&hdma_usart3_rx);
+
 	
 	//1ºÅµç»ú³¬Ê±¶¨Ê±Æ÷
 	HAL_TIM_Base_DeInit(&htim12);
@@ -6330,10 +6009,9 @@ int main(void)
 	HAL_TIM_Base_DeInit(&htim13);
 	HAL_TIM_Base_Init(&htim13);
 	
-	modbus_list_head=modbus_list_gen(64);
+	modbus_list_head=modbus_list_gen(128);
 	modbus_list_head_5=modbus_list_gen(32);
-	modbus_list_head_2=modbus_list_gen(64);
-	modbus_list_head_3=modbus_list_gen(64);
+
 	
 	//HAL_TIM_Base_Start_IT(&htim12);
 	
@@ -6356,23 +6034,7 @@ int main(void)
 		printf("%s\n","modbus list 5 error");
 	}
 	
-	if(modbus_list_head_2!=NULL)
-	{
-		modbus_list_tail_2=modbus_list_head_2;
-	}
-	else
-	{
-		printf("%s\n","modbus list 2 error");
-	}
-	
-	if(modbus_list_head_3!=NULL)
-	{
-		modbus_list_tail_3=modbus_list_head_3;
-	}
-	else
-	{
-		printf("%s\n","modbus list 3 error");
-	}
+
 	//Ä¬ÈÏÖÃÓÚ·¢ËÍ×´Ì¬
 	HAL_GPIO_WritePin(GPIOE,GPIO_PIN_0,GPIO_PIN_RESET);
 	HAL_GPIO_WritePin(GPIOE,GPIO_PIN_1,GPIO_PIN_RESET);

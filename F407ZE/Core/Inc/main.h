@@ -279,7 +279,7 @@ void result_parse_6(uint8_t* data, uint8_t num);
 void timer_start(void);
 uint8_t can_start(void);
 uint8_t switchGet(uint8_t motor_id);
-uint8_t iic_rw(uint8_t rw_flag, uint8_t addr,uint8_t* data,uint8_t length);
+uint8_t iic_rw(uint8_t rw_flag, uint16_t addr,uint8_t* data,uint8_t length);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
@@ -474,13 +474,11 @@ uint8_t modbus_send(QUEUE_STRUCT send_struct);
 uint8_t modbus_send_sub(QUEUE_STRUCT send_struct);
 uint8_t modbus_send_5(QUEUE_STRUCT send_struct);
 uint8_t modbus_send_sub_5(QUEUE_STRUCT send_struct);
-uint8_t modbus_send_2(QUEUE_STRUCT send_struct);
-uint8_t modbus_send_sub_2(QUEUE_STRUCT send_struct);
 
-uint8_t iic_rw(uint8_t rw_flag, uint8_t addr,uint8_t* data,uint8_t length);
+
+uint8_t iic_rw(uint8_t rw_flag, uint16_t addr,uint8_t* data,uint8_t length);
 extern int(*command_to_function[27])(uint8_t*,uint32_t);
 extern void(*result_to_parameter[10])(uint8_t*, uint8_t);
-extern void(*result_to_parameter_2[10])(uint8_t*, uint8_t);
 extern void enable_motor(void);
 extern uint8_t motor_array_init(void);
 extern uint16_t usMBCRC16( uint8_t * pucFrame, uint16_t usLen );
@@ -490,11 +488,7 @@ extern MODBUS_LIST* modbus_list_tail;
 extern MODBUS_LIST* modbus_list_head_5;
 extern MODBUS_LIST* modbus_list_tail_5;
 
-extern MODBUS_LIST* modbus_list_head_2;
-extern MODBUS_LIST* modbus_list_tail_2;
 
-extern MODBUS_LIST* modbus_list_head_3;
-extern MODBUS_LIST* modbus_list_tail_3;
 
 extern GRATING grating_value;
 /* USER CODE END Private defines */
