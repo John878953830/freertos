@@ -136,6 +136,13 @@ extern uint8_t cmd6_if_return;                 //6号总体自检完成是否返回
 #define ENABLE_POSTURE_POWER     3
 
 //错误码
+#define return_error(data, error)\
+data[0]=(uint8_t)(((error+3000)>>24)&0xFF);\
+data[1]=(uint8_t)(((error+3000)>>16)&0xFF);\
+data[2]=(uint8_t)(((error+3000)>>8)&0xFF);\
+data[3]=(uint8_t)(((error+3000))&0xFF);     
+#define MODULE_OFFSET           3000
+#define RETURN_OK               0
 #define ERROR_UNKNOWN           0xFF
 #define ERROR_FUNC_BUSY         0xFE
 #define ERROR_SEMA_NULL         0x01
@@ -181,6 +188,8 @@ extern uint8_t cmd6_if_return;                 //6号总体自检完成是否返回
 #define ERROR_COMMAND_12_EEPROM_ERROR   0x28
 #define ERROR_COMMAND_13_EEPROM_ERROR   0x29
 #define ERROR_COMMAND_14_EEPROM_ERROR   0x2A
+#define ERROR_COMMAND_7_FAIL_TIMER_CHANGE_ERROR  0x2B
+#define ERROR_COMMAND_CONFLICT_DETECT            0x2C
 
 
 //帧结构掩码
@@ -216,20 +225,20 @@ extern uint8_t cmd6_if_return;                 //6号总体自检完成是否返回
 #define TARGET_POSITION_ADDR     4008
 
 //自检开始与结束定义
-#define CMD6_START_SELFCHECK_0           3500
-#define CMD6_START_SELFCHECK_ERR0_0      3501
-#define CMD6_START_SELFCHECK_ERR1_0      3502
-#define CMD6_START_SELFCHECK_OK_0        3550
+#define CMD6_START_SELFCHECK_0           500
+#define CMD6_START_SELFCHECK_ERR0_0      501
+#define CMD6_START_SELFCHECK_ERR1_0      502
+#define CMD6_START_SELFCHECK_OK_0        550
 
-#define CMD6_START_SELFCHECK_2           3600
-#define CMD6_START_SELFCHECK_ERR0_2      3601
-#define CMD6_START_SELFCHECK_ERR1_2      3602
-#define CMD6_START_SELFCHECK_OK_2        3650
+#define CMD6_START_SELFCHECK_2           600
+#define CMD6_START_SELFCHECK_ERR0_2      601
+#define CMD6_START_SELFCHECK_ERR1_2      602
+#define CMD6_START_SELFCHECK_OK_2        650
 
-#define CMD6_START_SELFCHECK_3           3700
-#define CMD6_START_SELFCHECK_ERR0_3      3701
-#define CMD6_START_SELFCHECK_ERR1_3      3702
-#define CMD6_START_SELFCHECK_OK_3        3750
+#define CMD6_START_SELFCHECK_3           700
+#define CMD6_START_SELFCHECK_ERR0_3      701
+#define CMD6_START_SELFCHECK_ERR1_3      702
+#define CMD6_START_SELFCHECK_OK_3        750
 
 /* USER CODE END EM */
 
@@ -487,7 +496,7 @@ extern MODBUS_LIST* modbus_list_tail;
 
 extern MODBUS_LIST* modbus_list_head_5;
 extern MODBUS_LIST* modbus_list_tail_5;
-
+extern uint8_t cmd6_stage;
 
 
 extern GRATING grating_value;
