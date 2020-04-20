@@ -135,6 +135,11 @@ extern uint8_t cmd6_if_return;                 //6号总体自检完成是否返回
 #define ENABLE_DIR               2
 #define ENABLE_POSTURE_POWER     3
 
+#define DISTANCE_MIN             26           //130/5,  飞机机腿间距
+#define DISTANCE_45              40           //45度时的遮挡距离
+#define DISTANCE_DELTA            3           //误差限，3组间距15mm
+#define DISTANCE_MIDDLE_DELTA     5           //中轴方向判定误差限, 大于此值时认为机头朝左或右
+
 //错误码
 #define return_error(data, error)\
 data[0]=(uint8_t)(((error+3000)>>24)&0xFF);\
@@ -190,6 +195,7 @@ data[3]=(uint8_t)(((error+3000))&0xFF);
 #define ERROR_COMMAND_14_EEPROM_ERROR   0x2A
 #define ERROR_COMMAND_7_FAIL_TIMER_CHANGE_ERROR  0x2B
 #define ERROR_COMMAND_CONFLICT_DETECT            0x2C
+#define ERROR_NEED_ROTATE                        0x2D
 
 
 //帧结构掩码
@@ -429,8 +435,11 @@ typedef struct grating_struct{
 	uint32_t distance;                          //光栅被遮盖光点之间的最大距离
 	uint32_t distance_max;                      //飞机的允许最大距离
 	uint8_t status;                             //光栅检测飞机夹角是否接近45度，0：不接近 1： 接近45度，需要旋转协作处理
-	uint8_t if_have_target;                     //光栅检测飞机是否存在， 0： 不存在， 1： 存在
+	uint8_t if_have_target;                     //光栅检测飞机是否存在， 0： 不存在， 1： 存在, 2:存在其他物体
 	uint8_t data[6];                            //存放光栅原始数据
+	uint8_t front_point_counter;                //data[0],data[1],data[2]
+	uint8_t back_point_counter;                 //data[3],data[4],data[5]
+	uint8_t status_angle;                       // 00:无飞机 01： 机头朝尾 10 ：机头朝头 11：90度方向
 }GRATING;
 	
 

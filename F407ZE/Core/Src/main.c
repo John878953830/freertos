@@ -370,6 +370,11 @@ uint8_t motor_array_init(void)
 	motor_array[3].conflict_value.conflict_number[0]=2;
 	motor_array[3].conflict_value.conflict_number[1]=3;
 	
+	//初始化光栅结构体的一些量
+	grating_value.if_have_target=0;
+	grating_value.status_angle=0;
+	grating_value.status=0;
+	
 	return 0;
 }
 //链表创建函数
@@ -4455,6 +4460,15 @@ void result_parse_2(uint8_t* data, uint8_t num)
 					frame_return.length=4;
 					
 					return_error(frame_return.data,RETURN_OK);
+					if(motor_array[num].command.command_id==0x08 || 
+						 motor_array[num].command.command_id==0x08 ||
+					   motor_array[num].command.command_id==0x08)
+					{
+						if(grating_value.if_have_target==0x04)
+						{
+							return_error(frame_return.data,ERROR_NEED_ROTATE);
+						}
+					}
 					/*
 					frame_return.data[0]=0xFF;              //错误码，0标识正常
 					frame_return.data[1]=0xFF;              //执行结果， 1代表已完成

@@ -1902,7 +1902,140 @@ void start_tk_result_process_rece_5(void *argument)
 						modbus_status_5=0;
 						modbus_time_flag_5=0;
 					}
-					;
+					if((grating_value.data[0] | grating_value.data[1] | grating_value.data[2] | grating_value.data[3] | grating_value.data[4] | grating_value.data[5])==0x00)
+					{
+						grating_value.if_have_target=0;
+						grating_value.status=0;
+					}
+					else
+					{
+						//统计最大跨度,正向搜索，data 0 开始搜索
+						uint8_t i=0, j=0;
+						uint8_t left=0,right=0;//left right start min = 0
+						for(i=0;i<6;i++)
+						{
+							uint8_t tmp=grating_value.data[i];
+							uint8_t k=0;
+							for(k=0;k<8;k++)
+							{
+								if(((tmp<<k)&0x80)==0x80)
+								{
+									goto LEFT_OVER;
+								}
+								left++;
+							}
+						}
+						LEFT_OVER:
+						for(i=6;i>0;i--)
+						{
+							uint8_t tmp=grating_value.data[i-1];
+							uint8_t k=0;
+							for(k=0;k<8;k++)
+							{
+								if(((tmp>>k)&0x01)==0x01)
+								{
+									goto RIGHT_OVER;
+								}
+								right++;
+							}
+						}
+						RIGHT_OVER:
+						right=47-right;//变换序号
+						if(__fabs(left-right)<DISTANCE_45)
+						{
+							if(__fabs(left-right)<DISTANCE_MIN)
+							{
+								grating_value.if_have_target=0x02;
+								grating_value.status=0;
+							}
+							else
+							{
+								grating_value.if_have_target=0x01;
+								grating_value.status=0;
+							}
+						}
+						else
+						{
+							//统计跨度前区和跨度后区的1的个数
+							//计算跨度中轴
+							uint8_t middle=left+(uint8_t)(__fabs(left-right)/2);
+							uint8_t left_counter=0, right_counter=0;
+							uint8_t tmp_counter=0;
+							//统计左侧光点个数
+							for(i=0;i<6;i++)
+							{
+								uint8_t tmp=grating_value.data[i];
+								uint8_t k=0;
+								for(k=0;k<8;k++)
+								{
+									if(((tmp<<k)&0x80)==0x80)
+									{
+										left_counter++;
+									}
+									tmp_counter++;
+									if(tmp_counter==middle+1)
+									{
+										goto LEFT_STAT_OVER;
+									}
+								}
+							}
+							LEFT_STAT_OVER:
+							//统计右侧光点数
+							tmp_counter=0;
+							for(i=6;i>0;i--)
+							{
+								uint8_t tmp=grating_value.data[i-1];
+								uint8_t k=0;
+								for(k=0;k<8;k++)
+								{
+									if(((tmp>>k)&0x01)==0x01)
+									{
+										right_counter++;
+									}
+									tmp_counter++;
+									if(tmp_counter==47-middle)
+									{
+										goto RIGHT_STAT_OVER;
+									}
+								}
+							}
+							RIGHT_STAT_OVER:
+							if(left_counter < DISTANCE_MIN && right_counter < DISTANCE_MIN)
+							{
+								grating_value.if_have_target=0x02;
+								grating_value.status=0;
+							}
+							else
+							{
+								grating_value.if_have_target=0x04;     //有飞机有危险
+								grating_value.status=1;
+							}
+							//根据光点数进行运算,确定机头朝向
+							if(__fabs(right_counter-left_counter)<DISTANCE_MIDDLE_DELTA)
+							{
+								if(right_counter<DISTANCE_DELTA && left_counter<DISTANCE_DELTA)
+								{
+									grating_value.status_angle=0x00;
+								}else{
+									grating_value.status_angle=0x11;
+								}
+							}
+							else
+							{
+								if(__fabs(right_counter-left_counter)>=DISTANCE_MIDDLE_DELTA)
+								{
+									if(right_counter>left_counter)
+									{
+										grating_value.status_angle=0x01;
+									}
+									else
+									{
+										grating_value.status_angle=0x10;
+									}
+								}
+							}
+						}
+					}	
 				}
 			}
 			else
