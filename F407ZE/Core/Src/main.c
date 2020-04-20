@@ -1022,9 +1022,9 @@ int command_6(uint8_t* data,uint32_t para)
 		#endif
 	}
 	
-	command_15(&cmd6_stage,if_return);
+	//command_15(&cmd6_stage,if_return);
 	//taskEXIT_CRITICAL();
-	//command_17(data,if_return);
+	command_17(data,if_return);
 	//command_18(data,if_return);
 	return 0;
 }
@@ -5173,7 +5173,7 @@ uint8_t iic_rw(uint8_t rw_flag, uint16_t addr,uint8_t* data,uint8_t length) //ad
 			uint8_t txcache[3];
 			txcache[0]=tmp_addr_h;
 			txcache[1]=tmp_addr_l;
-			txcache[2]=data[0];
+			txcache[2]=data[i];
 			if(HAL_I2C_Master_Transmit(&hi2c1,IIC_ADDRESS,txcache,3,100)!=HAL_OK)
 			{
 				#ifdef DEBUG_OUTPUT
@@ -5188,6 +5188,7 @@ uint8_t iic_rw(uint8_t rw_flag, uint16_t addr,uint8_t* data,uint8_t length) //ad
 				printf("%s\n","start tk iic send success");
 				#endif
 			}
+			tmp_addr_l++;
 		}
 		
 		HAL_Delay(1);
@@ -5216,6 +5217,7 @@ uint8_t iic_rw(uint8_t rw_flag, uint16_t addr,uint8_t* data,uint8_t length) //ad
 				printf("%s\n","start tk iic send 2 success");
 				#endif
 			}
+			tmp_addr_l++;
 		  HAL_Delay(1);
 			//HAL_I2C_Master_Receive_IT(&hi2c1,IIC_ADDRESS,&rxdata[i],1)
 			if(HAL_I2C_Master_Receive(&hi2c1, (uint16_t)IIC_ADDRESS, (uint8_t *)&rxdata[i], 1, 100) != HAL_OK)
