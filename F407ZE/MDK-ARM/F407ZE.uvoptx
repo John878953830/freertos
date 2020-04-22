@@ -155,9 +155,25 @@
         <Bp>
           <Number>0</Number>
           <Type>0</Type>
-          <LineNumber>1129</LineNumber>
+          <LineNumber>1131</LineNumber>
           <EnabledFlag>1</EnabledFlag>
           <Address>134251192</Address>
+          <ByteObject>0</ByteObject>
+          <HtxType>0</HtxType>
+          <ManyObjects>0</ManyObjects>
+          <SizeOfObject>0</SizeOfObject>
+          <BreakByAccess>0</BreakByAccess>
+          <BreakIfRCount>1</BreakIfRCount>
+          <Filename>../Core/Src/main.c</Filename>
+          <ExecCommand></ExecCommand>
+          <Expression>\\F407ZE\../Core/Src/main.c\1131</Expression>
+        </Bp>
+        <Bp>
+          <Number>1</Number>
+          <Type>0</Type>
+          <LineNumber>1129</LineNumber>
+          <EnabledFlag>1</EnabledFlag>
+          <Address>134251176</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
@@ -219,6 +235,16 @@
           <count>9</count>
           <WinNumber>1</WinNumber>
           <ItemText>left_counter</ItemText>
+        </Ww>
+        <Ww>
+          <count>10</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>modbus_list_tail</ItemText>
+        </Ww>
+        <Ww>
+          <count>11</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>motor_communicate_flag</ItemText>
         </Ww>
       </WatchWindow1>
       <WatchWindow2>

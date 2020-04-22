@@ -127,7 +127,7 @@ extern uint8_t cmd6_if_return;                 //6号总体自检完成是否返回
 #define SPEED_JUDGE             40            //速度误差限
 //命令参数映射
 #define CAN_COMMAND_NUMBER      20
-
+#define MODBUS_MAX_RETRY        5             //最大超时重发次数
 
 //输出gpio映射
 #define ENABLE_MOTOR             0
@@ -351,6 +351,7 @@ typedef struct queue_struct{
 typedef struct modbus_list{
 	QUEUE_STRUCT modbus_element;
 	uint8_t if_over;                            //标志本节点是否有效
+	uint8_t counter;                            //超时次数计数，大于阈值时，认为通信故障
 	struct modbus_list* next;
 	//uint8_t parameter;                          //标志操作的属性值， 1： 位置， 2： 速度， 3， 扭矩， 4：错误码， 5：温度， 6：滞留脉冲数,7:目标位置
 }MODBUS_LIST;
@@ -509,7 +510,7 @@ extern MODBUS_LIST* modbus_list_head_5;
 extern MODBUS_LIST* modbus_list_tail_5;
 extern uint8_t cmd6_stage;
 
-
+extern uint8_t motor_communicate_flag[5];
 extern GRATING grating_value;
 /* USER CODE END Private defines */
 

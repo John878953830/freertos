@@ -74,6 +74,8 @@ GRATING grating_value;                 //存放光栅数据
 const uint8_t grating_send_buf[8]={0x01,0x03,0x00,0x00,0x00,0x03,0x05,0xCB};
 uint16_t modbus_period=89;
 uint8_t cmd6_stage=0;
+
+uint8_t motor_communicate_flag[5]={0,0,0,0,0};           //电机通信错误标志表， 0 正常， 1：通信错误
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -5759,9 +5761,14 @@ uint8_t modbus_send(QUEUE_STRUCT send_struct)
 	{
 		if(modbus_list_tail!=NULL && modbus_list_tail->if_over==0)
 		{
-			memcpy(&(modbus_list_tail->modbus_element),&send_struct,sizeof(QUEUE_STRUCT));
-			modbus_list_tail->if_over=1;
-			modbus_list_tail=modbus_list_tail->next;
+			if(motor_communicate_flag[send_struct.modbus_addr]==0)
+			{
+				memcpy(&(modbus_list_tail->modbus_element),&send_struct,sizeof(QUEUE_STRUCT));
+				modbus_list_tail->if_over=1;
+				modbus_list_tail->counter=0;
+				modbus_list_tail=modbus_list_tail->next;
+			}
+			
 		}
 		else{
 			return MODBUS_LIST_ERROR;
@@ -5822,9 +5829,14 @@ uint8_t modbus_send(QUEUE_STRUCT send_struct)
 		//modbus数据压入链表
 		if(modbus_list_tail!=NULL && modbus_list_tail->if_over==0)
 		{
-			memcpy(&(modbus_list_tail->modbus_element),&send_struct,sizeof(QUEUE_STRUCT));
-			modbus_list_tail->if_over=1;
-			modbus_list_tail=modbus_list_tail->next;
+			if(motor_communicate_flag[send_struct.modbus_addr]==0)
+			{
+				memcpy(&(modbus_list_tail->modbus_element),&send_struct,sizeof(QUEUE_STRUCT));
+				modbus_list_tail->if_over=1;
+				modbus_list_tail->counter=0;
+				modbus_list_tail=modbus_list_tail->next;
+			}
+			
 			return MODBUS_BUSY;
 		}
 		else
@@ -5899,44 +5911,14 @@ uint8_t modbus_send_sub(QUEUE_STRUCT send_struct)
 //485 发送
 uint8_t modbus_send_5(QUEUE_STRUCT send_struct)
 {
-	if(modbus_status_5==0)
-	{
-		if(modbus_list_tail_5!=NULL && modbus_list_tail_5->if_over==0)
+		if(modbus_list_tail_5!=NULL)
 		{
 			memcpy(&(modbus_list_tail_5->modbus_element),&send_struct,sizeof(QUEUE_STRUCT));
 			modbus_list_tail_5->if_over=1;
+			modbus_list_tail_5->counter=0;
 			modbus_list_tail_5=modbus_list_tail_5->next;
 		}
-		else{
-			return MODBUS_LIST_ERROR;
-		}
-		//读取光栅内容
-		//taskENTER_CRITICAL();
-		HAL_GPIO_WritePin(GPIOE,GPIO_PIN_1,GPIO_PIN_RESET);
-		__NOP();
-		__NOP();
-		HAL_UART_Transmit_DMA(&huart6,(uint8_t*)grating_send_buf,8);
-		modbus_time_flag_5=1;
-		rece_count_5=11;
-		modbus_status_5=1;
-		//taskEXIT_CRITICAL();
 		
-	}
-	else
-	{
-		//modbus数据压入链表
-		if(modbus_list_tail_5!=NULL && modbus_list_tail_5->if_over==0)
-		{
-			memcpy(&(modbus_list_tail_5->modbus_element),&send_struct,sizeof(QUEUE_STRUCT));
-			modbus_list_tail_5->if_over=1;
-			modbus_list_tail_5=modbus_list_tail_5->next;
-			return MODBUS_BUSY;
-		}
-		else
-		{
-			return MODBUS_LIST_ERROR;
-		}
-	}
 	return 0;
 }
 

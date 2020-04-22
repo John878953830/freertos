@@ -1744,7 +1744,29 @@ void start_tk_result_process(void *argument)
 		{
 			if(modbus_list_head!=NULL)
 			{
-				modbus_send_sub(modbus_list_head->modbus_element);
+				if(modbus_list_head->counter>MODBUS_MAX_RETRY)
+				{
+					//通信错误,广播对应电机通信错误
+					
+					//标志置位
+					motor_communicate_flag[modbus_list_head->modbus_element.modbus_addr]=1;
+					
+					//发送下一条
+					modbus_list_head->if_over=0;
+					modbus_list_head->counter=0;
+					modbus_list_head=modbus_list_head->next;
+					if(modbus_list_head->if_over==1)
+					{
+						HAL_Delay(3);
+						modbus_send_sub(modbus_list_head->modbus_element);
+					}
+				}
+				else
+				{
+					modbus_list_head->counter++;
+				  modbus_send_sub(modbus_list_head->modbus_element);
+				}
+				
 			}
 		}
     osDelay(1);
@@ -1804,6 +1826,7 @@ void start_tk_result_process_rece(void *argument)
 						motor_array[modbus_list_head->modbus_element.modbus_addr-1].position_value.target_position=tmp_offset;
 					}
 					modbus_list_head->if_over=0;
+					modbus_list_head->counter=0;
 					modbus_list_head=modbus_list_head->next;
 					if(modbus_list_head->if_over==1)
 					{
@@ -2040,7 +2063,7 @@ void start_tk_result_process_rece_5(void *argument)
 								}
 							}
 						}
-					}	
+					}
 				}
 			}
 			else
