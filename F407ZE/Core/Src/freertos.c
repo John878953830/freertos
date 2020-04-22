@@ -1889,6 +1889,7 @@ void start_tk_result_process_rece_5(void *argument)
 				{
 					//解析收到的数据放入光栅结构体中
 					memcpy(grating_value.data,&(rece_cache_5[3]),6);
+					
 					modbus_list_head_5->if_over=0;
 					modbus_list_head_5=modbus_list_head_5->next;
 					if(modbus_list_head_5->if_over==1)
@@ -1926,6 +1927,7 @@ void start_tk_result_process_rece_5(void *argument)
 							}
 						}
 						LEFT_OVER:
+						grating_value.min_point=left;
 						for(i=6;i>0;i--)
 						{
 							uint8_t tmp=grating_value.data[i-1];
@@ -1941,6 +1943,7 @@ void start_tk_result_process_rece_5(void *argument)
 						}
 						RIGHT_OVER:
 						right=47-right;//变换序号
+						grating_value.max_point=right;
 						if(__fabs(left-right)<DISTANCE_45)
 						{
 							if(__fabs(left-right)<DISTANCE_MIN)
@@ -1981,6 +1984,7 @@ void start_tk_result_process_rece_5(void *argument)
 							}
 							LEFT_STAT_OVER:
 							//统计右侧光点数
+							grating_value.front_point_counter=left_counter;
 							tmp_counter=0;
 							for(i=6;i>0;i--)
 							{
@@ -2000,7 +2004,8 @@ void start_tk_result_process_rece_5(void *argument)
 								}
 							}
 							RIGHT_STAT_OVER:
-							if(left_counter < DISTANCE_MIN && right_counter < DISTANCE_MIN)
+							grating_value.back_point_counter=right_counter;
+							if(left_counter < DISTANCE_LIMIT_MIN && right_counter < DISTANCE_LIMIT_MIN)
 							{
 								grating_value.if_have_target=0x02;
 								grating_value.status=0;

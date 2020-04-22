@@ -157,7 +157,7 @@
           <Type>0</Type>
           <LineNumber>1129</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134250468</Address>
+          <Address>134251192</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
@@ -214,6 +214,11 @@
           <count>8</count>
           <WinNumber>1</WinNumber>
           <ItemText>grating_value</ItemText>
+        </Ww>
+        <Ww>
+          <count>9</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>left_counter</ItemText>
         </Ww>
       </WatchWindow1>
       <WatchWindow2>

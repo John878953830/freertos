@@ -4288,6 +4288,254 @@ int command_18(uint8_t* data,uint32_t para)
 int command_19(uint8_t* data,uint32_t para)
 {
 	//旋转角度获取
+	uint8_t if_return=para;
+	int angle;
+	switch(grating_value.if_have_target)
+	{
+		case 0:
+		{
+			angle=0;
+			QUEUE_STRUCT tmp;
+			tmp.property=0x00;             //can send
+			tmp.can_command=0x13;          //停止指令
+			tmp.can_if_ack=0x01;           //需要ACK
+			tmp.can_source=0x03;           //本模块
+			tmp.can_target=0x00;
+			tmp.can_priority=0x05;         //角度数据帧
+			tmp.can_if_last=0x00;
+			tmp.can_if_return=0x00;
+			tmp.length=4;
+			tmp.data[0]=(uint8_t)((angle>>24) & 0xFF);
+			tmp.data[1]=(uint8_t)((angle>>16) & 0xFF);
+			tmp.data[2]=(uint8_t)((angle>>8) & 0xFF);
+			tmp.data[3]=(uint8_t)(angle & 0xFF);
+			BaseType_t status_q = xQueueSendToBack(send_queueHandle, &tmp, 0);
+			if(status_q!=pdPASS)
+			{
+				#ifdef DEBUG_OUTPUT
+				printf("%s\n","queue overflow");
+				#endif
+			}
+			else
+			{
+				#ifdef DEBUG_OUTPUT
+				printf("%s\n","send command 1 success to queue already");
+				#endif
+			}
+			if(if_return == 0x01)
+			{
+				QUEUE_STRUCT tmp;
+				tmp.property=0x00;             //can send
+				tmp.can_command=0x13;          //停止指令
+				tmp.can_if_ack=0x01;           //需要ACK
+				tmp.can_source=0x03;           //本模块
+				tmp.can_target=0x00;
+				tmp.can_priority=0x03;         //命令结束返回帧
+				tmp.can_if_last=0x00;
+				tmp.can_if_return=0x00;
+				tmp.length=4;
+				return_error(tmp.data,RETURN_OK);
+				BaseType_t status_q = xQueueSendToBack(send_queueHandle, &tmp, 0);
+				if(status_q!=pdPASS)
+				{
+					#ifdef DEBUG_OUTPUT
+					printf("%s\n","queue overflow");
+					#endif
+				}
+				else
+				{
+					#ifdef DEBUG_OUTPUT
+					printf("%s\n","send command 1 success to queue already");
+					#endif
+				}
+			}
+			break;
+		}
+		case 1:
+		{
+			if(grating_value.status_angle==0x11)
+			{
+				angle=8000;
+			}
+			else
+			{
+				angle=0;
+			}
+			QUEUE_STRUCT tmp;
+			tmp.property=0x00;             //can send
+			tmp.can_command=0x13;          //停止指令
+			tmp.can_if_ack=0x01;           //需要ACK
+			tmp.can_source=0x03;           //本模块
+			tmp.can_target=0x00;
+			tmp.can_priority=0x05;         //角度数据帧
+			tmp.can_if_last=0x00;
+			tmp.can_if_return=0x00;
+			tmp.length=4;
+			tmp.data[0]=(uint8_t)((angle>>24) & 0xFF);
+			tmp.data[1]=(uint8_t)((angle>>16) & 0xFF);
+			tmp.data[2]=(uint8_t)((angle>>8) & 0xFF);
+			tmp.data[3]=(uint8_t)(angle & 0xFF);
+			BaseType_t status_q = xQueueSendToBack(send_queueHandle, &tmp, 0);
+			if(status_q!=pdPASS)
+			{
+				#ifdef DEBUG_OUTPUT
+				printf("%s\n","queue overflow");
+				#endif
+			}
+			else
+			{
+				#ifdef DEBUG_OUTPUT
+				printf("%s\n","send command 1 success to queue already");
+				#endif
+			}
+			if(if_return == 0x01)
+			{
+				QUEUE_STRUCT tmp;
+				tmp.property=0x00;             //can send
+				tmp.can_command=0x13;          //停止指令
+				tmp.can_if_ack=0x01;           //需要ACK
+				tmp.can_source=0x03;           //本模块
+				tmp.can_target=0x00;
+				tmp.can_priority=0x03;         //命令结束返回帧
+				tmp.can_if_last=0x00;
+				tmp.can_if_return=0x00;
+				tmp.length=4;
+				return_error(tmp.data,RETURN_OK);
+				BaseType_t status_q = xQueueSendToBack(send_queueHandle, &tmp, 0);
+				if(status_q!=pdPASS)
+				{
+					#ifdef DEBUG_OUTPUT
+					printf("%s\n","queue overflow");
+					#endif
+				}
+				else
+				{
+					#ifdef DEBUG_OUTPUT
+					printf("%s\n","send command 1 success to queue already");
+					#endif
+				}
+			}
+			break;
+		}
+		case 2:
+		{
+			angle=0;
+			QUEUE_STRUCT tmp;
+			tmp.property=0x00;             //can send
+			tmp.can_command=0x13;          //停止指令
+			tmp.can_if_ack=0x01;           //需要ACK
+			tmp.can_source=0x03;           //本模块
+			tmp.can_target=0x00;
+			tmp.can_priority=0x05;         //角度数据帧
+			tmp.can_if_last=0x00;
+			tmp.can_if_return=0x00;
+			tmp.length=4;
+			tmp.data[0]=(uint8_t)((angle>>24) & 0xFF);
+			tmp.data[1]=(uint8_t)((angle>>16) & 0xFF);
+			tmp.data[2]=(uint8_t)((angle>>8) & 0xFF);
+			tmp.data[3]=(uint8_t)(angle & 0xFF);
+			BaseType_t status_q = xQueueSendToBack(send_queueHandle, &tmp, 0);
+			if(status_q!=pdPASS)
+			{
+				#ifdef DEBUG_OUTPUT
+				printf("%s\n","queue overflow");
+				#endif
+			}
+			else
+			{
+				#ifdef DEBUG_OUTPUT
+				printf("%s\n","send command 1 success to queue already");
+				#endif
+			}
+			if(if_return == 0x01)
+			{
+				QUEUE_STRUCT tmp;
+				tmp.property=0x00;             //can send
+				tmp.can_command=0x13;          //停止指令
+				tmp.can_if_ack=0x01;           //需要ACK
+				tmp.can_source=0x03;           //本模块
+				tmp.can_target=0x00;
+				tmp.can_priority=0x03;         //命令结束返回帧
+				tmp.can_if_last=0x00;
+				tmp.can_if_return=0x00;
+				tmp.length=4;
+				return_error(tmp.data,ERROR_OTHER_THING);
+				BaseType_t status_q = xQueueSendToBack(send_queueHandle, &tmp, 0);
+				if(status_q!=pdPASS)
+				{
+					#ifdef DEBUG_OUTPUT
+					printf("%s\n","queue overflow");
+					#endif
+				}
+				else
+				{
+					#ifdef DEBUG_OUTPUT
+					printf("%s\n","send command 1 success to queue already");
+					#endif
+				}
+			}
+			break;
+		}
+		case 4:
+		{
+			angle=-4000;
+			QUEUE_STRUCT tmp;
+			tmp.property=0x00;             //can send
+			tmp.can_command=0x13;          //停止指令
+			tmp.can_if_ack=0x01;           //需要ACK
+			tmp.can_source=0x03;           //本模块
+			tmp.can_target=0x00;
+			tmp.can_priority=0x05;         //角度数据帧
+			tmp.can_if_last=0x00;
+			tmp.can_if_return=0x00;
+			tmp.length=4;
+			tmp.data[0]=(uint8_t)((angle>>24) & 0xFF);
+			tmp.data[1]=(uint8_t)((angle>>16) & 0xFF);
+			tmp.data[2]=(uint8_t)((angle>>8) & 0xFF);
+			tmp.data[3]=(uint8_t)(angle & 0xFF);
+			BaseType_t status_q = xQueueSendToBack(send_queueHandle, &tmp, 0);
+			if(status_q!=pdPASS)
+			{
+				#ifdef DEBUG_OUTPUT
+				printf("%s\n","queue overflow");
+				#endif
+			}
+			else
+			{
+				#ifdef DEBUG_OUTPUT
+				printf("%s\n","send command 1 success to queue already");
+				#endif
+			}
+			if(if_return == 0x01)
+			{
+				QUEUE_STRUCT tmp;
+				tmp.property=0x00;             //can send
+				tmp.can_command=0x13;          //停止指令
+				tmp.can_if_ack=0x01;           //需要ACK
+				tmp.can_source=0x03;           //本模块
+				tmp.can_target=0x00;
+				tmp.can_priority=0x03;         //命令结束返回帧
+				tmp.can_if_last=0x00;
+				tmp.can_if_return=0x00;
+				tmp.length=4;
+				return_error(tmp.data,RETURN_OK);
+				BaseType_t status_q = xQueueSendToBack(send_queueHandle, &tmp, 0);
+				if(status_q!=pdPASS)
+				{
+					#ifdef DEBUG_OUTPUT
+					printf("%s\n","queue overflow");
+					#endif
+				}
+				else
+				{
+					#ifdef DEBUG_OUTPUT
+					printf("%s\n","send command 1 success to queue already");
+					#endif
+				}
+			}
+			break;
+		}
+	}
 	return 0;
 }
 int command_20(uint8_t* data,uint32_t para)
@@ -4835,6 +5083,10 @@ void result_parse_2(uint8_t* data, uint8_t num)
 			frame_return.can_if_return=0x00;        //无需返回
 			frame_return.length=4;
 			return_error(frame_return.data,RETURN_OK);
+			if(grating_value.if_have_target==0x04)
+			{
+				return_error(frame_return.data,ERROR_NEED_ROTATE);
+			}
 			/*
 			frame_return.data[0]=0x00;              //错误码，0标识正常
 			frame_return.data[1]=0x00;              //执行结果， 1代表已完成
