@@ -95,6 +95,19 @@ static void prvAutoReloadTimerCallback( TimerHandle_t xTimer )
 	queue_id.data[0]=0x00;
 	queue_id.data[1]=0x00;
 	queue_id.data[2]=0x00;
+	//计算通信状态填充数据
+	if(motor_communicate_flag[1]==0x01)
+		queue_id.data[2]|=0x01;
+	else
+		queue_id.data[2]&=0xFE;
+	if(motor_communicate_flag[3]==0x01)
+		queue_id.data[2]|=0x02;
+	else
+		queue_id.data[2]&=0xFD;
+	if(motor_communicate_flag[4]==0x01)
+		queue_id.data[2]|=0x04;
+	else
+		queue_id.data[2]&=0xFB;
 	//计算填充数据
 	queue_id.data[3]=0x00;
 	//天窗位置
