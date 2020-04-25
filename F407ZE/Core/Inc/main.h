@@ -460,7 +460,7 @@ typedef struct motor_struct{
 	SPEED speed_value;                           //速度结构体
 	POSITION position_value;                     //位置结构体
 	uint8_t limit_sw_number;                     //限位开关个数，最大为8，最小为0
-	SWITCH limit_sw[7];                          //限位开关组，最多可关联4个限位开关，0:TP0 到位开关 1：tp1到位开关 2：tp2 到位开关
+	SWITCH limit_sw[7];                          //限位开关组，最多可关联4个限位开关，0:TP0 到位开关 1：tp1到位开关 2：tp2 到位开关 3： tp3 天窗原点开关
 	PID pid_value;                               //PID结构体
 	TORQUE torque_value;                         //电机扭矩特性
 	DIM dim_value;                               //维度结构体

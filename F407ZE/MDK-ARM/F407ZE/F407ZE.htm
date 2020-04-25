@@ -3,7 +3,7 @@
 <title>Static Call Graph - [F407ZE\F407ZE.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image F407ZE\F407ZE.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060422: Last Updated: Thu Apr 23 14:16:39 2020
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060422: Last Updated: Sun Apr 26 05:11:14 2020
 <BR><P>
 <H3>Maximum Stack Usage =       1816 bytes + Unknown(Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -2098,7 +2098,8 @@ Global Symbols
 <P><STRONG><a name="[b4]"></a>__2printf</STRONG> (Thumb, 0 bytes, Stack size 24 bytes, printf3.o(i.__0printf$3))
 <BR><BR>[Stack]<UL><LI>Max Depth = 24<LI>Call Chain = __2printf
 </UL>
-<BR>[Called By]<UL><LI><a href="#[1c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;result_parse_2
+<BR>[Called By]<UL><LI><a href="#[1d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;result_parse_3
+<LI><a href="#[1c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;result_parse_2
 <LI><a href="#[7d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 <LI><a href="#[175]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;iic_rw
 <LI><a href="#[143]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;enable_motor
@@ -2539,7 +2540,7 @@ Global Symbols
 <LI><a href="#[8d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;start_tk_grating_monitor
 </UL>
 
-<P><STRONG><a name="[13f]"></a>motor_array_init</STRONG> (Thumb, 516 bytes, Stack size 40 bytes, main.o(i.motor_array_init))
+<P><STRONG><a name="[13f]"></a>motor_array_init</STRONG> (Thumb, 594 bytes, Stack size 40 bytes, main.o(i.motor_array_init))
 <BR><BR>[Stack]<UL><LI>Max Depth = 232<LI>Call Chain = motor_array_init &rArr; iic_rw &rArr; HAL_I2C_Master_Receive &rArr; I2C_MasterRequestRead &rArr; I2C_WaitOnMasterAddressFlagUntilTimeout
 </UL>
 <BR>[Calls]<UL><LI><a href="#[175]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;iic_rw
@@ -2649,7 +2650,11 @@ Global Symbols
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> main.o(.data)
 </UL>
-<P><STRONG><a name="[1d]"></a>result_parse_3</STRONG> (Thumb, 42 bytes, Stack size 0 bytes, main.o(i.result_parse_3))
+<P><STRONG><a name="[1d]"></a>result_parse_3</STRONG> (Thumb, 52 bytes, Stack size 0 bytes, main.o(i.result_parse_3))
+<BR><BR>[Stack]<UL><LI>Max Depth = 24<LI>Call Chain = result_parse_3 &rArr; __2printf
+</UL>
+<BR>[Calls]<UL><LI><a href="#[b4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__2printf
+</UL>
 <BR>[Address Reference Count : 1]<UL><LI> main.o(.data)
 </UL>
 <P><STRONG><a name="[1e]"></a>result_parse_4</STRONG> (Thumb, 42 bytes, Stack size 0 bytes, main.o(i.result_parse_4))

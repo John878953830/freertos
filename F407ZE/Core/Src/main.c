@@ -377,6 +377,68 @@ uint8_t motor_array_init(void)
 	grating_value.status_angle=0;
 	grating_value.status=0;
 	
+	//初始化电机的一些开关量配置结构
+	//1号电机， 天窗开关量配置
+	motor_array[0].limit_sw_number=4;     //天窗有4个光电开关
+	
+	motor_array[0].limit_sw[0].type=0;   //常开型
+	motor_array[0].limit_sw[0].pin_number=GPIO_PIN_0;
+	motor_array[0].limit_sw[0].gpio_index=0;
+	motor_array[0].limit_sw[0].gpio_port=GPIOF;
+	
+	motor_array[0].limit_sw[1].type=0;
+	motor_array[0].limit_sw[1].pin_number=GPIO_PIN_1;
+	motor_array[0].limit_sw[1].gpio_index=1;
+	motor_array[0].limit_sw[1].gpio_port=GPIOF;
+	
+	motor_array[0].limit_sw[2].type=0;
+	motor_array[0].limit_sw[2].pin_number=GPIO_PIN_2;
+	motor_array[0].limit_sw[2].gpio_index=2;
+	motor_array[0].limit_sw[2].gpio_port=GPIOF;
+	
+	motor_array[0].limit_sw[3].type=0;
+	motor_array[0].limit_sw[3].pin_number=GPIO_PIN_3;
+	motor_array[0].limit_sw[3].gpio_index=3;
+	motor_array[0].limit_sw[3].gpio_port=GPIOF;
+	
+	//3号电机，前后夹紧电机
+	motor_array[2].limit_sw_number=3;
+	
+	motor_array[2].limit_sw[0].type=0;    //前后3个光电
+	motor_array[2].limit_sw[0].pin_number=GPIO_PIN_4;
+	motor_array[2].limit_sw[0].gpio_index=0;
+	motor_array[2].limit_sw[0].gpio_port=GPIOF;
+	
+	motor_array[2].limit_sw[1].type=0;
+	motor_array[2].limit_sw[1].pin_number=GPIO_PIN_5;
+	motor_array[2].limit_sw[1].gpio_index=1;
+	motor_array[2].limit_sw[1].gpio_port=GPIOF;
+	
+	motor_array[2].limit_sw[2].type=0;
+	motor_array[2].limit_sw[2].pin_number=GPIO_PIN_6;
+	motor_array[2].limit_sw[2].gpio_index=2;
+	motor_array[2].limit_sw[2].gpio_port=GPIOF;
+	
+	//4号电机，左右夹紧电机
+	motor_array[3].limit_sw_number=3;
+	
+	motor_array[3].limit_sw[0].type=0;      //左右3个光电
+	motor_array[3].limit_sw[0].pin_number=GPIO_PIN_7;
+	motor_array[3].limit_sw[0].gpio_index=0;
+	motor_array[3].limit_sw[0].gpio_port=GPIOF;
+	
+	motor_array[3].limit_sw[1].type=0;
+	motor_array[3].limit_sw[1].pin_number=GPIO_PIN_8;
+	motor_array[3].limit_sw[1].gpio_index=1;
+	motor_array[3].limit_sw[1].gpio_port=GPIOF;
+	
+	motor_array[3].limit_sw[2].type=0;
+	motor_array[3].limit_sw[2].pin_number=GPIO_PIN_9;
+	motor_array[3].limit_sw[2].gpio_index=2;
+	motor_array[3].limit_sw[2].gpio_port=GPIOF;
+	
+	
+	
 	return 0;
 }
 //链表创建函数
@@ -5124,6 +5186,9 @@ void result_parse_3(uint8_t* data, uint8_t num)
 	else
 	{
 		motor_array[num].torque_value.current_torque=((uint32_t)data[0]<<8) | (uint32_t)data[1] | ((uint32_t)data[2] << 24) | ((uint32_t)data[3] << 16);
+		#ifdef DEBUG_OUTPUT
+		printf("%s : %d, %d\n","---------torque is", num,motor_array[num].torque_value.current_torque);
+		#endif
 	}
 	return;
 }
