@@ -41,6 +41,7 @@ TIM_HandleTypeDef htim14;
 /* TIM1 init function */
 void MX_TIM1_Init(void)
 {
+	/*
   TIM_ClockConfigTypeDef sClockSourceConfig = {0};
   TIM_MasterConfigTypeDef sMasterConfig = {0};
   TIM_OC_InitTypeDef sConfigOC = {0};
@@ -95,6 +96,7 @@ void MX_TIM1_Init(void)
     Error_Handler();
   }
   HAL_TIM_MspPostInit(&htim1);
+	*/
 
 }
 /* TIM2 init function */
