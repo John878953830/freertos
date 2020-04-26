@@ -108,6 +108,7 @@ static void prvAutoReloadTimerCallback( TimerHandle_t xTimer )
 		queue_id.data[2]|=0x04;
 	else
 		queue_id.data[2]&=0xFB;
+	
 	//计算填充数据
 	queue_id.data[3]=0x00;
 	//天窗位置
@@ -1028,7 +1029,7 @@ void StartDefaultTask(void *argument)
                          2000 );
 		if(notify_use!=0)
 		{
-			
+			HAL_GPIO_TogglePin(GPIOB,GPIO_PIN_15);
 			notify_use=0;
 			//QUEUE_STRUCT tmp_5;
 			//modbus_send_sub_5(tmp_5);
@@ -1622,6 +1623,7 @@ void start_tk_master_order(void *argument)
 							}
 							else
 							{
+								HAL_GPIO_WritePin(GPIOB,GPIO_PIN_14,GPIO_PIN_SET);
 								if(
 								tmp_command_id==0  || 
 								tmp_command_id==2  ||
@@ -1668,6 +1670,7 @@ void start_tk_master_order(void *argument)
 									para|=(tmp_if_last << 5);     //bit 5表示是否是最后一帧
 									command_to_function[tmp_command_id](data,para);
 								}
+								HAL_GPIO_WritePin(GPIOB,GPIO_PIN_14,GPIO_PIN_RESET);
 							}
 						//根据命令电机映射表找到要动作的电机，并将参数压入电机中的命令结构
 						//uint8_t motor_id=command_to_motor[tmp_command_id];
@@ -1763,6 +1766,11 @@ void start_tk_result_process(void *argument)
 					
 					//标志置位
 					motor_communicate_flag[modbus_list_head->modbus_element.modbus_addr]=1;
+					if((motor_communicate_flag[1]||motor_communicate_flag[3]||motor_communicate_flag[4])&&motor_communicate_counter==0)
+					{
+						HAL_GPIO_WritePin(GPIOD,GPIO_PIN_10,GPIO_PIN_SET);
+						motor_communicate_counter=1;
+					}
 					
 					//发送下一条
 					modbus_list_head->if_over=0;

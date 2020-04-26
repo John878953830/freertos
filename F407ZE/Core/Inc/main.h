@@ -511,6 +511,7 @@ extern MODBUS_LIST* modbus_list_tail_5;
 extern uint8_t cmd6_stage;
 
 extern uint8_t motor_communicate_flag[5];
+extern uint8_t motor_communicate_counter;
 extern GRATING grating_value;
 /* USER CODE END Private defines */
 

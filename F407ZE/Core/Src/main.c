@@ -76,6 +76,7 @@ uint16_t modbus_period=89;
 uint8_t cmd6_stage=0;
 
 uint8_t motor_communicate_flag[5]={0,0,0,0,0};           //电机通信错误标志表， 0 正常， 1：通信错误
+uint8_t motor_communicate_counter=0;                     //重复计数，确保只点亮一次PD10
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -385,21 +386,25 @@ uint8_t motor_array_init(void)
 	motor_array[0].limit_sw[0].pin_number=GPIO_PIN_0;
 	motor_array[0].limit_sw[0].gpio_index=0;
 	motor_array[0].limit_sw[0].gpio_port=GPIOF;
+	motor_array[0].limit_sw[0].status=HAL_GPIO_ReadPin(motor_array[0].limit_sw[0].gpio_port,motor_array[0].limit_sw[0].pin_number);
 	
 	motor_array[0].limit_sw[1].type=0;
 	motor_array[0].limit_sw[1].pin_number=GPIO_PIN_1;
 	motor_array[0].limit_sw[1].gpio_index=1;
 	motor_array[0].limit_sw[1].gpio_port=GPIOF;
+	motor_array[0].limit_sw[1].status=HAL_GPIO_ReadPin(motor_array[0].limit_sw[1].gpio_port,motor_array[0].limit_sw[1].pin_number);
 	
 	motor_array[0].limit_sw[2].type=0;
 	motor_array[0].limit_sw[2].pin_number=GPIO_PIN_2;
 	motor_array[0].limit_sw[2].gpio_index=2;
 	motor_array[0].limit_sw[2].gpio_port=GPIOF;
+	motor_array[0].limit_sw[2].status=HAL_GPIO_ReadPin(motor_array[0].limit_sw[2].gpio_port,motor_array[0].limit_sw[2].pin_number);
 	
 	motor_array[0].limit_sw[3].type=0;
 	motor_array[0].limit_sw[3].pin_number=GPIO_PIN_3;
 	motor_array[0].limit_sw[3].gpio_index=3;
 	motor_array[0].limit_sw[3].gpio_port=GPIOF;
+	motor_array[0].limit_sw[3].status=HAL_GPIO_ReadPin(motor_array[0].limit_sw[3].gpio_port,motor_array[0].limit_sw[3].pin_number);
 	
 	//3号电机，前后夹紧电机
 	motor_array[2].limit_sw_number=3;
@@ -408,16 +413,19 @@ uint8_t motor_array_init(void)
 	motor_array[2].limit_sw[0].pin_number=GPIO_PIN_4;
 	motor_array[2].limit_sw[0].gpio_index=0;
 	motor_array[2].limit_sw[0].gpio_port=GPIOF;
+	motor_array[2].limit_sw[0].status=HAL_GPIO_ReadPin(motor_array[2].limit_sw[0].gpio_port,motor_array[2].limit_sw[0].pin_number);
 	
 	motor_array[2].limit_sw[1].type=0;
 	motor_array[2].limit_sw[1].pin_number=GPIO_PIN_5;
 	motor_array[2].limit_sw[1].gpio_index=1;
 	motor_array[2].limit_sw[1].gpio_port=GPIOF;
+	motor_array[2].limit_sw[1].status=HAL_GPIO_ReadPin(motor_array[2].limit_sw[1].gpio_port,motor_array[2].limit_sw[1].pin_number);
 	
 	motor_array[2].limit_sw[2].type=0;
 	motor_array[2].limit_sw[2].pin_number=GPIO_PIN_6;
 	motor_array[2].limit_sw[2].gpio_index=2;
 	motor_array[2].limit_sw[2].gpio_port=GPIOF;
+	motor_array[2].limit_sw[2].status=HAL_GPIO_ReadPin(motor_array[2].limit_sw[2].gpio_port,motor_array[2].limit_sw[2].pin_number);
 	
 	//4号电机，左右夹紧电机
 	motor_array[3].limit_sw_number=3;
@@ -426,17 +434,19 @@ uint8_t motor_array_init(void)
 	motor_array[3].limit_sw[0].pin_number=GPIO_PIN_7;
 	motor_array[3].limit_sw[0].gpio_index=0;
 	motor_array[3].limit_sw[0].gpio_port=GPIOF;
+	motor_array[3].limit_sw[0].status=HAL_GPIO_ReadPin(motor_array[3].limit_sw[0].gpio_port,motor_array[3].limit_sw[0].pin_number);
 	
 	motor_array[3].limit_sw[1].type=0;
 	motor_array[3].limit_sw[1].pin_number=GPIO_PIN_8;
 	motor_array[3].limit_sw[1].gpio_index=1;
 	motor_array[3].limit_sw[1].gpio_port=GPIOF;
+	motor_array[3].limit_sw[1].status=HAL_GPIO_ReadPin(motor_array[3].limit_sw[1].gpio_port,motor_array[3].limit_sw[1].pin_number);
 	
 	motor_array[3].limit_sw[2].type=0;
 	motor_array[3].limit_sw[2].pin_number=GPIO_PIN_9;
 	motor_array[3].limit_sw[2].gpio_index=2;
 	motor_array[3].limit_sw[2].gpio_port=GPIOF;
-	
+	motor_array[3].limit_sw[2].status=HAL_GPIO_ReadPin(motor_array[3].limit_sw[2].gpio_port,motor_array[3].limit_sw[2].pin_number);
 	
 	
 	return 0;
@@ -6182,6 +6192,9 @@ int main(void)
 	HAL_GPIO_WritePin(GPIOE,GPIO_PIN_9,GPIO_PIN_SET);
 	HAL_GPIO_WritePin(GPIOE,GPIO_PIN_10,GPIO_PIN_SET);
 	HAL_GPIO_WritePin(GPIOE,GPIO_PIN_12,GPIO_PIN_SET);
+	
+	//PD10 电机驱动引脚输出低电平
+	HAL_GPIO_WritePin(GPIOD,GPIO_PIN_10,GPIO_PIN_RESET);
 	
 	
 	//继电器引脚
