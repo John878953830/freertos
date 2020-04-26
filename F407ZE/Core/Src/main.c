@@ -5394,7 +5394,7 @@ unsigned long getRunTimeCounterValue(void)
 void timer_start()
 {
 	//Êä³öPWM
-	HAL_TIM_PWM_Start(&htim1,TIM_CHANNEL_1);
+	//HAL_TIM_PWM_Start(&htim1,TIM_CHANNEL_1);
 	HAL_TIM_PWM_Start(&htim2,TIM_CHANNEL_1);
 	HAL_TIM_PWM_Start(&htim3,TIM_CHANNEL_1);
 	HAL_TIM_PWM_Start(&htim4,TIM_CHANNEL_1);
