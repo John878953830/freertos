@@ -1,30 +1,39 @@
 
-T1300 000:056 SEGGER J-Link V6.10i Log File (0001ms, 0029ms total)
-T1300 000:056 DLL Compiled: Oct 25 2016 19:31:51 (0001ms, 0029ms total)
-T1300 000:056 Logging started @ 2020-04-26 03:59 (0001ms, 0029ms total)
-T1300 000:057 JLINK_SetWarnOutHandler(...) (0000ms, 0029ms total)
-T1300 000:057 JLINK_OpenEx(...)
+T20D0 000:267 SEGGER J-Link V6.10i Log File (0001ms, 0045ms total)
+T20D0 000:267 DLL Compiled: Oct 25 2016 19:31:51 (0001ms, 0045ms total)
+T20D0 000:267 Logging started @ 2020-04-26 06:18 (0001ms, 0045ms total)
+T20D0 000:268 JLINK_SetWarnOutHandler(...) (0000ms, 0045ms total)
+T20D0 000:268 JLINK_OpenEx(...)
 Firmware: J-Link V9 compiled Sep  1 2016 18:29:50
 Hardware: V9.60
 S/N: 69664717
-Feature(s): RDI, GDB, FlashDL, FlashBP, JFlashWEBSRV Webserver running on local port 19080 (0019ms, 0048ms total)
-T1300 000:057   returns O.K. (0019ms, 0048ms total)
-T1300 000:076 JLINK_SetErrorOutHandler(...) (0000ms, 0048ms total)
-T1300 000:076 JLINK_ExecCommand("ProjectFile = "D:\F407ZE\F407ZE\MDK-ARM\JLinkSettings.ini"", ...).   returns 0x00 (0075ms, 0123ms total)
-T1300 000:157 JLINK_ExecCommand("Device = STM32F407ZETx", ...). Device "STM32F407ZE" selected.  returns 0x00 (0006ms, 0130ms total)
-T1300 000:163 JLINK_ExecCommand("DisableConnectionTimeout", ...).   returns 0x01 (0000ms, 0130ms total)
-T1300 000:163 JLINK_GetHardwareVersion()  returns 0x17700 (0000ms, 0130ms total)
-T1300 000:163 JLINK_GetDLLVersion()  returns 61009 (0000ms, 0130ms total)
-T1300 000:163 JLINK_GetFirmwareString(...) (0000ms, 0130ms total)
-T1300 000:178 JLINK_GetDLLVersion()  returns 61009 (0000ms, 0130ms total)
-T1300 000:178 JLINK_GetCompileDateTime() (0000ms, 0130ms total)
-T1300 000:184 JLINK_GetFirmwareString(...) (0000ms, 0130ms total)
-T1300 000:190 JLINK_GetHardwareVersion()  returns 0x17700 (0000ms, 0130ms total)
-T1300 000:210 JLINK_TIF_Select(JLINKARM_TIF_SWD)  returns 0x00 (0000ms, 0130ms total)
-T1300 000:210 JLINK_SetSpeed(5) (0001ms, 0131ms total)
-T1300 000:211 JLINK_GetId() >0x108 TIF> >0x108 TIF>STM32 (connect): Can not attach to CPU. Trying connect under reset. >0x108 TIF> >0x108 TIF>
-  ***** Error: STM32: Connecting to CPU via connect under reset failed. >0x108 TIF> >0x108 TIF>STM32 (connect): Can not attach to CPU. Trying connect under reset. >0x108 TIF> >0x108 TIF>
-  ***** Error: STM32: Connecting to CPU via connect under reset failed.  returns 0x00000000 (1160ms, 1291ms total)
-T1300 002:850 JLINK_Close() (0014ms, 1305ms total)
-T1300 002:850  (0015ms, 1306ms total)
-T1300 002:850 Closed (0015ms, 1306ms total)
+Feature(s): RDI, GDB, FlashDL, FlashBP, JFlashWEBSRV Webserver running on local port 19080 (0024ms, 0069ms total)
+T20D0 000:268   returns O.K. (0024ms, 0069ms total)
+T20D0 000:292 JLINK_SetErrorOutHandler(...) (0000ms, 0069ms total)
+T20D0 000:292 JLINK_ExecCommand("ProjectFile = "D:\F407ZE\F407ZE\MDK-ARM\JLinkSettings.ini"", ...).   returns 0x00 (0107ms, 0176ms total)
+T20D0 000:399 JLINK_ExecCommand("Device = STM32F407ZETx", ...). Device "STM32F407ZE" selected.  returns 0x00 (0002ms, 0178ms total)
+T20D0 000:401 JLINK_ExecCommand("DisableConnectionTimeout", ...).   returns 0x01 (0000ms, 0178ms total)
+T20D0 000:401 JLINK_GetHardwareVersion()  returns 0x17700 (0000ms, 0178ms total)
+T20D0 000:401 JLINK_GetDLLVersion()  returns 61009 (0000ms, 0178ms total)
+T20D0 000:401 JLINK_GetFirmwareString(...) (0000ms, 0178ms total)
+T20D0 000:401 JLINK_GetDLLVersion()  returns 61009 (0000ms, 0178ms total)
+T20D0 000:401 JLINK_GetCompileDateTime() (0001ms, 0179ms total)
+T20D0 000:402 JLINK_GetFirmwareString(...) (0000ms, 0179ms total)
+T20D0 000:402 JLINK_GetHardwareVersion()  returns 0x17700 (0000ms, 0179ms total)
+T20D0 000:402 JLINK_TIF_Select(JLINKARM_TIF_SWD)  returns 0x00 (0003ms, 0182ms total)
+T20D0 000:405 JLINK_SetSpeed(5) (0001ms, 0183ms total)
+T20D0 000:407 JLINK_SetResetType(JLINKARM_RESET_TYPE_NORMAL)  returns JLINKARM_RESET_TYPE_NORMAL (0000ms, 0183ms total)
+T20D0 000:407 JLINK_Reset() >0x108 TIF> >0x108 TIF>STM32 (connect): Can not attach to CPU. Trying connect under reset. >0x108 TIF> >0x108 TIF>
+  ***** Error: STM32: Connecting to CPU via connect under reset failed. >0x108 TIF>Found SWD-DP with ID 0x8BD01477 >0x0D TIF> >0x28 TIF> >0x0D TIF> >0x28 TIF> >0x0D TIF> >0x28 TIF> >0x0D TIF> >0x28 TIF> >0x0D TIF> >0x21 TIF> >0x0D TIF> >0x28 TIF> >0x0D TIF> >0x28 TIF> >0x0D TIF> >0x28 TIF> >0x0D TIF> >0x21 TIF> >0x0D TIF> >0x21 TIF> >0x0D TIF> >0x28 TIF>
+ >0x0D TIF> >0x21 TIF> >0x0D TIF>STM32 (connect): Can not attach to CPU. Trying connect under reset. >0x108 TIF> >0x108 TIF>
+  ***** Error: STM32: Connecting to CPU via connect under reset failed.JLINK_GetId() >0x108 TIF> >0x108 TIF>STM32 (connect): Can not attach to CPU. Trying connect under reset. >0x108 TIF> >0x108 TIF>
+  ***** Error: STM32: Connecting to CPU via connect under reset failed. >0x108 TIF> >0x108 TIF>STM32 (connect): Can not attach to CPU. Trying connect under reset. >0x108 TIF>
+ >0x108 TIF>
+  ***** Error: STM32: Connecting to CPU via connect under reset failed.  returns 0x00000000 (1162ms, 2499ms total)
+T20D0 002:724 JLINK_GetId() >0x108 TIF>Found SWD-DP with ID 0x2BA01477 >0x0D TIF> >0x28 TIF> >0x0D TIF> >0x28 TIF> >0x0D TIF> >0x28 TIF> >0x0D TIF> >0x28 TIF> >0x0D TIF> >0x21 TIF> >0x0D TIF> >0x28 TIF> >0x0D TIF> >0x28 TIF> >0x0D TIF> >0x28 TIF> >0x0D TIF> >0x21 TIF> >0x0D TIF> >0x21 TIF>STM32 (connect): Can not attach to CPU. Trying connect under reset. >0x108 TIF> >0x108 TIF>
+  ***** Error: STM32: Connecting to CPU via connect under reset failed. >0x108 TIF> >0x108 TIF>
+STM32 (connect): Can not attach to CPU. Trying connect under reset. >0x108 TIF> >0x108 TIF>
+  ***** Error: STM32: Connecting to CPU via connect under reset failed.  returns 0x00000000 (1125ms, 3624ms total)
+T20D0 003:859 JLINK_GetFirmwareString(...) (0001ms, 3625ms total)
+
+                JLINK_Close()
