@@ -3,11 +3,11 @@
 <title>Static Call Graph - [F407ZE\F407ZE.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image F407ZE\F407ZE.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060422: Last Updated: Sun Apr 26 15:36:06 2020
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060422: Last Updated: Tue Apr 28 18:40:30 2020
 <BR><P>
-<H3>Maximum Stack Usage =       1816 bytes + Unknown(Cycles, Untraceable Function Pointers)</H3><H3>
+<H3>Maximum Stack Usage =       1776 bytes + Unknown(Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
-command_6 &rArr; command_17 &rArr; xQueueGenericSend &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
+result_parse_2 &rArr; command_18 &rArr; xQueueGenericSend &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
 <P>
 <H3>
 Mutually Recursive functions
@@ -387,6 +387,7 @@ Global Symbols
 <P><STRONG><a name="[13f]"></a>__aeabi_memcpy4</STRONG> (Thumb, 0 bytes, Stack size 0 bytes, memcpya.o(.text))
 <BR><BR>[Called By]<UL><LI><a href="#[13c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MX_FREERTOS_Init
 <LI><a href="#[181]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;modbus_send
+<LI><a href="#[6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_6
 <LI><a href="#[12]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_18
 <LI><a href="#[11]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_17
 <LI><a href="#[f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_15
@@ -460,6 +461,7 @@ Global Symbols
 <BR>[Calls]<UL><LI><a href="#[aa]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_double_epilogue
 </UL>
 <BR>[Called By]<UL><LI><a href="#[1c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;result_parse_2
+<LI><a href="#[6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_6
 <LI><a href="#[12]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_18
 <LI><a href="#[11]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_17
 <LI><a href="#[f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_15
@@ -512,6 +514,7 @@ Global Symbols
 
 <P><STRONG><a name="[172]"></a>__aeabi_cdrcmple</STRONG> (Thumb, 48 bytes, Stack size 0 bytes, cdrcmple.o(.text))
 <BR><BR>[Called By]<UL><LI><a href="#[1c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;result_parse_2
+<LI><a href="#[6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_6
 <LI><a href="#[12]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_18
 <LI><a href="#[11]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_17
 <LI><a href="#[f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_15
@@ -2271,7 +2274,6 @@ Global Symbols
 <LI><a href="#[13f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memcpy4
 </UL>
 <BR>[Called By]<UL><LI><a href="#[1c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;result_parse_2
-<LI><a href="#[6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_6
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> main.o(.data)
 </UL>
@@ -2351,12 +2353,15 @@ Global Symbols
 <P><STRONG><a name="[5]"></a>command_5</STRONG> (Thumb, 4 bytes, Stack size 0 bytes, main.o(i.command_5))
 <BR>[Address Reference Count : 1]<UL><LI> main.o(.data)
 </UL>
-<P><STRONG><a name="[6]"></a>command_6</STRONG> (Thumb, 248 bytes, Stack size 160 bytes, main.o(i.command_6))
-<BR><BR>[Stack]<UL><LI>Max Depth = 1816<LI>Call Chain = command_6 &rArr; command_17 &rArr; xQueueGenericSend &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
+<P><STRONG><a name="[6]"></a>command_6</STRONG> (Thumb, 868 bytes, Stack size 1616 bytes, main.o(i.command_6))
+<BR><BR>[Stack]<UL><LI>Max Depth = 1728<LI>Call Chain = command_6 &rArr; xQueueGenericSend &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
 </UL>
 <BR>[Calls]<UL><LI><a href="#[16f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueGenericSend
-<LI><a href="#[11]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_17
+<LI><a href="#[171]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;uxQueueSpacesAvailable
+<LI><a href="#[ab]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_i2d
+<LI><a href="#[172]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_cdrcmple
 <LI><a href="#[b4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__2printf
+<LI><a href="#[13f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memcpy4
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> main.o(.data)
 </UL>
@@ -2916,6 +2921,7 @@ Global Symbols
 <LI><a href="#[178]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;vPortEnterCritical
 </UL>
 <BR>[Called By]<UL><LI><a href="#[8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_8
+<LI><a href="#[6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_6
 <LI><a href="#[12]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_18
 <LI><a href="#[11]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_17
 <LI><a href="#[f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_15

@@ -293,7 +293,7 @@ void EXTI3_IRQHandler(void)
 void EXTI4_IRQHandler(void)
 {
   /* USER CODE BEGIN EXTI4_IRQn 0 */
-  if(__HAL_GPIO_EXTI_GET_IT(GPIO_PIN_5)!=RESET)
+  if(__HAL_GPIO_EXTI_GET_IT(GPIO_PIN_4)!=RESET)
 	{
 		//FALLING TRIGGER
 		motor_array[2].limit_sw[0].status=HAL_GPIO_ReadPin(motor_array[2].limit_sw[0].gpio_port,motor_array[2].limit_sw[0].pin_number);

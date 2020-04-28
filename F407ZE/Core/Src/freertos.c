@@ -1629,7 +1629,6 @@ void start_tk_master_order(void *argument)
 								tmp_command_id==2  ||
 								tmp_command_id==4  ||
 								tmp_command_id==5  ||
-								tmp_command_id==6  ||
 								tmp_command_id==10 ||
 								tmp_command_id==15 ||
 								tmp_command_id==16 ||
@@ -1643,6 +1642,7 @@ void start_tk_master_order(void *argument)
 								}
 								if(tmp_command_id==1  ||
 									 tmp_command_id==3  ||
+								   tmp_command_id==6  ||
 									 tmp_command_id==7  ||
 									 tmp_command_id==8  ||
 									 tmp_command_id==9  ||
