@@ -614,11 +614,35 @@ int command_0(uint8_t* data,uint32_t para)
 	GPIO_PinState status;
 	for(i=0;i<MAX_MOTOR_NUMBER+1;i++)
 	{
+		if(i==1)
+		{
+			continue;
+		}
+		/*
 		//各电机GPIO使能输出低电平
 		HAL_GPIO_WritePin(motor_array[i].gpio_output[ENABLE_MOTOR].gpio_port,motor_array[i].gpio_output[ENABLE_MOTOR].pin_number,GPIO_PIN_RESET);
 		status=HAL_GPIO_ReadPin(motor_array[i].gpio_output[ENABLE_MOTOR].gpio_port,motor_array[i].gpio_output[ENABLE_MOTOR].pin_number);
-		if(status!=GPIO_PIN_RESET)
+		*/
+		//发送停止指令方式
+		QUEUE_STRUCT tmp;
+		tmp.property=1;                           //485 send
+		tmp.modbus_addr=0;                       //电机号需要根据命令中的电机号赋值
+		tmp.modbus_func=0x10;                    //写多个寄存器
+		tmp.modbus_addr_h=(uint8_t)(2040>>8);
+		tmp.modbus_addr_l=(uint8_t)(2040&0xFF);        //写使能寄存器
+		tmp.modbus_data_len_h=0x00;
+		tmp.modbus_data_len_l=0x02;
+		tmp.modbus_data_byte=0x04;
+		tmp.modbus_data_1=0x08;                      //使能寄存器写2048
+		tmp.modbus_data_2=0x00;                      
+		tmp.modbus_data_3=0x00;                      
+		tmp.modbus_data_4=0x00;
+		BaseType_t status_q = xQueueSendToBack(send_queueHandle, &tmp, 0);
+		if(status_q!=pdPASS)
 		{
+			#ifdef DEBUG_OUTPUT
+			printf("%s\n","queue overflow");
+			#endif
 			if(para==1)
 			{
 				QUEUE_STRUCT tmp;
@@ -631,12 +655,6 @@ int command_0(uint8_t* data,uint32_t para)
 				tmp.can_if_return=0x00;
 				tmp.length=4;
 				return_error(tmp.data,ERROR_COMMAND_0_FAIL);
-				/*
-				tmp.data[0]=0x00;
-				tmp.data[1]=0x00;
-				tmp.data[2]=0x00;
-				tmp.data[3]=ERROR_COMMAND_0_FAIL;
-				*/
 			  BaseType_t status_q = xQueueSendToBack(send_queueHandle, &tmp, 0);
 				if(status_q!=pdPASS)
 				{
@@ -654,6 +672,45 @@ int command_0(uint8_t* data,uint32_t para)
 			}
 			return ERROR_COMMAND_0_FAIL;
 		}
+		else
+		{
+			#ifdef DEBUG_OUTPUT
+			printf("%s\n","send command 0 error to queue already");
+			#endif
+		}
+		/*
+		if(status!=GPIO_PIN_RESET)
+		{
+			if(para==1)
+			{
+				QUEUE_STRUCT tmp;
+        tmp.can_command=0x00;          //停止指令
+        tmp.can_if_ack=0x01;           //需要ACK
+				tmp.can_source=0x03;           //本模块
+				tmp.can_target=0x00;
+				tmp.can_priority=0x03;         //命令结束返回帧
+				tmp.can_if_last=0x00;
+				tmp.can_if_return=0x00;
+				tmp.length=4;
+				return_error(tmp.data,ERROR_COMMAND_0_FAIL);
+			  BaseType_t status_q = xQueueSendToBack(send_queueHandle, &tmp, 0);
+				if(status_q!=pdPASS)
+				{
+					#ifdef DEBUG_OUTPUT
+					printf("%s\n","queue overflow");
+					#endif
+				}
+				else
+				{
+					#ifdef DEBUG_OUTPUT
+					printf("%s\n","send command 0 error to queue already");
+					#endif
+				}
+				;
+			}
+			return ERROR_COMMAND_0_FAIL;
+		}
+		*/
 	}
 	if(para==1)
 	{

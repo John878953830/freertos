@@ -3,7 +3,7 @@
 <title>Static Call Graph - [F407ZE\F407ZE.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image F407ZE\F407ZE.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060422: Last Updated: Wed Apr 29 09:47:13 2020
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060422: Last Updated: Wed Apr 29 11:36:23 2020
 <BR><P>
 <H3>Maximum Stack Usage =       2120 bytes + Unknown(Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -1031,7 +1031,6 @@ Global Symbols
 <BR><BR>[Called By]<UL><LI><a href="#[1b4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;switchGet
 <LI><a href="#[140]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;motor_array_init
 <LI><a href="#[1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_1
-<LI><a href="#[0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_0
 <LI><a href="#[43]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;EXTI9_5_IRQHandler
 <LI><a href="#[36]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;EXTI4_IRQHandler
 <LI><a href="#[35]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;EXTI3_IRQHandler
@@ -1051,7 +1050,6 @@ Global Symbols
 <LI><a href="#[181]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;modbus_send
 <LI><a href="#[7d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 <LI><a href="#[1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_1
-<LI><a href="#[0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_0
 <LI><a href="#[95]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;start_tk_result_process_send
 <LI><a href="#[98]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;start_tk_result_process_rece_5_sendover
 <LI><a href="#[96]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;start_tk_result_process_rece_5
@@ -2175,12 +2173,10 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[13c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MX_FREERTOS_Init
 </UL>
 
-<P><STRONG><a name="[0]"></a>command_0</STRONG> (Thumb, 260 bytes, Stack size 104 bytes, main.o(i.command_0))
-<BR><BR>[Stack]<UL><LI>Max Depth = 216<LI>Call Chain = command_0 &rArr; xQueueGenericSend &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
+<P><STRONG><a name="[0]"></a>command_0</STRONG> (Thumb, 320 bytes, Stack size 176 bytes, main.o(i.command_0))
+<BR><BR>[Stack]<UL><LI>Max Depth = 288<LI>Call Chain = command_0 &rArr; xQueueGenericSend &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
 </UL>
 <BR>[Calls]<UL><LI><a href="#[16f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueGenericSend
-<LI><a href="#[146]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_GPIO_WritePin
-<LI><a href="#[b7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_GPIO_ReadPin
 <LI><a href="#[b4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__2printf
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> main.o(.data)
