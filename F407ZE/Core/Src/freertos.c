@@ -1030,6 +1030,7 @@ void StartDefaultTask(void *argument)
 		if(notify_use!=0)
 		{
 			HAL_GPIO_TogglePin(GPIOB,GPIO_PIN_15);
+			time_counter++;
 			notify_use=0;
 			//QUEUE_STRUCT tmp_5;
 			//modbus_send_sub_5(tmp_5);
@@ -1608,17 +1609,44 @@ void start_tk_master_order(void *argument)
 								if(tmp_source==0x01 && tmp_command_id==0x0B)
 								{
 									//填充碰撞检测结构体
-									uint8_t i=0;
-									for(i=0;i<4;i++)
+									if(motor_array[0].conflict_value.time==0)
 									{
-										if(i==1)
-											continue;
-										uint8_t j;
-										for(j=0;j<motor_array[i].conflict_value.conflict_counter;j++)
+										uint8_t i=0;
+										for(i=0;i<4;i++)
 										{
-											motor_array[i].conflict_value.conflict_status[j]=(id.data[3]>>motor_array[i].conflict_value.conflict_number[j])&0x01;
+											if(i==1)
+												continue;
+											motor_array[i].conflict_value.time=time_counter;
+											uint8_t j;
+											for(j=0;j<motor_array[i].conflict_value.conflict_counter;j++)
+											{
+												motor_array[i].conflict_value.conflict_status[j]=(id.data[3]>>motor_array[i].conflict_value.conflict_number[j])&0x01;
+											}
 										}
 									}
+									else
+									{
+										if(__fabs(motor_array[0].conflict_value.time - time_counter)>3)
+										{
+											//广播失效，发送错误,待完成
+										}
+										else
+										{
+											uint8_t i=0;
+											for(i=0;i<4;i++)
+											{
+												if(i==1)
+													continue;
+												motor_array[i].conflict_value.time=time_counter;
+												uint8_t j;
+												for(j=0;j<motor_array[i].conflict_value.conflict_counter;j++)
+												{
+													motor_array[i].conflict_value.conflict_status[j]=(id.data[3]>>motor_array[i].conflict_value.conflict_number[j])&0x01;
+												}
+											}
+										}
+									}
+									
 								}
 							}
 							else

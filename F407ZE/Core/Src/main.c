@@ -77,6 +77,8 @@ uint8_t cmd6_stage=0;
 
 uint8_t motor_communicate_flag[5]={0,0,0,0,0};           //电机通信错误标志表， 0 正常， 1：通信错误
 uint8_t motor_communicate_counter=0;                     //重复计数，确保只点亮一次PD10
+
+uint32_t time_counter=0;                                 //时间计数值，在default任务中增加，单位秒，其实取决于default任务的调用间隔        
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -448,6 +450,10 @@ uint8_t motor_array_init(void)
 	motor_array[3].limit_sw[2].gpio_port=GPIOF;
 	motor_array[3].limit_sw[2].status=HAL_GPIO_ReadPin(motor_array[3].limit_sw[2].gpio_port,motor_array[3].limit_sw[2].pin_number);
 	
+	//初始化碰撞检测计时值
+	motor_array[0].conflict_value.time=0;
+	motor_array[2].conflict_value.time=0;
+	motor_array[3].conflict_value.time=0;
 	
 	return 0;
 }
@@ -2273,7 +2279,7 @@ int command_11(uint8_t* data,uint32_t para)
 	if(motor_array[0].position_value.if_tp_already==0x01)
 	{
 		//碰撞检测判定，不管是否需要返回帧，强制发送
-		if(motor_array[data[0] - 1].conflict_value.if_conflict==0x01)
+		if(motor_array[1 - 1].conflict_value.if_conflict==0x01)
 		{
 			QUEUE_STRUCT tmp;
 			tmp.property=0x00;             //can send
@@ -2359,7 +2365,7 @@ int command_11(uint8_t* data,uint32_t para)
 		command_seq_l1[3].modbus_addr=0x01;
 		
 		//填充动作目标
-		if(data[0]==0x00)//关闭天窗
+		if(data[0]==0x00)
 		{
 			command_seq_l1[1].modbus_data_1=(uint8_t)((motor_array[0].position_value.tp[1] >> 8) & 0xFF);
 			command_seq_l1[1].modbus_data_2=(uint8_t)((motor_array[0].position_value.tp[1]) & 0xFF);
@@ -2894,7 +2900,7 @@ int command_13(uint8_t* data,uint32_t para)
 	if(motor_array[2].position_value.if_tp_already==0x01)
 	{
 		//碰撞检测判定，不管是否需要返回帧，强制发送
-		if(motor_array[data[0] - 1].conflict_value.if_conflict==0x01)
+		if(motor_array[2 - 1].conflict_value.if_conflict==0x01)
 		{
 			QUEUE_STRUCT tmp;
 			tmp.property=0x00;             //can send
@@ -2931,10 +2937,11 @@ int command_13(uint8_t* data,uint32_t para)
 		//检测当前位置是否为目标位置
 		if(data[0]==0x00 || data[0]==0x01)
 		{
-			if(__fabs(motor_array[2].position_value.tp[1+data[0]] - motor_array[2].position_value.current_position) < COMPLETE_JUDGE)
+			if((data[0]==0x00 && __fabs(motor_array[2].position_value.tp[1] - motor_array[2].position_value.current_position) < COMPLETE_JUDGE)
+				 || (data[0]==0x01 && __fabs(motor_array[2].position_value.tp[0] - motor_array[2].position_value.current_position) < COMPLETE_JUDGE))
 			{
 				//当前位置已经处于误差限中
-				if(if_return == 0x01)
+				if(if_return == 0x01 && motor_array[2].command.command_union!=0x14)
 				{
 					QUEUE_STRUCT tmp;
 					tmp.property=0x00;             //can send
@@ -2967,6 +2974,11 @@ int command_13(uint8_t* data,uint32_t para)
 						#endif
 					}
 				}
+				if(motor_array[2].command.command_union==0x14)
+				{
+					motor_array[2].command.command_union=0;
+					motor_array[2].command.command_status=2;
+				}
 				return 0;
 			}
 		}
@@ -2979,7 +2991,7 @@ int command_13(uint8_t* data,uint32_t para)
 		command_seq_l1[3].modbus_addr=0x03;
 		
 		//填充动作目标
-		if(data[0]==0x00)//关闭天窗
+		if(data[0]==0x00)
 		{
 			command_seq_l1[1].modbus_data_1=(uint8_t)((motor_array[2].position_value.tp[1] >> 8) & 0xFF);
 			command_seq_l1[1].modbus_data_2=(uint8_t)((motor_array[2].position_value.tp[1]) & 0xFF);
@@ -2988,10 +3000,81 @@ int command_13(uint8_t* data,uint32_t para)
 		}
 		if(data[0]==0x01)
 		{
-			command_seq_l1[1].modbus_data_1=(uint8_t)((motor_array[2].position_value.tp[2] >> 8) & 0xFF);
-		  command_seq_l1[1].modbus_data_2=(uint8_t)((motor_array[2].position_value.tp[2]) & 0xFF);
-		  command_seq_l1[1].modbus_data_3=(uint8_t)((motor_array[2].position_value.tp[2] >> 24) & 0xFF);
-		  command_seq_l1[1].modbus_data_4=(uint8_t)((motor_array[2].position_value.tp[2] >> 16) & 0xFF);
+			if(__fabs(motor_array[2].position_value.tp[2] - motor_array[2].position_value.current_position) < COMPLETE_JUDGE)
+			{
+				//发送返回帧
+				QUEUE_STRUCT frame_return;
+				frame_return.property=0x00;             //can send
+				frame_return.can_command=motor_array[2].command.command_id;          
+				frame_return.can_if_ack=0x01;           //需要ACK
+				frame_return.can_source=0x03;           //本模块
+				frame_return.can_target=0x00;
+				frame_return.can_priority=0x03;         //命令结束返回帧
+				frame_return.can_if_last=0x00;          //无需拼接
+				frame_return.can_if_return=0x00;        //无需返回
+				frame_return.length=4;
+				//已到达45度位置，判定并发送下一段指令
+				//需要旋转
+				if(grating_value.if_have_target==0x04)
+				{
+					return_error(frame_return.data,ERROR_NEED_ROTATE);
+					//发送执行完成指令
+					taskENTER_CRITICAL();
+					portBASE_TYPE status = xQueueSendToBack(send_queueHandle, &frame_return, 0);
+					if(status!=pdPASS)
+					{
+						#ifdef DEBUG_OUTPUT
+						printf("%s\n","queue overflow");
+						#endif
+					}
+					else
+					{
+						#ifdef DEBUG_OUTPUT
+						printf("%s\n","send command 7 error to queue already");
+						#endif
+					}
+					taskEXIT_CRITICAL();
+					return ERROR_NEED_ROTATE;
+				}
+				//有其他物体
+				if(grating_value.if_have_target==0x02)
+				{
+					return_error(frame_return.data,ERROR_OTHER_THING);
+					//发送执行完成指令
+					taskENTER_CRITICAL();
+					portBASE_TYPE status = xQueueSendToBack(send_queueHandle, &frame_return, 0);
+					if(status!=pdPASS)
+					{
+						#ifdef DEBUG_OUTPUT
+						printf("%s\n","queue overflow");
+						#endif
+					}
+					else
+					{
+						#ifdef DEBUG_OUTPUT
+						printf("%s\n","send command 7 error to queue already");
+						#endif
+					}
+					taskEXIT_CRITICAL();
+					return ERROR_OTHER_THING;
+				}
+				//不需要旋转
+				if(grating_value.if_have_target==0x01)
+				{
+					//填充动作目标
+					command_seq_l1[1].modbus_data_1=(uint8_t)((motor_array[2].position_value.tp[0] >> 8) & 0xFF);
+					command_seq_l1[1].modbus_data_2=(uint8_t)((motor_array[2].position_value.tp[0]) & 0xFF);
+					command_seq_l1[1].modbus_data_3=(uint8_t)((motor_array[2].position_value.tp[0] >> 24) & 0xFF);
+					command_seq_l1[1].modbus_data_4=(uint8_t)((motor_array[2].position_value.tp[0] >> 16) & 0xFF);
+				}
+			}
+			else
+			{
+				command_seq_l1[1].modbus_data_1=(uint8_t)((motor_array[2].position_value.tp[2] >> 8) & 0xFF);
+				command_seq_l1[1].modbus_data_2=(uint8_t)((motor_array[2].position_value.tp[2]) & 0xFF);
+				command_seq_l1[1].modbus_data_3=(uint8_t)((motor_array[2].position_value.tp[2] >> 24) & 0xFF);
+				command_seq_l1[1].modbus_data_4=(uint8_t)((motor_array[2].position_value.tp[2] >> 16) & 0xFF);
+			}
 		}
 			
 		
@@ -3210,7 +3293,7 @@ int command_14(uint8_t* data,uint32_t para)
 	if(motor_array[3].position_value.if_tp_already==0x01)
 	{
 		//碰撞检测判定，不管是否需要返回帧，强制发送
-		if(motor_array[data[0] - 1].conflict_value.if_conflict==0x01)
+		if(motor_array[3 - 1].conflict_value.if_conflict==0x01)
 		{
 			QUEUE_STRUCT tmp;
 			tmp.property=0x00;             //can send
@@ -3247,7 +3330,8 @@ int command_14(uint8_t* data,uint32_t para)
 		//检测当前位置是否为目标位置
 		if(data[0]==0x00 || data[0]==0x01)
 		{
-			if(__fabs(motor_array[3].position_value.tp[1+data[0]] - motor_array[3].position_value.current_position) < COMPLETE_JUDGE)
+			if((data[0]==0x00 && __fabs(motor_array[3].position_value.tp[1] - motor_array[3].position_value.current_position) < COMPLETE_JUDGE)
+				 || (data[0]==0x01 && __fabs(motor_array[3].position_value.tp[0] - motor_array[3].position_value.current_position) < COMPLETE_JUDGE))
 			{
 				//当前位置已经处于误差限中
 				if(if_return == 0x01)
@@ -3295,7 +3379,7 @@ int command_14(uint8_t* data,uint32_t para)
 		command_seq_l1[3].modbus_addr=0x04;
 		
 		//填充动作目标
-		if(data[0]==0x00)//关闭天窗
+		if(data[0]==0x00)
 		{
 			command_seq_l1[1].modbus_data_1=(uint8_t)((motor_array[3].position_value.tp[1] >> 8) & 0xFF);
 			command_seq_l1[1].modbus_data_2=(uint8_t)((motor_array[3].position_value.tp[1]) & 0xFF);
@@ -3304,10 +3388,81 @@ int command_14(uint8_t* data,uint32_t para)
 		}
 		if(data[0]==0x01)
 		{
-			command_seq_l1[1].modbus_data_1=(uint8_t)((motor_array[3].position_value.tp[2] >> 8) & 0xFF);
-		  command_seq_l1[1].modbus_data_2=(uint8_t)((motor_array[3].position_value.tp[2]) & 0xFF);
-		  command_seq_l1[1].modbus_data_3=(uint8_t)((motor_array[3].position_value.tp[2] >> 24) & 0xFF);
-		  command_seq_l1[1].modbus_data_4=(uint8_t)((motor_array[3].position_value.tp[2] >> 16) & 0xFF);
+			if(__fabs(motor_array[3].position_value.tp[2] - motor_array[3].position_value.current_position) < COMPLETE_JUDGE)
+			{
+				//发送返回帧
+				QUEUE_STRUCT frame_return;
+				frame_return.property=0x00;             //can send
+				frame_return.can_command=motor_array[2].command.command_id;          
+				frame_return.can_if_ack=0x01;           //需要ACK
+				frame_return.can_source=0x03;           //本模块
+				frame_return.can_target=0x00;
+				frame_return.can_priority=0x03;         //命令结束返回帧
+				frame_return.can_if_last=0x00;          //无需拼接
+				frame_return.can_if_return=0x00;        //无需返回
+				frame_return.length=4;
+				//已到达45度位置，判定并发送下一段指令
+				//需要旋转
+				if(grating_value.if_have_target==0x04)
+				{
+					return_error(frame_return.data,ERROR_NEED_ROTATE);
+					//发送执行完成指令
+					taskENTER_CRITICAL();
+					portBASE_TYPE status = xQueueSendToBack(send_queueHandle, &frame_return, 0);
+					if(status!=pdPASS)
+					{
+						#ifdef DEBUG_OUTPUT
+						printf("%s\n","queue overflow");
+						#endif
+					}
+					else
+					{
+						#ifdef DEBUG_OUTPUT
+						printf("%s\n","send command 7 error to queue already");
+						#endif
+					}
+					taskEXIT_CRITICAL();
+					return ERROR_NEED_ROTATE;
+				}
+				//有其他物体
+				if(grating_value.if_have_target==0x02)
+				{
+					return_error(frame_return.data,ERROR_OTHER_THING);
+					//发送执行完成指令
+					taskENTER_CRITICAL();
+					portBASE_TYPE status = xQueueSendToBack(send_queueHandle, &frame_return, 0);
+					if(status!=pdPASS)
+					{
+						#ifdef DEBUG_OUTPUT
+						printf("%s\n","queue overflow");
+						#endif
+					}
+					else
+					{
+						#ifdef DEBUG_OUTPUT
+						printf("%s\n","send command 7 error to queue already");
+						#endif
+					}
+					taskEXIT_CRITICAL();
+					return ERROR_OTHER_THING;
+				}
+				//不需要旋转
+				if(grating_value.if_have_target==0x01)
+				{
+					//填充动作目标
+					command_seq_l1[1].modbus_data_1=(uint8_t)((motor_array[3].position_value.tp[0] >> 8) & 0xFF);
+					command_seq_l1[1].modbus_data_2=(uint8_t)((motor_array[3].position_value.tp[0]) & 0xFF);
+					command_seq_l1[1].modbus_data_3=(uint8_t)((motor_array[3].position_value.tp[0] >> 24) & 0xFF);
+					command_seq_l1[1].modbus_data_4=(uint8_t)((motor_array[3].position_value.tp[0] >> 16) & 0xFF);
+				}
+			}
+			else
+			{
+				command_seq_l1[1].modbus_data_1=(uint8_t)((motor_array[3].position_value.tp[2] >> 8) & 0xFF);
+				command_seq_l1[1].modbus_data_2=(uint8_t)((motor_array[3].position_value.tp[2]) & 0xFF);
+				command_seq_l1[1].modbus_data_3=(uint8_t)((motor_array[3].position_value.tp[2] >> 24) & 0xFF);
+				command_seq_l1[1].modbus_data_4=(uint8_t)((motor_array[3].position_value.tp[2] >> 16) & 0xFF);
+			}
 		}
 			
 		
@@ -4992,11 +5147,12 @@ int command_20(uint8_t* data,uint32_t para)
 		}
 		return ERROR_COMMAND_CONFLICT_DETECT;
 	}
-	command_13(data,para);
-	command_14(data,para);
 	//填充命令属性
 	motor_array[2].command.command_union=0x14;
 	motor_array[3].command.command_union=0x14;
+	command_13(data,para);
+	command_14(data,para);
+	
 	return 0;
 }
 int command_21(uint8_t* data,uint32_t para)
@@ -5085,36 +5241,452 @@ void result_parse_2(uint8_t* data, uint8_t num)
 					frame_return.length=4;
 					
 					return_error(frame_return.data,RETURN_OK);
-					if(motor_array[num].command.command_id==0x08 || 
-						 motor_array[num].command.command_id==0x08 ||
-					   motor_array[num].command.command_id==0x08)
+					if(motor_array[num].command.command_id==0x0D ||
+					   motor_array[num].command.command_id==0x0E)
 					{
+						//需要旋转
 						if(grating_value.if_have_target==0x04)
 						{
 							return_error(frame_return.data,ERROR_NEED_ROTATE);
+							goto SEND_ERROR;
 						}
-					}
-					/*
-					frame_return.data[0]=0xFF;              //错误码，0标识正常
-					frame_return.data[1]=0xFF;              //执行结果， 1代表已完成
-					frame_return.data[2]=0xFF;               //电机号
-					frame_return.data[3]=0xFE;              //保留
-					*/
-					taskENTER_CRITICAL();
-					portBASE_TYPE status = xQueueSendToBack(send_queueHandle, &frame_return, 0);
-					if(status!=pdPASS)
-					{
-						#ifdef DEBUG_OUTPUT
-						printf("%s\n","queue overflow");
-						#endif
+						//有其他物体
+						if(grating_value.if_have_target==0x02)
+						{
+							return_error(frame_return.data,ERROR_OTHER_THING);
+							goto SEND_ERROR;
+						}
+						//不需要旋转
+						if(motor_array[num].command.command_id==0x0D || motor_array[num].command.command_id==0x0E)
+						{
+							if(grating_value.if_have_target==0x01)
+							{
+								if(__fabs(motor_array[num].position_value.current_position-motor_array[num].position_value.tp[0])>COMPLETE_JUDGE)
+								{
+									motor_array[num].command.command_status=0x01;
+									//发送末段动作， cmd 13， cmd14
+									if(motor_array[num].command.command_id==0x0D)
+									{
+										//发送cmd13末段目标
+										//声明动作序列
+										QUEUE_STRUCT command_seq_l1[4]=
+										{
+											{
+												.property=1,                          //485 send
+												.modbus_addr=0,                       //电机号需要根据命令中的电机号赋值
+												.modbus_func=0x03,                    //读多个寄存器
+												.modbus_addr_h=(uint8_t)(4004>>8),    //读当前脉冲位置
+												.modbus_addr_l=(uint8_t)(4004&0xFF),  
+												.modbus_data_len_h=0x00,
+												.modbus_data_len_l=0x02,
+												.modbus_property=1,
+											},
+											{
+												.property=1,                            //485 send
+												.modbus_addr=0,                       //电机号需要根据命令中的电机号赋值
+												.modbus_func=0x10,                    //写多个寄存器
+												.modbus_addr_h=(uint8_t)(3202>>8),
+												.modbus_addr_l=(uint8_t)(3202&0xFF),        //写目标位置
+												.modbus_data_len_h=0x00,
+												.modbus_data_len_l=0x02,
+												.modbus_data_byte=0x04,
+												.modbus_data_1=0,                      //先赋值为命令中的数值，当前位置读取成功后修改值
+												.modbus_data_2=0,                      //先赋值为命令中的数值，当前位置读取成功后修改值
+												.modbus_data_3=0,                      //先赋值为命令中的数值，当前位置读取成功后修改值
+												.modbus_data_4=0,                      //先赋值为命令中的数值，当前位置读取成功后修改值
+											},
+											{
+												.property=1,                            //485 send
+												.modbus_addr=0,                       //电机号需要根据命令中的电机号赋值
+												.modbus_func=0x10,                    //写多个寄存器
+												.modbus_addr_h=(uint8_t)(2040>>8),
+												.modbus_addr_l=(uint8_t)(2040&0xFF),        //写使能寄存器
+												.modbus_data_len_h=0x00,
+												.modbus_data_len_l=0x02,
+												.modbus_data_byte=0x04,
+												.modbus_data_1=0xFF,                      //使能寄存器全部写为FF
+												.modbus_data_2=0xFF,                      
+												.modbus_data_3=0xFF,                      
+												.modbus_data_4=0xFF,                      
+											},
+											{
+												.property=1,                            //485 send
+												.modbus_addr=0,                       //电机号需要根据命令中的电机号赋值
+												.modbus_func=0x10,                    //写多个寄存器
+												.modbus_addr_h=(uint8_t)(2040>>8),
+												.modbus_addr_l=(uint8_t)(2040&0xFF),        //写使能寄存器
+												.modbus_data_len_h=0x00,
+												.modbus_data_len_l=0x02,
+												.modbus_data_byte=0x04,
+												.modbus_data_1=0x00,                      //使能寄存器全部写为00
+												.modbus_data_2=0x00,                      
+												.modbus_data_3=0x00,                      
+												.modbus_data_4=0x00,
+											},
+										};
+										uint8_t if_return=1;
+										//碰撞检测判定，不管是否需要返回帧，强制发送
+										if(motor_array[num].conflict_value.if_conflict==0x01)
+										{
+											QUEUE_STRUCT tmp;
+											tmp.property=0x00;             //can send
+											tmp.can_command=0x0D;          //停止指令
+											tmp.can_if_ack=0x01;           //需要ACK
+											tmp.can_source=0x03;           //本模块
+											tmp.can_target=0x00;
+											tmp.can_priority=0x03;         //命令结束返回帧
+											tmp.can_if_last=0x00;
+											tmp.can_if_return=0x00;
+											tmp.length=4;
+											return_error(tmp.data,ERROR_COMMAND_CONFLICT_DETECT);
+											/*
+											tmp.data[0]=0x00;
+											tmp.data[1]=0x00;
+											tmp.data[2]=0x00;
+											tmp.data[3]=ERROR_COMMAND_8_FAIL;
+											*/
+											portBASE_TYPE status = xQueueSendToBack(send_queueHandle, &tmp, 0);
+											if(status!=pdPASS)
+											{
+												#ifdef DEBUG_OUTPUT
+												printf("%s\n","queue overflow");
+												#endif
+											}
+											else
+											{
+												#ifdef DEBUG_OUTPUT
+												printf("%s\n","send command 7 error to queue already");
+												#endif
+											}
+										}
+										else
+										{
+											//发送动作序列
+											//填充序列
+											command_seq_l1[0].can_command=0x0D;
+											command_seq_l1[0].modbus_addr=0x03;           //地址赋值为3号，前后夹紧电机
+											command_seq_l1[1].modbus_addr=0x03;
+											command_seq_l1[2].modbus_addr=0x03;
+											command_seq_l1[3].modbus_addr=0x03;
+											
+											//填充动作目标
+											command_seq_l1[1].modbus_data_1=(uint8_t)((motor_array[2].position_value.tp[0] >> 8) & 0xFF);
+											command_seq_l1[1].modbus_data_2=(uint8_t)((motor_array[2].position_value.tp[0]) & 0xFF);
+											command_seq_l1[1].modbus_data_3=(uint8_t)((motor_array[2].position_value.tp[0] >> 24) & 0xFF);
+											command_seq_l1[1].modbus_data_4=(uint8_t)((motor_array[2].position_value.tp[0] >> 16) & 0xFF);
+												
+											
+											//填充电机的命令结构体
+											motor_array[2].command.command_id=0x0D;           //命令id填充为8
+											motor_array[2].command.command_status=0x01;       //命令执行中
+											motor_array[2].command.if_return=if_return;       //执行完成是否需要回复帧
+											
+											
+											//动作序列压入队列
+											//获取队列中的空闲位置数量
+											uint32_t space_left=uxQueueSpacesAvailable(send_queueHandle);
+											if(space_left<4)
+											{
+												//发送队列已满，直接返回错误,未完成
+												;
+											}
+											else
+											{
+												//压入发送队列
+												portBASE_TYPE status = xQueueSendToBack(send_queueHandle, &command_seq_l1[0], 0);
+												if(status!=pdPASS)
+												{
+													#ifdef DEBUG_OUTPUT
+													printf("%s\n","queue overflow");
+													#endif
+												}
+												else
+												{
+													#ifdef DEBUG_OUTPUT
+													printf("%s\n","send command 8 error to queue already");
+													#endif
+												}
+
+												status = xQueueSendToBack(send_queueHandle, &command_seq_l1[1], 0);
+												if(status!=pdPASS)
+												{
+													#ifdef DEBUG_OUTPUT
+													printf("%s\n","queue overflow");
+													#endif
+												}
+												else
+												{
+													#ifdef DEBUG_OUTPUT
+													printf("%s\n","send command 8 error to queue already");
+													#endif
+												}
+												
+												status = xQueueSendToBack(send_queueHandle, &command_seq_l1[2], 0);
+												if(status!=pdPASS)
+												{
+													#ifdef DEBUG_OUTPUT
+													printf("%s\n","queue overflow");
+													#endif
+												}
+												else
+												{
+													#ifdef DEBUG_OUTPUT
+													printf("%s\n","send command 8 error to queue already");
+													#endif
+												}
+												
+												status = xQueueSendToBack(send_queueHandle, &command_seq_l1[3], 0);
+												if(status!=pdPASS)
+												{
+													#ifdef DEBUG_OUTPUT
+													printf("%s\n","queue overflow");
+													#endif
+												}
+												else
+												{
+													#ifdef DEBUG_OUTPUT
+													printf("%s\n","send command 8 error to queue already");
+													#endif
+												}
+											}
+										}
+									}
+									if(motor_array[num].command.command_id==0x0E)
+									{
+										//发送cmd14末段目标
+										//声明动作序列
+										QUEUE_STRUCT command_seq_l1[4]=
+										{
+											{
+												.property=1,                          //485 send
+												.modbus_addr=0,                       //电机号需要根据命令中的电机号赋值
+												.modbus_func=0x03,                    //读多个寄存器
+												.modbus_addr_h=(uint8_t)(4004>>8),    //读当前脉冲位置
+												.modbus_addr_l=(uint8_t)(4004&0xFF),  
+												.modbus_data_len_h=0x00,
+												.modbus_data_len_l=0x02,
+												.modbus_property=1,
+											},
+											{
+												.property=1,                            //485 send
+												.modbus_addr=0,                       //电机号需要根据命令中的电机号赋值
+												.modbus_func=0x10,                    //写多个寄存器
+												.modbus_addr_h=(uint8_t)(3202>>8),
+												.modbus_addr_l=(uint8_t)(3202&0xFF),        //写目标位置
+												.modbus_data_len_h=0x00,
+												.modbus_data_len_l=0x02,
+												.modbus_data_byte=0x04,
+												.modbus_data_1=0,                      //先赋值为命令中的数值，当前位置读取成功后修改值
+												.modbus_data_2=0,                      //先赋值为命令中的数值，当前位置读取成功后修改值
+												.modbus_data_3=0,                      //先赋值为命令中的数值，当前位置读取成功后修改值
+												.modbus_data_4=0,                      //先赋值为命令中的数值，当前位置读取成功后修改值
+											},
+											{
+												.property=1,                            //485 send
+												.modbus_addr=0,                       //电机号需要根据命令中的电机号赋值
+												.modbus_func=0x10,                    //写多个寄存器
+												.modbus_addr_h=(uint8_t)(2040>>8),
+												.modbus_addr_l=(uint8_t)(2040&0xFF),        //写使能寄存器
+												.modbus_data_len_h=0x00,
+												.modbus_data_len_l=0x02,
+												.modbus_data_byte=0x04,
+												.modbus_data_1=0xFF,                      //使能寄存器全部写为FF
+												.modbus_data_2=0xFF,                      
+												.modbus_data_3=0xFF,                      
+												.modbus_data_4=0xFF,                      
+											},
+											{
+												.property=1,                            //485 send
+												.modbus_addr=0,                       //电机号需要根据命令中的电机号赋值
+												.modbus_func=0x10,                    //写多个寄存器
+												.modbus_addr_h=(uint8_t)(2040>>8),
+												.modbus_addr_l=(uint8_t)(2040&0xFF),        //写使能寄存器
+												.modbus_data_len_h=0x00,
+												.modbus_data_len_l=0x02,
+												.modbus_data_byte=0x04,
+												.modbus_data_1=0x00,                      //使能寄存器全部写为00
+												.modbus_data_2=0x00,                      
+												.modbus_data_3=0x00,                      
+												.modbus_data_4=0x00,
+											},
+										};
+										uint8_t if_return=1;
+										//碰撞检测判定，不管是否需要返回帧，强制发送
+										if(motor_array[num].conflict_value.if_conflict==0x01)
+										{
+											QUEUE_STRUCT tmp;
+											tmp.property=0x00;             //can send
+											tmp.can_command=0x0E;          //停止指令
+											tmp.can_if_ack=0x01;           //需要ACK
+											tmp.can_source=0x03;           //本模块
+											tmp.can_target=0x00;
+											tmp.can_priority=0x03;         //命令结束返回帧
+											tmp.can_if_last=0x00;
+											tmp.can_if_return=0x00;
+											tmp.length=4;
+											return_error(tmp.data,ERROR_COMMAND_CONFLICT_DETECT);
+											/*
+											tmp.data[0]=0x00;
+											tmp.data[1]=0x00;
+											tmp.data[2]=0x00;
+											tmp.data[3]=ERROR_COMMAND_8_FAIL;
+											*/
+											portBASE_TYPE status = xQueueSendToBack(send_queueHandle, &tmp, 0);
+											if(status!=pdPASS)
+											{
+												#ifdef DEBUG_OUTPUT
+												printf("%s\n","queue overflow");
+												#endif
+											}
+											else
+											{
+												#ifdef DEBUG_OUTPUT
+												printf("%s\n","send command 7 error to queue already");
+												#endif
+											}
+										}
+										else
+										{
+											//发送动作序列
+											//填充序列
+											command_seq_l1[0].can_command=0x0E;
+											command_seq_l1[0].modbus_addr=0x04;           //地址赋值为4号，左右夹紧电机
+											command_seq_l1[1].modbus_addr=0x04;
+											command_seq_l1[2].modbus_addr=0x04;
+											command_seq_l1[3].modbus_addr=0x04;
+											
+											//填充动作目标
+											command_seq_l1[1].modbus_data_1=(uint8_t)((motor_array[3].position_value.tp[0] >> 8) & 0xFF);
+											command_seq_l1[1].modbus_data_2=(uint8_t)((motor_array[3].position_value.tp[0]) & 0xFF);
+											command_seq_l1[1].modbus_data_3=(uint8_t)((motor_array[3].position_value.tp[0] >> 24) & 0xFF);
+											command_seq_l1[1].modbus_data_4=(uint8_t)((motor_array[3].position_value.tp[0] >> 16) & 0xFF);
+												
+											
+											//填充电机的命令结构体
+											motor_array[3].command.command_id=0x0E;           //命令id填充为8
+											motor_array[3].command.command_status=0x01;       //命令执行中
+											motor_array[3].command.if_return=if_return;       //执行完成是否需要回复帧
+											
+											
+											//动作序列压入队列
+											//获取队列中的空闲位置数量
+											uint32_t space_left=uxQueueSpacesAvailable(send_queueHandle);
+											if(space_left<4)
+											{
+												//发送队列已满，直接返回错误,未完成
+												;
+											}
+											else
+											{
+												//压入发送队列
+												portBASE_TYPE status = xQueueSendToBack(send_queueHandle, &command_seq_l1[0], 0);
+												if(status!=pdPASS)
+												{
+													#ifdef DEBUG_OUTPUT
+													printf("%s\n","queue overflow");
+													#endif
+												}
+												else
+												{
+													#ifdef DEBUG_OUTPUT
+													printf("%s\n","send command 8 error to queue already");
+													#endif
+												}
+
+												status = xQueueSendToBack(send_queueHandle, &command_seq_l1[1], 0);
+												if(status!=pdPASS)
+												{
+													#ifdef DEBUG_OUTPUT
+													printf("%s\n","queue overflow");
+													#endif
+												}
+												else
+												{
+													#ifdef DEBUG_OUTPUT
+													printf("%s\n","send command 8 error to queue already");
+													#endif
+												}
+												
+												status = xQueueSendToBack(send_queueHandle, &command_seq_l1[2], 0);
+												if(status!=pdPASS)
+												{
+													#ifdef DEBUG_OUTPUT
+													printf("%s\n","queue overflow");
+													#endif
+												}
+												else
+												{
+													#ifdef DEBUG_OUTPUT
+													printf("%s\n","send command 8 error to queue already");
+													#endif
+												}
+												
+												status = xQueueSendToBack(send_queueHandle, &command_seq_l1[3], 0);
+												if(status!=pdPASS)
+												{
+													#ifdef DEBUG_OUTPUT
+													printf("%s\n","queue overflow");
+													#endif
+												}
+												else
+												{
+													#ifdef DEBUG_OUTPUT
+													printf("%s\n","send command 8 error to queue already");
+													#endif
+												}
+											}
+										}
+									}
+								}
+								else
+								{
+									SEND_ERROR:
+									//发送执行完成指令
+									taskENTER_CRITICAL();
+									portBASE_TYPE status = xQueueSendToBack(send_queueHandle, &frame_return, 0);
+									if(status!=pdPASS)
+									{
+										#ifdef DEBUG_OUTPUT
+										printf("%s\n","queue overflow");
+										#endif
+									}
+									else
+									{
+										#ifdef DEBUG_OUTPUT
+										printf("%s\n","send command 7 error to queue already");
+										#endif
+									}
+									taskEXIT_CRITICAL();
+								}
+								
+							}
+						}
+						
 					}
 					else
 					{
-						#ifdef DEBUG_OUTPUT
-						printf("%s\n","send command 7 error to queue already");
-						#endif
+						/*
+						frame_return.data[0]=0xFF;              //错误码，0标识正常
+						frame_return.data[1]=0xFF;              //执行结果， 1代表已完成
+						frame_return.data[2]=0xFF;               //电机号
+						frame_return.data[3]=0xFE;              //保留
+						*/
+						taskENTER_CRITICAL();
+						portBASE_TYPE status = xQueueSendToBack(send_queueHandle, &frame_return, 0);
+						if(status!=pdPASS)
+						{
+							#ifdef DEBUG_OUTPUT
+							printf("%s\n","queue overflow");
+							#endif
+						}
+						else
+						{
+							#ifdef DEBUG_OUTPUT
+							printf("%s\n","send command 7 error to queue already");
+							#endif
+						}
+						taskEXIT_CRITICAL();
 					}
-					taskEXIT_CRITICAL();
 				}
 			}
 			
@@ -5712,12 +6284,12 @@ void timer_start()
 	HAL_TIM_PWM_Start(&htim3,TIM_CHANNEL_1);
 	HAL_TIM_PWM_Start(&htim4,TIM_CHANNEL_1);
 	//开启定时器触发任务
-	HAL_TIM_Base_Start_IT(&htim5);
-	HAL_TIM_Base_Start_IT(&htim7);
+	HAL_TIM_Base_Start_IT(&htim5);   //485电机监测
+	HAL_TIM_Base_Start_IT(&htim7);   //1秒定时，打印log， led灯翻转任务
 	HAL_TIM_Base_Start_IT(&htim8);
-	HAL_TIM_Base_Start_IT(&htim9);
-	HAL_TIM_Base_Start_IT(&htim10);
-	HAL_TIM_Base_Start_IT(&htim11);
+	HAL_TIM_Base_Start_IT(&htim9);   //光栅监测
+	HAL_TIM_Base_Start_IT(&htim10);  
+	//HAL_TIM_Base_Start_IT(&htim11);//PID OUTPUT
 	
 	//开启任务统计定时器14
 	HAL_TIM_Base_Start_IT(&htim14);

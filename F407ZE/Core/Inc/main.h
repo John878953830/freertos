@@ -56,6 +56,7 @@ extern uint8_t tklog[500];
 extern uint32_t ulHighFrequencyTimerTicks;
 extern uint32_t queuespace;
 extern uint32_t fifo_level;
+extern uint32_t time_counter;
 //发送队列句柄
 extern osMessageQueueId_t send_queueHandle;
 //数组定义
@@ -306,6 +307,7 @@ typedef struct conflict_struct{
 	uint8_t conflict_number[8];                 //表示碰撞检测所要检测的状态点的位置
 	uint8_t conflict_counter;                   //表示碰撞检测点位的总个数，最大为8
 	uint8_t if_conflict;                        //0: 无碰撞 1：存在碰撞
+	uint32_t time;                              //表示上次收到的广播的时间
 }CONFLICT_STRUCT;
 typedef union broadcast_union{
 	uint8_t data[4];
@@ -410,9 +412,9 @@ typedef struct position{
 	int32_t remain_position_pre;                //上一采样时刻的滞留脉冲数
 	int32_t remain_position_delta;              //差值
 	int32_t remain_position_delta_pre;          //上一次的差值
-	int32_t tp[8];                                //配置文件位置,根据命令文件映射不同的位置，最多支持8个位置, tp0:电机45度位置，初始化时从eeprom读入
-	//tp1，打开/松开
-	//tp2，关闭/夹紧
+	int32_t tp[8];                                //配置文件位置,根据命令文件映射不同的位置，最多支持8个位置, tp0:电机完全夹紧位置（前后左右）， 45度位置（天窗）
+	//tp1，打开/松开，完全打开位置
+	//tp2，（天窗）关闭/夹紧，45度关闭夹紧（前后左右）
 	uint8_t if_tp_already;                      //标志tp是否有效，初始化时为0， 成功读取eeprom数据后置1
 }POSITION;
 typedef struct dimension{
