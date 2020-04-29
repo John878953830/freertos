@@ -626,7 +626,7 @@ int command_0(uint8_t* data,uint32_t para)
 		//发送停止指令方式
 		QUEUE_STRUCT tmp;
 		tmp.property=1;                           //485 send
-		tmp.modbus_addr=0;                       //电机号需要根据命令中的电机号赋值
+		tmp.modbus_addr=i+1;                       //电机号需要根据命令中的电机号赋值
 		tmp.modbus_func=0x10;                    //写多个寄存器
 		tmp.modbus_addr_h=(uint8_t)(2040>>8);
 		tmp.modbus_addr_l=(uint8_t)(2040&0xFF);        //写使能寄存器

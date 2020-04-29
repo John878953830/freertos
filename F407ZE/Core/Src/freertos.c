@@ -1334,7 +1334,7 @@ void start_tk_sensor_monitor(void *argument)
 				}
 			}
 			//获取电机扭矩
-			for(i=0;i<4;i++) //暂时只读取1号电机的参数，因缺少电缆
+			for(i=0;i<4;i++)
 			{
 				if(i==1)
 				{
@@ -1367,7 +1367,7 @@ void start_tk_sensor_monitor(void *argument)
 			}
 			
 			//获取电机目标位置
-			for(i=0;i<4;i++) //暂时只读取1号电机的参数，因缺少电缆
+			for(i=0;i<4;i++)
 			{
 				if(i==1)
 				{
