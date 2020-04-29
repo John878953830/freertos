@@ -199,6 +199,17 @@ data[3]=(uint8_t)(((error+3000))&0xFF);
 #define ERROR_COMMAND_CONFLICT_DETECT            0x2C
 #define ERROR_NEED_ROTATE                        0x2D
 #define ERROR_OTHER_THING                        0x2E
+#define ERROR_3047                               0x2F
+#define ERROR_3048                               0x30
+#define ERROR_3049                               0x31
+#define ERROR_3050                               0x32
+#define ERROR_3051                               0x33
+#define ERROR_3052                               0x34
+#define ERROR_3053                               0x35
+#define ERROR_3054                               0x36
+#define ERROR_3055                               0x37              //天窗多个光电同时触发
+#define ERROR_3056                               0x38              //前后夹紧多个光电同时触发
+#define ERROR_3057                               0x39              //左右夹紧多个光电同时触发
 
 
 //帧结构掩码
@@ -473,6 +484,7 @@ typedef struct motor_struct{
 	uint32_t motor_error_code;                    //电机驱动器的错误码
 	uint8_t self_check_counter;                   //自检计数值
 	CONFLICT_STRUCT conflict_value;               //碰撞检测结构体
+	uint8_t broadcast_timeout_flag;               //广播超时标志， 0： 未超时 1：超时, 初始化后置位为1
 }MOTOR_STRUCT;
 
 typedef struct angle_struct{

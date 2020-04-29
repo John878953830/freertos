@@ -382,7 +382,7 @@ uint8_t motor_array_init(void)
 	
 	//初始化电机的一些开关量配置结构
 	//1号电机， 天窗开关量配置
-	motor_array[0].limit_sw_number=4;     //天窗有4个光电开关
+	motor_array[0].limit_sw_number=0;     //天窗有2个光电开关
 	
 	motor_array[0].limit_sw[0].type=0;   //常开型
 	motor_array[0].limit_sw[0].pin_number=GPIO_PIN_0;
@@ -450,10 +450,13 @@ uint8_t motor_array_init(void)
 	motor_array[3].limit_sw[2].gpio_port=GPIOF;
 	motor_array[3].limit_sw[2].status=HAL_GPIO_ReadPin(motor_array[3].limit_sw[2].gpio_port,motor_array[3].limit_sw[2].pin_number);
 	
-	//初始化碰撞检测计时值
-	motor_array[0].conflict_value.time=0;
-	motor_array[2].conflict_value.time=0;
-	motor_array[3].conflict_value.time=0;
+	//初始化碰撞检测时间标志和次数计数
+	motor_array[0].conflict_value.time=4;
+	motor_array[2].conflict_value.time=4;
+	motor_array[3].conflict_value.time=4;
+	motor_array[0].broadcast_timeout_flag=1;
+	motor_array[2].broadcast_timeout_flag=1;
+	motor_array[3].broadcast_timeout_flag=1;
 	
 	return 0;
 }
@@ -5298,9 +5301,96 @@ void result_parse_2(uint8_t* data, uint8_t num)
 					frame_return.length=4;
 					
 					return_error(frame_return.data,RETURN_OK);
+					
+					uint8_t trigger_counter=0,ti=0;
+					uint8_t tindex=0;
+					//光电开关是否触发判定
+					for(ti=0;ti<motor_array[num].limit_sw_number;ti++)
+					{
+						if(__fabs(motor_array[num].position_value.target_position-motor_array[num].position_value.current_position)<COMPLETE_JUDGE)
+						{
+							trigger_counter++;
+							tindex|=(1<<num);
+						}
+					}
+					if(trigger_counter>1)
+					{
+						//多组限位开关同时触发，错误
+						switch(num)
+						{
+							case 0:
+							{
+								return_error(frame_return.data,ERROR_3055);
+								break;
+							}
+							case 2:
+							{
+								return_error(frame_return.data,ERROR_3056);
+								break;
+							}
+							case 3:
+							{
+								return_error(frame_return.data,ERROR_3057);
+								break;
+							}
+						}
+						goto SEND_RES;
+					}
+					if(trigger_counter==0)
+					{
+						//光电开关未触发
+						switch(num)
+						{
+							case 0:
+							{
+								if(__fabs(motor_array[0].position_value.current_position-motor_array[0].position_value.tp[0])<COMPLETE_JUDGE)
+								{
+									return_error(frame_return.data,ERROR_3048);
+								}
+								if(__fabs(motor_array[0].position_value.current_position-motor_array[0].position_value.tp[1])<COMPLETE_JUDGE)
+								{
+									return_error(frame_return.data,ERROR_3047);
+								}
+								break;
+							}
+							case 2:
+							{
+								if(__fabs(motor_array[2].position_value.current_position-motor_array[2].position_value.tp[0])<COMPLETE_JUDGE)
+								{
+									return_error(frame_return.data,ERROR_3051);
+								}
+								if(__fabs(motor_array[2].position_value.current_position-motor_array[2].position_value.tp[1])<COMPLETE_JUDGE)
+								{
+									return_error(frame_return.data,ERROR_3049);
+								}
+								if(__fabs(motor_array[2].position_value.current_position-motor_array[2].position_value.tp[2])<COMPLETE_JUDGE)
+								{
+									return_error(frame_return.data,ERROR_3050);
+								}
+								break;
+							}
+							case 3:
+							{
+								if(__fabs(motor_array[3].position_value.current_position-motor_array[3].position_value.tp[0])<COMPLETE_JUDGE)
+								{
+									return_error(frame_return.data,ERROR_3054);
+								}
+								if(__fabs(motor_array[3].position_value.current_position-motor_array[3].position_value.tp[1])<COMPLETE_JUDGE)
+								{
+									return_error(frame_return.data,ERROR_3052);
+								}
+								if(__fabs(motor_array[3].position_value.current_position-motor_array[3].position_value.tp[2])<COMPLETE_JUDGE)
+								{
+									return_error(frame_return.data,ERROR_3053);
+								}
+								break;
+							}
+						}
+						goto SEND_RES;
+					}
 					if(motor_array[num].command.command_id==0x0D ||
 					   motor_array[num].command.command_id==0x0E)
-					{
+					{	
 						//需要旋转
 						if(grating_value.if_have_target==0x04)
 						{
@@ -5717,17 +5807,16 @@ void result_parse_2(uint8_t* data, uint8_t num)
 								}
 								
 							}
+							else
+							{
+								goto SEND_RES;
+							}
 						}
 						
 					}
 					else
 					{
-						/*
-						frame_return.data[0]=0xFF;              //错误码，0标识正常
-						frame_return.data[1]=0xFF;              //执行结果， 1代表已完成
-						frame_return.data[2]=0xFF;               //电机号
-						frame_return.data[3]=0xFE;              //保留
-						*/
+						SEND_RES:
 						taskENTER_CRITICAL();
 						portBASE_TYPE status = xQueueSendToBack(send_queueHandle, &frame_return, 0);
 						if(status!=pdPASS)

@@ -1145,6 +1145,21 @@ void start_tk_commu_monitor(void *argument)
 			#ifdef DEBUG_OUTPUT
 			printf("%s\n","start tk communicate monitor");
 			#endif
+			if(motor_array[0].conflict_value.time<4)
+			{
+				motor_array[0].conflict_value.time++;
+				motor_array[2].conflict_value.time++;
+				motor_array[3].conflict_value.time++;
+			}
+			else
+			{
+				motor_array[0].conflict_value.time=4;
+				motor_array[2].conflict_value.time=4;
+				motor_array[3].conflict_value.time=4;
+				motor_array[0].broadcast_timeout_flag=1;
+				motor_array[2].broadcast_timeout_flag=1;
+				motor_array[3].broadcast_timeout_flag=1;
+			}
 			
 			notify_use=0;
 		}
@@ -1609,44 +1624,29 @@ void start_tk_master_order(void *argument)
 								if(tmp_source==0x01 && tmp_command_id==0x0B)
 								{
 									//填充碰撞检测结构体
-									if(motor_array[0].conflict_value.time==0)
+									uint8_t i=0;
+									for(i=0;i<4;i++)
 									{
-										uint8_t i=0;
-										for(i=0;i<4;i++)
+										if(i==1)
+											continue;
+										motor_array[i].conflict_value.time=time_counter;
+										uint8_t j;
+										for(j=0;j<motor_array[i].conflict_value.conflict_counter;j++)
 										{
-											if(i==1)
-												continue;
-											motor_array[i].conflict_value.time=time_counter;
-											uint8_t j;
-											for(j=0;j<motor_array[i].conflict_value.conflict_counter;j++)
-											{
-												motor_array[i].conflict_value.conflict_status[j]=(id.data[3]>>motor_array[i].conflict_value.conflict_number[j])&0x01;
-											}
+											motor_array[i].conflict_value.conflict_status[j]=(id.data[3]>>motor_array[i].conflict_value.conflict_number[j])&0x01;
+										}
+										//广播状态转换
+										if(motor_array[i].conflict_value.time<4)
+										{
+											motor_array[i].conflict_value.time=0;
+										}
+										if(motor_array[i].broadcast_timeout_flag==1)
+										{
+											//超时标志清除
+											motor_array[i].broadcast_timeout_flag=0;
+											motor_array[i].conflict_value.time=0;
 										}
 									}
-									else
-									{
-										if(__fabs(motor_array[0].conflict_value.time - time_counter)>3)
-										{
-											//广播失效，发送错误,待完成
-										}
-										else
-										{
-											uint8_t i=0;
-											for(i=0;i<4;i++)
-											{
-												if(i==1)
-													continue;
-												motor_array[i].conflict_value.time=time_counter;
-												uint8_t j;
-												for(j=0;j<motor_array[i].conflict_value.conflict_counter;j++)
-												{
-													motor_array[i].conflict_value.conflict_status[j]=(id.data[3]>>motor_array[i].conflict_value.conflict_number[j])&0x01;
-												}
-											}
-										}
-									}
-									
 								}
 							}
 							else

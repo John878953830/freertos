@@ -27,28 +27,37 @@ Project File Date:  04/26/2020
 <h2>Output:</h2>
 *** Using Compiler 'V5.06 update 4 (build 422)', folder: 'D:\Keil_v5\ARM\ARMCC\Bin'
 Build target 'F407ZE'
-compiling freertos.c...
-../Core/Src/freertos.c(1432): warning:  #177-D: variable "i"  was declared but never referenced
-  			uint8_t i=0;
-../Core/Src/freertos.c(1553): warning:  #177-D: variable "tmp_can_version"  was declared but never referenced
-  					uint8_t tmp_can_version=(id.RxHeader.ExtId & MASK_VERSION) >> 0;
-../Core/Src/freertos.c(1519): warning:  #550-D: variable "notify_use"  was set but never used
-  	uint32_t notify_use=0;
-../Core/Src/freertos.c(1986): warning:  #177-D: variable "j"  was declared but never referenced
-  						uint8_t i=0, j=0;
-../Core/Src/freertos.c: 4 warnings, 0 errors
+compiling crc.c...
+compiling i2c.c...
+compiling dma.c...
+compiling can.c...
+compiling gpio.c...
 compiling main.c...
 ../Core/Src/main.c(180): warning:  #177-D: variable "addr"  was declared but never referenced
   	uint8_t rw_flag=0,addr=0,length=0;
 ../Core/Src/main.c(181): warning:  #177-D: variable "j"  was declared but never referenced
   	uint16_t i=0,j=0;
-../Core/Src/main.c(614): warning:  #177-D: variable "status"  was declared but never referenced
+../Core/Src/main.c(617): warning:  #177-D: variable "status"  was declared but never referenced
   	GPIO_PinState status;
-../Core/Src/main.c(6436): warning:  #177-D: variable "txdata"  was declared but never referenced
+../Core/Src/main.c(6525): warning:  #177-D: variable "txdata"  was declared but never referenced
   	uint8_t txdata[2*EEPROM_CONFIG_LENGTH]={0};
 ../Core/Src/main.c: 4 warnings, 0 errors
+compiling freertos.c...
+../Core/Src/freertos.c(1447): warning:  #177-D: variable "i"  was declared but never referenced
+  			uint8_t i=0;
+../Core/Src/freertos.c(1568): warning:  #177-D: variable "tmp_can_version"  was declared but never referenced
+  					uint8_t tmp_can_version=(id.RxHeader.ExtId & MASK_VERSION) >> 0;
+../Core/Src/freertos.c(1534): warning:  #550-D: variable "notify_use"  was set but never used
+  	uint32_t notify_use=0;
+../Core/Src/freertos.c(1986): warning:  #177-D: variable "j"  was declared but never referenced
+  						uint8_t i=0, j=0;
+../Core/Src/freertos.c: 4 warnings, 0 errors
+compiling stm32f4xx_hal_msp.c...
+compiling stm32f4xx_it.c...
+compiling usart.c...
+compiling tim.c...
 linking...
-Program Size: Code=57036 RO-data=6632 RW-data=772 ZI-data=87852  
+Program Size: Code=57776 RO-data=6632 RW-data=772 ZI-data=87868  
 FromELF: creating hex file...
 "F407ZE\F407ZE.axf" - 0 Error(s), 8 Warning(s).
 
@@ -68,7 +77,7 @@ Package Vendor: ARM
 <h2>Collection of Component Files used:</h2>
 
    * Component: ARM::CMSIS:CORE:5.3.0
-Build Time Elapsed:  00:00:07
+Build Time Elapsed:  00:00:24
 </pre>
 </body>
 </html>
