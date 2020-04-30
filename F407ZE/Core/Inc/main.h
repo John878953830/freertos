@@ -391,6 +391,7 @@ typedef struct speed{
 	int32_t current_speed_pre;
 	int32_t current_speed_delta;
 	uint32_t scal;                              //导程，单位微米
+	uint32_t calibrate_speed;                   //内部校准指令的速度值
 }SPEED;
 typedef struct limit_switch{
 	uint8_t type;                               //限位开关类型，常开型初始化为0，常闭型初始化为1
@@ -485,6 +486,7 @@ typedef struct motor_struct{
 	uint8_t self_check_counter;                   //自检计数值
 	CONFLICT_STRUCT conflict_value;               //碰撞检测结构体
 	uint8_t broadcast_timeout_flag;               //广播超时标志， 0： 未超时 1：超时, 初始化后置位为1
+	uint8_t calibrate_data[5];                    //内部校准数组，存储内部校准动作数据
 }MOTOR_STRUCT;
 
 typedef struct angle_struct{
@@ -518,6 +520,8 @@ extern void enable_motor(void);
 extern uint8_t motor_array_init(void);
 extern uint16_t usMBCRC16( uint8_t * pucFrame, uint16_t usLen );
 uint8_t speed_set(uint8_t num, int32_t speed);
+uint8_t torque_set(uint8_t num, int32_t torque);
+int calibrate_command(uint8_t* data,uint32_t para);
 extern MODBUS_LIST* modbus_list_head;
 extern MODBUS_LIST* modbus_list_tail;
 
@@ -530,6 +534,7 @@ extern uint8_t motor_communicate_counter;
 extern GRATING grating_value;
 
 extern uint8_t work_model;
+
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

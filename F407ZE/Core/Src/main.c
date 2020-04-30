@@ -288,7 +288,12 @@ uint8_t motor_array_init(void)
 			motor_array[i].speed_value.default_speed=((uint32_t)data[0] << 24) | ((uint32_t)data[1] << 16) | ((uint32_t)data[2] << 8) | ((uint32_t)data[3]);
 		}
 		//测试代码
-		motor_array[i].speed_value.default_speed=200;
+		motor_array[i].speed_value.default_speed=100;
+		//速度设置
+		if(i!=1)
+		{
+			speed_set(i+1,motor_array[i].speed_value.default_speed);
+		}
 	}
 	//默认扭矩设置
 	tmp_addr=84;
@@ -306,6 +311,11 @@ uint8_t motor_array_init(void)
 		}
 		//测试代码
 		motor_array[i].torque_value.max_torque=200;
+		//默认扭矩设置
+		if(i!=1)
+		{
+			torque_set(i+1,motor_array[i].torque_value.max_torque);
+		}
 	}
 	//最大速度设置，设置最大的速度值
 	tmp_addr=100;
@@ -322,12 +332,8 @@ uint8_t motor_array_init(void)
 			motor_array[i].speed_value.max_speed=((uint32_t)data[0] << 24) | ((uint32_t)data[1] << 16) | ((uint32_t)data[2] << 8) | ((uint32_t)data[3]);
 		}
 		//测试代码
-		motor_array[i].speed_value.max_speed=100;
-		//速度设置
-		if(i!=1)
-		{
-			speed_set(i+1,motor_array[i].speed_value.max_speed);
-		}
+		motor_array[i].speed_value.max_speed=200;
+		
 	}
 	//最大行程设置，是脉冲数设置，超过这个脉冲数停止电机
 	tmp_addr=116;
@@ -362,6 +368,23 @@ uint8_t motor_array_init(void)
 		}
 		//测试代码
 		motor_array[i].position_value.position_min=-200;
+	}
+	//校准速度设置
+	tmp_addr=148;
+	for(i=0;i<4;i++)
+	{
+		if(iic_rw(rw_flag, tmp_addr + i*4,data,length)!=0)
+		{
+			//读取EEPROM出错
+			break;
+			;
+		}
+		else
+		{
+			motor_array[i].speed_value.calibrate_speed=((int32_t)data[0] << 24) | ((uint32_t)data[1] << 16) | ((uint32_t)data[2] << 8) | ((uint32_t)data[3]);
+		}
+		//测试代码
+		motor_array[i].speed_value.calibrate_speed=50;//设置默认校准速度为50
 	}
 	
 	
@@ -464,6 +487,12 @@ uint8_t motor_array_init(void)
 	motor_array[0].broadcast_timeout_flag=1;
 	motor_array[2].broadcast_timeout_flag=1;
 	motor_array[3].broadcast_timeout_flag=1;
+	
+	//配置内部校准指令方向， bit 6
+	motor_array[0].dir=0x40;        //打开方向为校准方向
+	motor_array[2].dir=0x40;        //打开方向为校准方向
+	motor_array[3].dir=0x40;        //打开方向为校准方向
+	
 	
 	return 0;
 }
@@ -1621,9 +1650,9 @@ int command_8(uint8_t* data,uint32_t para)
 	QUEUE_STRUCT tmp;
 	if(data[0]>4 || data[0]==0 || data[0]==0x02)
 	{
-		if(data[0]==0x11 || data[0]==0x12 || data[0]==0x13
-		|| data[0]==0x31 || data[0]==0x32 || data[0]==0x33
-		|| data[0]==0x41 || data[0]==0x42 || data[0]==0x43)
+		if(data[0]==0x11 || data[0]==0x12 || data[0]==0x13 || data[0]==0x14
+		|| data[0]==0x31 || data[0]==0x32 || data[0]==0x33 || data[0]==0x34
+		|| data[0]==0x41 || data[0]==0x42 || data[0]==0x43 || data[0]==0x44)
 		{
 			//1号电机指令，启动，停止，编码器错误修正
 			if(data[0]==0x11)
@@ -1728,6 +1757,23 @@ int command_8(uint8_t* data,uint32_t para)
 				}
 				;
 			}
+			if(data[0]==0x14)
+			{
+				//天窗电机内部校准指令，未完成
+				//设置天窗电机校准速度
+				speed_set(1,motor_array[0].speed_value.calibrate_speed);
+				//根据配置dir设置cmd8的动作方向，动作数值
+				if((motor_array[0].dir>>6)&0x01)
+				{
+					int32_t tmp=5000;
+					motor_array[0].calibrate_data[0]=0x01;
+					motor_array[0].calibrate_data[1]=(uint8_t)((tmp>>24) & 0xFF);
+					motor_array[0].calibrate_data[2]=(uint8_t)((tmp>>16) & 0xFF);
+					motor_array[0].calibrate_data[3]=(uint8_t)((tmp>>8) & 0xFF);
+					motor_array[0].calibrate_data[4]=(uint8_t)(tmp & 0xFF);
+					calibrate_command(motor_array[0].calibrate_data,0);
+				}
+			}
 			//前后夹紧电机启动停止错误清0
 			if(data[0]==0x31)
 			{
@@ -1831,6 +1877,10 @@ int command_8(uint8_t* data,uint32_t para)
 				}
 				;
 			}
+			if(data[0]==0x34)
+			{
+				//前后夹紧电机内部校准指令
+			}
 			//左右夹紧电机
 			if(data[0]==0x41)
 			{
@@ -1933,6 +1983,10 @@ int command_8(uint8_t* data,uint32_t para)
 					#endif
 				}
 				;
+			}
+			if(data[0]==0x44)
+			{
+				//左右夹紧内部校准指令
 			}
 			;
 		}
@@ -7125,6 +7179,129 @@ uint8_t speed_set(uint8_t num, int32_t speed)
 	return 0;
 }
 
+//扭矩设置函数，设置最大允许扭矩
+uint8_t torque_set(uint8_t num, int32_t torque)
+{
+	int32_t tp=__fabs(torque);
+	QUEUE_STRUCT torque_struct;
+	torque_struct.property=1;                            //485 send
+	torque_struct.modbus_addr=num;
+	torque_struct.modbus_func=0x10;                      //写多个寄存器
+	torque_struct.modbus_addr_h=(uint8_t)(1020>>8);
+	torque_struct.modbus_addr_l=(uint8_t)(1020&0xFF);                   //电机485地址
+	torque_struct.modbus_data_len_h=0x00;
+	torque_struct.modbus_data_len_l=0x02;
+	torque_struct.modbus_data_byte=0x04;
+	torque_struct.modbus_data_1=(uint8_t)((tp >> 8) & 0xFF);              
+	torque_struct.modbus_data_2=(uint8_t)(tp & 0xFF);                          
+	torque_struct.modbus_data_3=(uint8_t)((tp >> 24) & 0xFF);                    
+	torque_struct.modbus_data_4=(uint8_t)((tp >> 16) & 0xFF); 
+	
+	BaseType_t status = xQueueSendToBack(send_queueHandle, &torque_struct, 0);
+	if(status!=pdPASS)
+	{
+		#ifdef DEBUG_OUTPUT
+		printf("%s\n","queue overflow");
+		#endif
+	}
+	else
+	{
+		#ifdef DEBUG_OUTPUT
+		printf("%s\n","send command 7 succes to queue already");
+		#endif
+	}
+	return 0;
+}
+int calibrate_command(uint8_t* data,uint32_t para)
+{
+	//填充序列
+	command_seq[0].can_command=0x08;
+	command_seq[0].modbus_addr=data[0];           //地址赋值为电机号
+	command_seq[1].modbus_addr=data[0];
+	command_seq[2].modbus_addr=data[0];
+	command_seq[3].modbus_addr=data[0];
+	
+	//填充动作目标
+	command_seq[1].modbus_data_1=data[3];
+	command_seq[1].modbus_data_2=data[4];
+	command_seq[1].modbus_data_3=data[1];
+	command_seq[1].modbus_data_4=data[2];
+	
+	//填充电机的命令结构体
+	motor_array[data[0]-1].command.command_id=0x08;           //命令id填充为8
+	motor_array[data[0]-1].command.command_status=0x01;       //命令执行中
+	motor_array[data[0]-1].command.if_return=0x10;            //标志执行的是内部校准指令
+	
+	
+	//动作序列压入队列
+	//获取队列中的空闲位置数量
+	uint32_t space_left=uxQueueSpacesAvailable(send_queueHandle);
+	if(space_left<4)
+	{
+		//发送队列已满，直接返回错误,未完成
+		;
+	}
+	else
+	{
+		//压入发送队列
+		portBASE_TYPE status = xQueueSendToBack(send_queueHandle, &command_seq[0], 0);
+		if(status!=pdPASS)
+		{
+			#ifdef DEBUG_OUTPUT
+			printf("%s\n","queue overflow");
+			#endif
+		}
+		else
+		{
+			#ifdef DEBUG_OUTPUT
+			printf("%s\n","send command 8 error to queue already");
+			#endif
+		}
+
+		status = xQueueSendToBack(send_queueHandle, &command_seq[1], 0);
+		if(status!=pdPASS)
+		{
+			#ifdef DEBUG_OUTPUT
+			printf("%s\n","queue overflow");
+			#endif
+		}
+		else
+		{
+			#ifdef DEBUG_OUTPUT
+			printf("%s\n","send command 8 error to queue already");
+			#endif
+		}
+		
+		status = xQueueSendToBack(send_queueHandle, &command_seq[2], 0);
+		if(status!=pdPASS)
+		{
+			#ifdef DEBUG_OUTPUT
+			printf("%s\n","queue overflow");
+			#endif
+		}
+		else
+		{
+			#ifdef DEBUG_OUTPUT
+			printf("%s\n","send command 8 error to queue already");
+			#endif
+		}
+		
+		status = xQueueSendToBack(send_queueHandle, &command_seq[3], 0);
+		if(status!=pdPASS)
+		{
+			#ifdef DEBUG_OUTPUT
+			printf("%s\n","queue overflow");
+			#endif
+		}
+		else
+		{
+			#ifdef DEBUG_OUTPUT
+			printf("%s\n","send command 8 error to queue already");
+			#endif
+		}
+	}
+	return 0;
+}
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
