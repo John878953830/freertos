@@ -78,7 +78,9 @@ uint8_t cmd6_stage=0;
 uint8_t motor_communicate_flag[5]={0,0,0,0,0};           //电机通信错误标志表， 0 正常， 1：通信错误
 uint8_t motor_communicate_counter=0;                     //重复计数，确保只点亮一次PD10
 
-uint32_t time_counter=0;                                 //时间计数值，在default任务中增加，单位秒，其实取决于default任务的调用间隔        
+uint32_t time_counter=0;                                 //时间计数值，在default任务中增加，单位秒，其实取决于default任务的调用间隔    
+
+uint8_t work_model=0;                                    //工作模式设定，0：安全模式 1：调试模式，调试模式不进行碰撞监测
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -320,7 +322,12 @@ uint8_t motor_array_init(void)
 			motor_array[i].speed_value.max_speed=((uint32_t)data[0] << 24) | ((uint32_t)data[1] << 16) | ((uint32_t)data[2] << 8) | ((uint32_t)data[3]);
 		}
 		//测试代码
-		motor_array[i].speed_value.max_speed=200;
+		motor_array[i].speed_value.max_speed=100;
+		//速度设置
+		if(i!=1)
+		{
+			speed_set(i+1,motor_array[i].speed_value.max_speed);
+		}
 	}
 	//最大行程设置，是脉冲数设置，超过这个脉冲数停止电机
 	tmp_addr=116;
@@ -1108,12 +1115,6 @@ int command_6(uint8_t* data,uint32_t para)
 			tmp.can_if_return=0x00;
 			tmp.length=4;
 			return_error(tmp.data,ERROR_COMMAND_6_FAIL);
-			/*
-			tmp.data[0]=0x00;
-			tmp.data[1]=0x00;
-			tmp.data[2]=0x00;
-			tmp.data[3]=ERROR_COMMAND_6_FAIL;
-			*/
 			BaseType_t status_q = xQueueSendToBack(send_queueHandle, &tmp, 0);
 			if(status_q!=pdPASS)
 			{
@@ -1146,12 +1147,6 @@ int command_6(uint8_t* data,uint32_t para)
 	tmp.can_if_return=0x00;
 	tmp.length=4;
 	return_error(tmp.data,CMD6_START_SELFCHECK_0);
-	/*
-	tmp.data[0]=(uint8_t)(CMD6_START_SELFCHECK_0>>24);
-	tmp.data[1]=(uint8_t)(CMD6_START_SELFCHECK_0>>16);
-	tmp.data[2]=(uint8_t)(CMD6_START_SELFCHECK_0>>8);
-	tmp.data[3]=(uint8_t)(CMD6_START_SELFCHECK_0);
-	*/
 	//taskENTER_CRITICAL();
 	BaseType_t status_q = xQueueSendToBack(send_queueHandle, &tmp, 0);
 	if(status_q!=pdPASS)
@@ -7095,6 +7090,40 @@ ANGLE_STRUCT angleCalculate(GRATING grating)
 	return res;
 }
 
+
+//速度设置函数
+uint8_t speed_set(uint8_t num, int32_t speed)
+{
+	int32_t sp=__fabs(speed);
+	QUEUE_STRUCT speed_struct;
+	speed_struct.property=1;                            //485 send
+	speed_struct.modbus_addr=num;
+	speed_struct.modbus_func=0x10;                      //写多个寄存器
+	speed_struct.modbus_addr_h=(uint8_t)(2042>>8);
+	speed_struct.modbus_addr_l=(uint8_t)(2042&0xFF);                   //电机485地址
+	speed_struct.modbus_data_len_h=0x00;
+	speed_struct.modbus_data_len_l=0x02;
+	speed_struct.modbus_data_byte=0x04;
+	speed_struct.modbus_data_1=(uint8_t)((sp >> 8) & 0xFF);              
+	speed_struct.modbus_data_2=(uint8_t)(sp & 0xFF);                          
+	speed_struct.modbus_data_3=(uint8_t)((sp >> 24) & 0xFF);                    
+	speed_struct.modbus_data_4=(uint8_t)((sp >> 16) & 0xFF); 
+	
+	BaseType_t status = xQueueSendToBack(send_queueHandle, &speed_struct, 0);
+	if(status!=pdPASS)
+	{
+		#ifdef DEBUG_OUTPUT
+		printf("%s\n","queue overflow");
+		#endif
+	}
+	else
+	{
+		#ifdef DEBUG_OUTPUT
+		printf("%s\n","send command 7 succes to queue already");
+		#endif
+	}
+	return 0;
+}
 
 /* USER CODE END PFP */
 

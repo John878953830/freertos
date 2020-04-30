@@ -1250,6 +1250,13 @@ void start_tk_conflict_monitor(void *argument)
 					motor_array[i].conflict_value.if_conflict=0;
 				}
 			}
+			if(work_model==0x01)
+			{
+				for(i=0;i<4;i++)
+				{
+					motor_array[i].conflict_value.if_conflict=0;
+				}
+			}
 			notify_use=0;
 		}
     osDelay(1);
@@ -1617,9 +1624,26 @@ void start_tk_master_order(void *argument)
 								//广播ID
 								uint8_t data=0;
 								uint8_t para=tmp_if_return;
-								if(tmp_source==0x00 && tmp_command_id==0x00)
+								if(tmp_source==0x00)
 								{
-									command_to_function[tmp_command_id](&data,para);
+									//主机广播指令
+									if(tmp_command_id==0x01)
+									{
+										//停机指令
+										command_to_function[0](&data,para);
+									}
+									if(tmp_command_id==0x02)
+									{
+										//工作模式设定指令
+										if(id.data[0]==0)
+										{
+											work_model=0;
+										}
+										if(id.data[0]==1)
+										{
+											work_model=1;
+										}
+									}
 								}
 								if(tmp_source==0x01 && tmp_command_id==0x0B)
 								{
