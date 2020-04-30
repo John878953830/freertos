@@ -27,39 +27,11 @@ Project File Date:  04/26/2020
 <h2>Output:</h2>
 *** Using Compiler 'V5.06 update 4 (build 422)', folder: 'D:\Keil_v5\ARM\ARMCC\Bin'
 Build target 'F407ZE'
-compiling can.c...
-compiling dma.c...
 compiling gpio.c...
-compiling i2c.c...
-compiling crc.c...
-compiling freertos.c...
-../Core/Src/freertos.c(1454): warning:  #177-D: variable "i"  was declared but never referenced
-  			uint8_t i=0;
-../Core/Src/freertos.c(1575): warning:  #177-D: variable "tmp_can_version"  was declared but never referenced
-  					uint8_t tmp_can_version=(id.RxHeader.ExtId & MASK_VERSION) >> 0;
-../Core/Src/freertos.c(1541): warning:  #550-D: variable "notify_use"  was set but never used
-  	uint32_t notify_use=0;
-../Core/Src/freertos.c(2010): warning:  #177-D: variable "j"  was declared but never referenced
-  						uint8_t i=0, j=0;
-../Core/Src/freertos.c: 4 warnings, 0 errors
-compiling main.c...
-../Core/Src/main.c(182): warning:  #177-D: variable "addr"  was declared but never referenced
-  	uint8_t rw_flag=0,addr=0,length=0;
-../Core/Src/main.c(183): warning:  #177-D: variable "j"  was declared but never referenced
-  	uint16_t i=0,j=0;
-../Core/Src/main.c(653): warning:  #177-D: variable "status"  was declared but never referenced
-  	GPIO_PinState status;
-../Core/Src/main.c(6574): warning:  #177-D: variable "txdata"  was declared but never referenced
-  	uint8_t txdata[2*EEPROM_CONFIG_LENGTH]={0};
-../Core/Src/main.c: 4 warnings, 0 errors
-compiling stm32f4xx_hal_msp.c...
-compiling stm32f4xx_it.c...
-compiling usart.c...
-compiling tim.c...
 linking...
 Program Size: Code=58652 RO-data=6632 RW-data=776 ZI-data=87904  
 FromELF: creating hex file...
-"F407ZE\F407ZE.axf" - 0 Error(s), 8 Warning(s).
+"F407ZE\F407ZE.axf" - 0 Error(s), 0 Warning(s).
 
 <h2>Software Packages used:</h2>
 
@@ -77,7 +49,7 @@ Package Vendor: ARM
 <h2>Collection of Component Files used:</h2>
 
    * Component: ARM::CMSIS:CORE:5.3.0
-Build Time Elapsed:  00:00:24
+Build Time Elapsed:  00:00:03
 </pre>
 </body>
 </html>
