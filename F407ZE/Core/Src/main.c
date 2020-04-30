@@ -7148,6 +7148,7 @@ ANGLE_STRUCT angleCalculate(GRATING grating)
 //速度设置函数
 uint8_t speed_set(uint8_t num, int32_t speed)
 {
+	
 	int32_t sp=__fabs(speed);
 	QUEUE_STRUCT speed_struct;
 	speed_struct.property=1;                            //485 send
@@ -7176,12 +7177,14 @@ uint8_t speed_set(uint8_t num, int32_t speed)
 		printf("%s\n","send command 7 succes to queue already");
 		#endif
 	}
+	
 	return 0;
 }
 
 //扭矩设置函数，设置最大允许扭矩
 uint8_t torque_set(uint8_t num, int32_t torque)
 {
+	
 	int32_t tp=__fabs(torque);
 	QUEUE_STRUCT torque_struct;
 	torque_struct.property=1;                            //485 send
@@ -7210,10 +7213,12 @@ uint8_t torque_set(uint8_t num, int32_t torque)
 		printf("%s\n","send command 7 succes to queue already");
 		#endif
 	}
+	
 	return 0;
 }
 int calibrate_command(uint8_t* data,uint32_t para)
 {
+	
 	//填充序列
 	command_seq[0].can_command=0x08;
 	command_seq[0].modbus_addr=data[0];           //地址赋值为电机号
@@ -7300,6 +7305,7 @@ int calibrate_command(uint8_t* data,uint32_t para)
 			#endif
 		}
 	}
+	
 	return 0;
 }
 /* USER CODE END PFP */
