@@ -379,6 +379,7 @@ typedef struct command_struct{
 	uint8_t can_version;                        //版本号
 	uint16_t command_status;                    //当前执行的命令的状态， 0：未执行， 1： 执行中 2： 执行完成 其他： 错误码
 	uint8_t command_union;                      //联合命令码， 0 ： 空闲  其他： 命令编号
+	uint8_t data_0;                             //夹紧指令的数据域0， 标志打开或夹紧， 仅对前后左右夹紧有效
 	
 }COMMAND_STRUCT;
 typedef struct speed{

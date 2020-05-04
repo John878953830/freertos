@@ -320,7 +320,7 @@ uint8_t motor_array_init(void)
 			motor_array[i].torque_value.max_torque=((uint32_t)data[0] << 24) | ((uint32_t)data[1] << 16) | ((uint32_t)data[2] << 8) | ((uint32_t)data[3]);
 		}
 		//测试代码
-		motor_array[i].torque_value.max_torque=2000;
+		motor_array[i].torque_value.max_torque=3000;
 		//默认扭矩设置
 		if(i!=1)
 		{
@@ -613,6 +613,52 @@ QUEUE_STRUCT command_seq[4]=
 		.modbus_data_len_l=0x02,
 		.modbus_property=1,
 	},
+	{
+		.property=1,                            //485 send
+		.modbus_addr=0,                       //电机号需要根据命令中的电机号赋值
+		.modbus_func=0x10,                    //写多个寄存器
+		.modbus_addr_h=(uint8_t)(3202>>8),
+		.modbus_addr_l=(uint8_t)(3202&0xFF),        //写目标位置
+		.modbus_data_len_h=0x00,
+		.modbus_data_len_l=0x02,
+		.modbus_data_byte=0x04,
+		.modbus_data_1=0,                      //先赋值为命令中的数值，当前位置读取成功后修改值
+		.modbus_data_2=0,                      //先赋值为命令中的数值，当前位置读取成功后修改值
+		.modbus_data_3=0,                      //先赋值为命令中的数值，当前位置读取成功后修改值
+		.modbus_data_4=0,                      //先赋值为命令中的数值，当前位置读取成功后修改值
+	},
+	{
+		.property=1,                            //485 send
+		.modbus_addr=0,                       //电机号需要根据命令中的电机号赋值
+		.modbus_func=0x10,                    //写多个寄存器
+		.modbus_addr_h=(uint8_t)(2040>>8),
+		.modbus_addr_l=(uint8_t)(2040&0xFF),        //写使能寄存器
+		.modbus_data_len_h=0x00,
+		.modbus_data_len_l=0x02,
+		.modbus_data_byte=0x04,
+		.modbus_data_1=0xFF,                      //使能寄存器全部写为FF
+		.modbus_data_2=0xFF,                      
+		.modbus_data_3=0xFF,                      
+		.modbus_data_4=0xFF,                      
+	},
+	{
+		.property=1,                            //485 send
+		.modbus_addr=0,                       //电机号需要根据命令中的电机号赋值
+		.modbus_func=0x10,                    //写多个寄存器
+		.modbus_addr_h=(uint8_t)(2040>>8),
+		.modbus_addr_l=(uint8_t)(2040&0xFF),        //写使能寄存器
+		.modbus_data_len_h=0x00,
+		.modbus_data_len_l=0x02,
+		.modbus_data_byte=0x04,
+		.modbus_data_1=0x00,                      //使能寄存器全部写为00
+		.modbus_data_2=0x00,                      
+		.modbus_data_3=0x00,                      
+		.modbus_data_4=0x00,
+	},
+};
+
+QUEUE_STRUCT command_seq_for_cmd13_14[3]=
+{
 	{
 		.property=1,                            //485 send
 		.modbus_addr=0,                       //电机号需要根据命令中的电机号赋值
@@ -3116,6 +3162,7 @@ int command_13(uint8_t* data,uint32_t para)
 			command_seq_l1[1].modbus_data_2=(uint8_t)((motor_array[2].position_value.tp[1]) & 0xFF);
 			command_seq_l1[1].modbus_data_3=(uint8_t)((motor_array[2].position_value.tp[1] >> 24) & 0xFF);
 			command_seq_l1[1].modbus_data_4=(uint8_t)((motor_array[2].position_value.tp[1] >> 16) & 0xFF);
+			motor_array[2].command.data_0=0;
 		}
 		if(data[0]==0x01)
 		{
@@ -3123,6 +3170,7 @@ int command_13(uint8_t* data,uint32_t para)
 		  command_seq_l1[1].modbus_data_2=(uint8_t)((motor_array[2].position_value.tp[2]) & 0xFF);
 		  command_seq_l1[1].modbus_data_3=(uint8_t)((motor_array[2].position_value.tp[2] >> 24) & 0xFF);
 		  command_seq_l1[1].modbus_data_4=(uint8_t)((motor_array[2].position_value.tp[2] >> 16) & 0xFF);
+			motor_array[2].command.data_0=1;
 		}
 			
 		
@@ -3433,6 +3481,7 @@ int command_14(uint8_t* data,uint32_t para)
 			command_seq_l1[1].modbus_data_2=(uint8_t)((motor_array[3].position_value.tp[1]) & 0xFF);
 			command_seq_l1[1].modbus_data_3=(uint8_t)((motor_array[3].position_value.tp[1] >> 24) & 0xFF);
 			command_seq_l1[1].modbus_data_4=(uint8_t)((motor_array[3].position_value.tp[1] >> 16) & 0xFF);
+			motor_array[3].command.data_0=0;
 		}
 		if(data[0]==0x01)
 		{
@@ -3440,6 +3489,7 @@ int command_14(uint8_t* data,uint32_t para)
 		  command_seq_l1[1].modbus_data_2=(uint8_t)((motor_array[3].position_value.tp[2]) & 0xFF);
 		  command_seq_l1[1].modbus_data_3=(uint8_t)((motor_array[3].position_value.tp[2] >> 24) & 0xFF);
 		  command_seq_l1[1].modbus_data_4=(uint8_t)((motor_array[3].position_value.tp[2] >> 16) & 0xFF);
+			motor_array[3].command.data_0=1;
 		}
 			
 		
@@ -5227,27 +5277,189 @@ void result_parse_2(uint8_t* data, uint8_t num)
 							return_error(frame_return.data,ERROR_NEED_ROTATE);
 						}
 					}
-					/*
-					frame_return.data[0]=0xFF;              //错误码，0标识正常
-					frame_return.data[1]=0xFF;              //执行结果， 1代表已完成
-					frame_return.data[2]=0xFF;               //电机号
-					frame_return.data[3]=0xFE;              //保留
-					*/
-					taskENTER_CRITICAL();
-					portBASE_TYPE status = xQueueSendToBack(send_queueHandle, &frame_return, 0);
-					if(status!=pdPASS)
+					uint8_t trigger_counter=0,ti=0;
+					uint8_t tindex=0;
+					//光电开关是否触发判定
+					for(ti=0;ti<motor_array[num].limit_sw_number;ti++)
 					{
-						#ifdef DEBUG_OUTPUT
-						printf("%s\n","queue overflow");
-						#endif
+						//if(__fabs(motor_array[num].position_value.tp[ti]-motor_array[num].position_value.current_position)<COMPLETE_JUDGE)
+						if(motor_array[num].limit_sw[ti].status==0)
+						{
+							trigger_counter++;
+							tindex|=(1<<num);
+						}
+					}
+					if(trigger_counter>1)
+					{
+						switch(num)
+						{
+							case 0:
+							{
+								if(tindex>2)
+								{
+									return_error(frame_return.data,ERROR_3055);
+								}
+								break;
+							}
+							case 2:
+							{
+								return_error(frame_return.data,ERROR_3056);
+								break;
+							}
+							case 3:
+							{
+								return_error(frame_return.data,ERROR_3057);
+								break;
+							}
+						}
+					}
+					if(trigger_counter==0)
+					{
+						switch(num)
+						{
+							case 0:
+							{
+								if(__fabs(motor_array[0].position_value.current_position-motor_array[0].position_value.tp[2])<COMPLETE_JUDGE)
+								{
+									return_error(frame_return.data,ERROR_3048);
+								}
+								if(__fabs(motor_array[0].position_value.current_position-motor_array[0].position_value.tp[1])<COMPLETE_JUDGE)
+								{
+									return_error(frame_return.data,ERROR_3047);
+								}
+								break;
+							}
+							case 2:
+							{
+								if(__fabs(motor_array[2].position_value.current_position-motor_array[2].position_value.tp[0])<COMPLETE_JUDGE)
+								{
+									return_error(frame_return.data,ERROR_3051);
+								}
+								if(__fabs(motor_array[2].position_value.current_position-motor_array[2].position_value.tp[1])<COMPLETE_JUDGE)
+								{
+									return_error(frame_return.data,ERROR_3049);
+								}
+								if(__fabs(motor_array[2].position_value.current_position-motor_array[2].position_value.tp[2])<COMPLETE_JUDGE)
+								{
+									return_error(frame_return.data,ERROR_3050);
+								}
+								break;
+							}
+							case 3:
+							{
+								if(__fabs(motor_array[3].position_value.current_position-motor_array[3].position_value.tp[0])<COMPLETE_JUDGE)
+								{
+									return_error(frame_return.data,ERROR_3054);
+								}
+								if(__fabs(motor_array[3].position_value.current_position-motor_array[3].position_value.tp[1])<COMPLETE_JUDGE)
+								{
+									return_error(frame_return.data,ERROR_3052);
+								}
+								if(__fabs(motor_array[3].position_value.current_position-motor_array[3].position_value.tp[2])<COMPLETE_JUDGE)
+								{
+									return_error(frame_return.data,ERROR_3053);
+								}
+								break;
+							}
+						}
+					}
+					if(1)     //如果光栅角度正常，发送下一帧动作， tp0 位置， 完全夹紧
+					{
+						if((__fabs(motor_array[num].position_value.current_position-motor_array[num].position_value.tp[0])>COMPLETE_JUDGE) && (num==2 || num==3) && motor_array[num].command.data_0 == 1 )
+						{
+							//发送末段位置
+							motor_array[num].command.command_status=1;
+							//末段目标
+							command_seq_for_cmd13_14[0].modbus_addr=num + 1;                       //电机号,4,左右夹紧电机
+							command_seq_for_cmd13_14[0].modbus_data_1=(uint8_t)((motor_array[num].position_value.tp[0] >> 8) & 0xFF);                       //先赋值为命令中的数值，当前位置读取成功后修改值
+							command_seq_for_cmd13_14[0].modbus_data_2=(uint8_t)((motor_array[num].position_value.tp[0]) & 0xFF);                            //先赋值为命令中的数值，当前位置读取成功后修改值
+							command_seq_for_cmd13_14[0].modbus_data_3=(uint8_t)((motor_array[num].position_value.tp[0] >> 24) & 0xFF);                      //先赋值为命令中的数值，当前位置读取成功后修改值
+							command_seq_for_cmd13_14[0].modbus_data_4=(uint8_t)((motor_array[num].position_value.tp[0] >> 16) & 0xFF);                      //先赋值为命令中的数值，当前位置读取成功后修改值
+							//动作指令
+							command_seq_for_cmd13_14[1].modbus_addr=num + 1;
+							command_seq_for_cmd13_14[2].modbus_addr=num + 1;
+							//发送指令
+							taskENTER_CRITICAL();
+							portBASE_TYPE status = xQueueSendToBack(send_queueHandle, &command_seq_for_cmd13_14[0], 0);
+							if(status!=pdPASS)
+							{
+								#ifdef DEBUG_OUTPUT
+								printf("%s\n","queue overflow");
+								#endif
+							}
+							else
+							{
+								#ifdef DEBUG_OUTPUT
+								printf("%s\n","send command 7 error to queue already");
+								#endif
+							}
+							status = xQueueSendToBack(send_queueHandle, &command_seq_for_cmd13_14[1], 0);
+							if(status!=pdPASS)
+							{
+								#ifdef DEBUG_OUTPUT
+								printf("%s\n","queue overflow");
+								#endif
+							}
+							else
+							{
+								#ifdef DEBUG_OUTPUT
+								printf("%s\n","send command 7 error to queue already");
+								#endif
+							}
+							status = xQueueSendToBack(send_queueHandle, &command_seq_for_cmd13_14[2], 0);
+							if(status!=pdPASS)
+							{
+								#ifdef DEBUG_OUTPUT
+								printf("%s\n","queue overflow");
+								#endif
+							}
+							else
+							{
+								#ifdef DEBUG_OUTPUT
+								printf("%s\n","send command 7 error to queue already");
+								#endif
+							}
+							taskEXIT_CRITICAL();
+						}
+						else
+						{
+							taskENTER_CRITICAL();
+							portBASE_TYPE status = xQueueSendToBack(send_queueHandle, &frame_return, 0);
+							if(status!=pdPASS)
+							{
+								#ifdef DEBUG_OUTPUT
+								printf("%s\n","queue overflow");
+								#endif
+							}
+							else
+							{
+								#ifdef DEBUG_OUTPUT
+								printf("%s\n","send command 7 error to queue already");
+								#endif
+							}
+							taskEXIT_CRITICAL();
+						}
+						
 					}
 					else
 					{
-						#ifdef DEBUG_OUTPUT
-						printf("%s\n","send command 7 error to queue already");
-						#endif
+						taskENTER_CRITICAL();
+						portBASE_TYPE status = xQueueSendToBack(send_queueHandle, &frame_return, 0);
+						if(status!=pdPASS)
+						{
+							#ifdef DEBUG_OUTPUT
+							printf("%s\n","queue overflow");
+							#endif
+						}
+						else
+						{
+							#ifdef DEBUG_OUTPUT
+							printf("%s\n","send command 7 error to queue already");
+							#endif
+						}
+						taskEXIT_CRITICAL();
 					}
-					taskEXIT_CRITICAL();
+					
 				}
 			}
 			
