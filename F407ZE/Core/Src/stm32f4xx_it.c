@@ -534,11 +534,6 @@ void TIM1_BRK_TIM9_IRQHandler(void)
 		xTaskNotifyFromISR(grating_monitorHandle,0x0001,eSetBits,&b_tk_grating_monitor);
 		portYIELD_FROM_ISR( b_tk_grating_monitor );
 	}
-	if(posture_monitorHandle !=NULL)
-	{
-		xTaskNotifyFromISR(posture_monitorHandle,0x0001,eSetBits,&b_tk_posture_monitor);
-		portYIELD_FROM_ISR(b_tk_posture_monitor);
-	}
   /* USER CODE END TIM1_BRK_TIM9_IRQn 0 */
   HAL_TIM_IRQHandler(&htim1);
   HAL_TIM_IRQHandler(&htim9);

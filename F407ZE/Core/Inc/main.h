@@ -56,6 +56,7 @@ extern uint8_t tklog[500];
 extern uint32_t ulHighFrequencyTimerTicks;
 extern uint32_t queuespace;
 extern uint32_t fifo_level;
+extern uint32_t time_counter;
 //发送队列句柄
 extern osMessageQueueId_t send_queueHandle;
 //数组定义
@@ -198,6 +199,17 @@ data[3]=(uint8_t)(((error+3000))&0xFF);
 #define ERROR_COMMAND_CONFLICT_DETECT            0x2C
 #define ERROR_NEED_ROTATE                        0x2D
 #define ERROR_OTHER_THING                        0x2E
+#define ERROR_3047                               0x2F
+#define ERROR_3048                               0x30
+#define ERROR_3049                               0x31
+#define ERROR_3050                               0x32
+#define ERROR_3051                               0x33
+#define ERROR_3052                               0x34
+#define ERROR_3053                               0x35
+#define ERROR_3054                               0x36
+#define ERROR_3055                               0x37              //天窗多个光电同时触发
+#define ERROR_3056                               0x38              //前后夹紧多个光电同时触发
+#define ERROR_3057                               0x39              //左右夹紧多个光电同时触发
 
 
 //帧结构掩码
@@ -306,6 +318,7 @@ typedef struct conflict_struct{
 	uint8_t conflict_number[8];                 //表示碰撞检测所要检测的状态点的位置
 	uint8_t conflict_counter;                   //表示碰撞检测点位的总个数，最大为8
 	uint8_t if_conflict;                        //0: 无碰撞 1：存在碰撞
+	uint32_t time;                              //表示上次收到的广播的时间
 }CONFLICT_STRUCT;
 typedef union broadcast_union{
 	uint8_t data[4];
@@ -378,6 +391,7 @@ typedef struct speed{
 	int32_t current_speed_pre;
 	int32_t current_speed_delta;
 	uint32_t scal;                              //导程，单位微米
+	uint32_t calibrate_speed;                   //内部校准指令的速度值
 }SPEED;
 typedef struct limit_switch{
 	uint8_t type;                               //限位开关类型，常开型初始化为0，常闭型初始化为1
@@ -410,9 +424,9 @@ typedef struct position{
 	int32_t remain_position_pre;                //上一采样时刻的滞留脉冲数
 	int32_t remain_position_delta;              //差值
 	int32_t remain_position_delta_pre;          //上一次的差值
-	int32_t tp[8];                                //配置文件位置,根据命令文件映射不同的位置，最多支持8个位置, tp0:电机45度位置，初始化时从eeprom读入
-	//tp1，打开/松开
-	//tp2，关闭/夹紧
+	int32_t tp[8];                                //配置文件位置,根据命令文件映射不同的位置，最多支持8个位置, tp0:电机完全夹紧位置（前后左右）， 45度位置（天窗）
+	//tp1，打开/松开，完全打开位置
+	//tp2，（天窗）关闭/夹紧，45度关闭夹紧（前后左右）
 	uint8_t if_tp_already;                      //标志tp是否有效，初始化时为0， 成功读取eeprom数据后置1
 }POSITION;
 typedef struct dimension{
@@ -471,6 +485,8 @@ typedef struct motor_struct{
 	uint32_t motor_error_code;                    //电机驱动器的错误码
 	uint8_t self_check_counter;                   //自检计数值
 	CONFLICT_STRUCT conflict_value;               //碰撞检测结构体
+	uint8_t broadcast_timeout_flag;               //广播超时标志， 0： 未超时 1：超时, 初始化后置位为1
+	uint8_t calibrate_data[5];                    //内部校准数组，存储内部校准动作数据
 }MOTOR_STRUCT;
 
 typedef struct angle_struct{
@@ -503,6 +519,9 @@ extern void(*result_to_parameter[10])(uint8_t*, uint8_t);
 extern void enable_motor(void);
 extern uint8_t motor_array_init(void);
 extern uint16_t usMBCRC16( uint8_t * pucFrame, uint16_t usLen );
+uint8_t speed_set(uint8_t num, int32_t speed);
+uint8_t torque_set(uint8_t num, int32_t torque);
+int calibrate_command(uint8_t* data,uint32_t para);
 extern MODBUS_LIST* modbus_list_head;
 extern MODBUS_LIST* modbus_list_tail;
 
@@ -513,6 +532,9 @@ extern uint8_t cmd6_stage;
 extern uint8_t motor_communicate_flag[5];
 extern uint8_t motor_communicate_counter;
 extern GRATING grating_value;
+
+extern uint8_t work_model;
+
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

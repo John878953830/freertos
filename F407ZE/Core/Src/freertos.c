@@ -1030,6 +1030,7 @@ void StartDefaultTask(void *argument)
 		if(notify_use!=0)
 		{
 			HAL_GPIO_TogglePin(GPIOB,GPIO_PIN_15);
+			time_counter++;
 			notify_use=0;
 			//QUEUE_STRUCT tmp_5;
 			//modbus_send_sub_5(tmp_5);
@@ -1144,6 +1145,21 @@ void start_tk_commu_monitor(void *argument)
 			#ifdef DEBUG_OUTPUT
 			printf("%s\n","start tk communicate monitor");
 			#endif
+			if(motor_array[0].conflict_value.time<4)
+			{
+				motor_array[0].conflict_value.time++;
+				motor_array[2].conflict_value.time++;
+				motor_array[3].conflict_value.time++;
+			}
+			else
+			{
+				motor_array[0].conflict_value.time=4;
+				motor_array[2].conflict_value.time=4;
+				motor_array[3].conflict_value.time=4;
+				motor_array[0].broadcast_timeout_flag=1;
+				motor_array[2].broadcast_timeout_flag=1;
+				motor_array[3].broadcast_timeout_flag=1;
+			}
 			
 			notify_use=0;
 		}
@@ -1230,6 +1246,13 @@ void start_tk_conflict_monitor(void *argument)
 					
 				}
 				else
+				{
+					motor_array[i].conflict_value.if_conflict=0;
+				}
+			}
+			if(work_model==0x01)
+			{
+				for(i=0;i<4;i++)
 				{
 					motor_array[i].conflict_value.if_conflict=0;
 				}
@@ -1333,7 +1356,7 @@ void start_tk_sensor_monitor(void *argument)
 				}
 			}
 			//获取电机扭矩
-			for(i=0;i<4;i++) //暂时只读取1号电机的参数，因缺少电缆
+			for(i=0;i<4;i++)
 			{
 				if(i==1)
 				{
@@ -1366,7 +1389,7 @@ void start_tk_sensor_monitor(void *argument)
 			}
 			
 			//获取电机目标位置
-			for(i=0;i<4;i++) //暂时只读取1号电机的参数，因缺少电缆
+			for(i=0;i<4;i++)
 			{
 				if(i==1)
 				{
@@ -1601,9 +1624,26 @@ void start_tk_master_order(void *argument)
 								//广播ID
 								uint8_t data=0;
 								uint8_t para=tmp_if_return;
-								if(tmp_source==0x00 && tmp_command_id==0x00)
+								if(tmp_source==0x00)
 								{
-									command_to_function[tmp_command_id](&data,para);
+									//主机广播指令
+									if(tmp_command_id==0x01)
+									{
+										//停机指令
+										command_to_function[0](&data,para);
+									}
+									if(tmp_command_id==0x02)
+									{
+										//工作模式设定指令
+										if(id.data[0]==0)
+										{
+											work_model=0;
+										}
+										if(id.data[0]==1)
+										{
+											work_model=1;
+										}
+									}
 								}
 								if(tmp_source==0x01 && tmp_command_id==0x0B)
 								{
@@ -1613,10 +1653,22 @@ void start_tk_master_order(void *argument)
 									{
 										if(i==1)
 											continue;
+										motor_array[i].conflict_value.time=time_counter;
 										uint8_t j;
 										for(j=0;j<motor_array[i].conflict_value.conflict_counter;j++)
 										{
 											motor_array[i].conflict_value.conflict_status[j]=(id.data[3]>>motor_array[i].conflict_value.conflict_number[j])&0x01;
+										}
+										//广播状态转换
+										if(motor_array[i].conflict_value.time<4)
+										{
+											motor_array[i].conflict_value.time=0;
+										}
+										if(motor_array[i].broadcast_timeout_flag==1)
+										{
+											//超时标志清除
+											motor_array[i].broadcast_timeout_flag=0;
+											motor_array[i].conflict_value.time=0;
 										}
 									}
 								}
