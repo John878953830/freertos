@@ -773,11 +773,15 @@ void TIM8_BRK_TIM12_IRQHandler(void)
 void TIM8_UP_TIM13_IRQHandler(void)
 {
   /* USER CODE BEGIN TIM8_UP_TIM13_IRQn 0 */
-	if(conflict_monitorHandle !=NULL)
+	if(__HAL_TIM_GET_FLAG(&htim8, TIM_FLAG_UPDATE) != RESET)
 	{
-		xTaskNotifyFromISR(conflict_monitorHandle,0x0001,eSetBits,&b_tk_conflict_monitor);
-		portYIELD_FROM_ISR(b_tk_conflict_monitor);
+		if(conflict_monitorHandle !=NULL)
+		{
+			xTaskNotifyFromISR(conflict_monitorHandle,0x0001,eSetBits,&b_tk_conflict_monitor);
+			portYIELD_FROM_ISR(b_tk_conflict_monitor);
+		}
 	}
+	
 	if(__HAL_TIM_GET_FLAG(&htim13, TIM_FLAG_UPDATE) != RESET)
 	{
 		if(result_processHandle_rece_5_timeout!=NULL)
