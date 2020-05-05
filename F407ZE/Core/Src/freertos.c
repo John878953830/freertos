@@ -2006,136 +2006,73 @@ void start_tk_result_process_rece_5(void *argument)
 					}
 					else
 					{
-						//统计最大跨度,正向搜索，data 0 开始搜索
-						uint8_t i=0, j=0;
-						uint8_t left=0,right=0;//left right start min = 0
-						for(i=0;i<6;i++)
+						//三段统计
+						uint8_t counter_0_1=0, counter_2_3=0,counter_4_5=0;
+						uint8_t itc=0,jtc=0;
+						for(itc=0;itc<6;itc++)
 						{
-							uint8_t tmp=grating_value.data[i];
-							uint8_t k=0;
-							for(k=0;k<8;k++)
+							if(itc==0 || itc==1)
 							{
-								if(((tmp<<k)&0x80)==0x80)
+								for(jtc=0;jtc<8;jtc++)
 								{
-									goto LEFT_OVER;
+									if((grating_value.data[itc]>>jtc)&0x01)
+									{
+										counter_0_1++;
+									}
 								}
-								left++;
+							}
+							if(itc==2 || itc==3)
+							{
+								for(jtc=0;jtc<8;jtc++)
+								{
+									if((grating_value.data[itc]>>jtc)&0x01)
+									{
+										counter_2_3++;
+									}
+								}
+							}
+							if(itc==4 || itc==5)
+							{
+								for(jtc=0;jtc<8;jtc++)
+								{
+									if((grating_value.data[itc]>>jtc)&0x01)
+									{
+										counter_4_5++;
+									}
+								}
 							}
 						}
-						LEFT_OVER:
-						grating_value.min_point=left;
-						for(i=6;i>0;i--)
+						if(counter_0_1>=counter_2_3 && counter_4_5>=counter_2_3 && counter_2_3<3)
 						{
-							uint8_t tmp=grating_value.data[i-1];
-							uint8_t k=0;
-							for(k=0;k<8;k++)
+							if(counter_0_1<4)
 							{
-								if(((tmp>>k)&0x01)==0x01)
-								{
-									goto RIGHT_OVER;
-								}
-								right++;
-							}
-						}
-						RIGHT_OVER:
-						right=47-right;//变换序号
-						grating_value.max_point=right;
-						if(__fabs(left-right)<DISTANCE_45)
-						{
-							if(__fabs(left-right)<DISTANCE_MIN)
-							{
-								grating_value.if_have_target=0x02;
-								grating_value.status=0;
+								//角度正常，无需旋转
+								grating_value.if_have_target=1;
+								grating_value.status_angle=0;
 							}
 							else
 							{
-								grating_value.if_have_target=0x01;
-								grating_value.status=0;
+								//角度不正常，顺时针旋转80度
+								grating_value.if_have_target=1;
+								grating_value.status_angle=0x11;
 							}
 						}
 						else
 						{
-							//统计跨度前区和跨度后区的1的个数
-							//计算跨度中轴
-							uint8_t middle=left+(uint8_t)(__fabs(left-right)/2);
-							uint8_t left_counter=0, right_counter=0;
-							uint8_t tmp_counter=0;
-							//统计左侧光点个数
-							for(i=0;i<6;i++)
+							//逆时针旋转40度
+							if(counter_0_1<counter_2_3 && counter_4_5<counter_2_3)
 							{
-								uint8_t tmp=grating_value.data[i];
-								uint8_t k=0;
-								for(k=0;k<8;k++)
+								if(counter_2_3>4)
 								{
-									if(((tmp<<k)&0x80)==0x80)
-									{
-										left_counter++;
-									}
-									tmp_counter++;
-									if(tmp_counter==middle+1)
-									{
-										goto LEFT_STAT_OVER;
-									}
-								}
-							}
-							LEFT_STAT_OVER:
-							//统计右侧光点数
-							grating_value.front_point_counter=left_counter;
-							tmp_counter=0;
-							for(i=6;i>0;i--)
-							{
-								uint8_t tmp=grating_value.data[i-1];
-								uint8_t k=0;
-								for(k=0;k<8;k++)
-								{
-									if(((tmp>>k)&0x01)==0x01)
-									{
-										right_counter++;
-									}
-									tmp_counter++;
-									if(tmp_counter==47-middle)
-									{
-										goto RIGHT_STAT_OVER;
-									}
-								}
-							}
-							RIGHT_STAT_OVER:
-							grating_value.back_point_counter=right_counter;
-							if(left_counter < DISTANCE_LIMIT_MIN && right_counter < DISTANCE_LIMIT_MIN)
-							{
-								grating_value.if_have_target=0x02;
-								grating_value.status=0;
-							}
-							else
-							{
-								grating_value.if_have_target=0x04;     //有飞机有危险
-								grating_value.status=1;
-							}
-							//根据光点数进行运算,确定机头朝向
-							if(__fabs(right_counter-left_counter)<DISTANCE_MIDDLE_DELTA)
-							{
-								if(right_counter<DISTANCE_DELTA && left_counter<DISTANCE_DELTA)
-								{
-									grating_value.status_angle=0x00;
-								}else{
-									grating_value.status_angle=0x11;
+									grating_value.if_have_target=4;
+									grating_value.status_angle=0;
 								}
 							}
 							else
 							{
-								if(__fabs(right_counter-left_counter)>=DISTANCE_MIDDLE_DELTA)
-								{
-									if(right_counter>left_counter)
-									{
-										grating_value.status_angle=0x01;
-									}
-									else
-									{
-										grating_value.status_angle=0x10;
-									}
-								}
+								grating_value.if_have_target=0;
 							}
-						}
+						}	
 					}
 				}
 			}

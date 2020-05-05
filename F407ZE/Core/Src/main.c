@@ -5485,12 +5485,6 @@ void result_parse_2(uint8_t* data, uint8_t num)
 					frame_return.can_if_last=0x00;          //无需拼接
 					frame_return.can_if_return=0x00;        //无需返回
 					frame_return.length=4;
-					/*
-					frame_return.data[0]=0xFF;              //错误码，0标识正常
-					frame_return.data[1]=0xFF;              //执行结果， 1代表已完成
-					frame_return.data[2]=0xFF;               //电机号
-					frame_return.data[3]=0xFE;              //保留
-					*/
 					return_error(frame_return.data,RETURN_OK);
 					if(motor_array[num].self_check_counter!=0)
 					{
