@@ -1564,7 +1564,7 @@ int command_7(uint8_t* data,uint32_t para)
 	uint8_t data_len=(uint8_t)(para & 0x0F);
 	if((data_len != 2) && if_return==1)
 	{
-		if(period!=0)
+		//if(period!=0)
 		{
 			QUEUE_STRUCT tmp;
 			tmp.property=0x00;             //can send
@@ -5363,7 +5363,7 @@ void result_parse_2(uint8_t* data, uint8_t num)
 							}
 						}
 					}
-					if(1)     //如果光栅角度正常，发送下一帧动作， tp0 位置， 完全夹紧
+					if((grating_value.if_have_target==1 && grating_value.status_angle==0) || grating_value.if_have_target==0)     //如果光栅角度正常，发送下一帧动作， tp0 位置， 完全夹紧
 					{
 						if((__fabs(motor_array[num].position_value.current_position-motor_array[num].position_value.tp[0])>COMPLETE_JUDGE) && (num==2 || num==3) && motor_array[num].command.data_0 == 1 )
 						{
@@ -5443,6 +5443,7 @@ void result_parse_2(uint8_t* data, uint8_t num)
 					}
 					else
 					{
+						return_error(frame_return.data,ERROR_NEED_ROTATE);
 						taskENTER_CRITICAL();
 						portBASE_TYPE status = xQueueSendToBack(send_queueHandle, &frame_return, 0);
 						if(status!=pdPASS)

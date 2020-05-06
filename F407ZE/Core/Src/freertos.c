@@ -2071,6 +2071,7 @@ void start_tk_result_process_rece_5(void *argument)
 							else
 							{
 								grating_value.if_have_target=0;
+								grating_value.status_angle=0;
 							}
 						}	
 					}
