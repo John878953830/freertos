@@ -523,6 +523,7 @@ extern uint16_t usMBCRC16( uint8_t * pucFrame, uint16_t usLen );
 uint8_t speed_set(uint8_t num, int32_t speed);
 uint8_t torque_set(uint8_t num, int32_t torque);
 int calibrate_command(uint8_t* data,uint32_t para);
+extern void cmd_abs(uint8_t num);
 extern MODBUS_LIST* modbus_list_head;
 extern MODBUS_LIST* modbus_list_tail;
 
@@ -535,6 +536,8 @@ extern uint8_t motor_communicate_counter;
 extern GRATING grating_value;
 
 extern uint8_t work_model;
+
+extern uint8_t subindex_for_cmd20;
 
 /* USER CODE END Private defines */
 
