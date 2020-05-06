@@ -36,7 +36,7 @@
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
-uint32_t timer_period=1000;
+uint32_t timer_period=100;
 xTimerHandle broadcast_timer;
 xTimerHandle motor_status_timer;     //µç»ú×´Ì¬²ÎÊı¶¨Ê±Æ÷
 uint32_t fifo_level=0;
@@ -81,6 +81,7 @@ uint8_t motor_communicate_counter=0;                     //ÖØ¸´¼ÆÊı£¬È·±£Ö»µãÁÁÒ
 uint32_t time_counter=0;                                 //Ê±¼ä¼ÆÊıÖµ£¬ÔÚdefaultÈÎÎñÖĞÔö¼Ó£¬µ¥Î»Ãë£¬ÆäÊµÈ¡¾öÓÚdefaultÈÎÎñµÄµ÷ÓÃ¼ä¸ô    
 
 uint8_t work_model=1;                                    //¹¤×÷Ä£Ê½Éè¶¨£¬0£º°²È«Ä£Ê½ 1£ºµ÷ÊÔÄ£Ê½£¬µ÷ÊÔÄ£Ê½²»½øĞĞÅö×²¼à²â
+uint8_t set_flag=0;                                      //EEPROMÊÇ·ñÉèÖÃ¹ı±êÖ¾£¬ 0£º Î´ÉèÖÃ¹ı   0x33ÉèÖÃ¹ı
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -186,6 +187,22 @@ uint8_t motor_array_init(void)
 	uint8_t tmp_addr=0x00;                      //1ºÅµç»úÆğÊ¼µØÖ·£¬tp1£¬2£¬3´æ´¢Çø
 	length=4;
 	rw_flag=0;
+	//¶ÁÈ¡EEPROMÉèÖÃÍê³É±êÖ¾Î»
+	uint8_t tmp_flag=148;
+	
+	if(iic_rw(rw_flag, tmp_addr,data,1)!=0)
+	{
+		//¶ÁÈ¡EEPROM³ö´í
+		;
+	}
+	else
+	{
+		set_flag=data[0];
+	}
+	
+	//²âÊÔ´úÂë
+	set_flag=0x33;
+	
 	//1ºÅµç»ú
 	for(i=0;i<3;i++)
 	{
@@ -396,6 +413,7 @@ uint8_t motor_array_init(void)
 		//²âÊÔ´úÂë
 		motor_array[i].speed_value.calibrate_speed=50;//ÉèÖÃÄ¬ÈÏĞ£×¼ËÙ¶ÈÎª50
 	}
+	
 	
 	
 	
@@ -5439,7 +5457,6 @@ void result_parse_2(uint8_t* data, uint8_t num)
 							}
 							taskEXIT_CRITICAL();
 						}
-						
 					}
 					else
 					{

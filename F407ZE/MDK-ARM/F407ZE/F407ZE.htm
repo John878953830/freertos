@@ -3,7 +3,7 @@
 <title>Static Call Graph - [F407ZE\F407ZE.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image F407ZE\F407ZE.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060422: Last Updated: Thu May 07 01:00:33 2020
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060422: Last Updated: Thu May 07 02:25:21 2020
 <BR><P>
 <H3>Maximum Stack Usage =       1784 bytes + Unknown(Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -1635,7 +1635,7 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[13a]"></a>MX_FREERTOS_Init</STRONG> (Thumb, 360 bytes, Stack size 192 bytes, freertos.o(i.MX_FREERTOS_Init))
-<BR><BR>[Stack]<UL><LI>Max Depth = 432<LI>Call Chain = MX_FREERTOS_Init &rArr; motor_array_init &rArr; torque_set &rArr; xQueueGenericSend &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
+<BR><BR>[Stack]<UL><LI>Max Depth = 448<LI>Call Chain = MX_FREERTOS_Init &rArr; motor_array_init &rArr; torque_set &rArr; xQueueGenericSend &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
 </UL>
 <BR>[Calls]<UL><LI><a href="#[140]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;timer_start
 <LI><a href="#[13e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;motor_array_init
@@ -2447,7 +2447,7 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[7d]"></a>main</STRONG> (Thumb, 346 bytes, Stack size 0 bytes, main.o(i.main))
-<BR><BR>[Stack]<UL><LI>Max Depth = 432<LI>Call Chain = main &rArr; MX_FREERTOS_Init &rArr; motor_array_init &rArr; torque_set &rArr; xQueueGenericSend &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
+<BR><BR>[Stack]<UL><LI>Max Depth = 448<LI>Call Chain = main &rArr; MX_FREERTOS_Init &rArr; motor_array_init &rArr; torque_set &rArr; xQueueGenericSend &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
 </UL>
 <BR>[Calls]<UL><LI><a href="#[17f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osKernelStart
 <LI><a href="#[17e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osKernelInitialize
@@ -2533,8 +2533,8 @@ Global Symbols
 <LI><a href="#[8d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;start_tk_grating_monitor
 </UL>
 
-<P><STRONG><a name="[13e]"></a>motor_array_init</STRONG> (Thumb, 1048 bytes, Stack size 48 bytes, main.o(i.motor_array_init))
-<BR><BR>[Stack]<UL><LI>Max Depth = 240<LI>Call Chain = motor_array_init &rArr; torque_set &rArr; xQueueGenericSend &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
+<P><STRONG><a name="[13e]"></a>motor_array_init</STRONG> (Thumb, 1080 bytes, Stack size 64 bytes, main.o(i.motor_array_init))
+<BR><BR>[Stack]<UL><LI>Max Depth = 256<LI>Call Chain = motor_array_init &rArr; torque_set &rArr; xQueueGenericSend &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
 </UL>
 <BR>[Calls]<UL><LI><a href="#[b5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_GPIO_ReadPin
 <LI><a href="#[185]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;torque_set
