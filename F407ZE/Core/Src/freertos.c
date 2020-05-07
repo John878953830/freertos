@@ -2181,15 +2181,21 @@ void start_tk_result_process_rece_5(void *argument)
 							//逆时针旋转40度
 							if(counter_0_1<counter_2_3 && counter_4_5<counter_2_3)
 							{
-								if(counter_2_3>4)
+								if(counter_2_3>4 && counter_0_1<6)
 								{
 									grating_value.if_have_target=4;
 									grating_value.status_angle=0;
 								}
+								else
+								{
+									//角度不正常，顺时针旋转80度
+								  grating_value.if_have_target=1;
+								  grating_value.status_angle=0x11;
+								}
 							}
 							else
 							{
-								grating_value.if_have_target=0;
+								grating_value.if_have_target=1;
 								grating_value.status_angle=0;
 							}
 						}	
