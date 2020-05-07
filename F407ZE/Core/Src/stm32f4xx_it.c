@@ -224,6 +224,10 @@ void EXTI0_IRQHandler(void)
 	{
 		//FALLING TRIGGER
 		motor_array[0].limit_sw[0].status=HAL_GPIO_ReadPin(motor_array[0].limit_sw[0].gpio_port,motor_array[0].limit_sw[0].pin_number);
+		if(motor_array[0].command.command_id==15)
+		{
+			motor_array[0].self_check_counter--;
+		}
 	}
 
   /* USER CODE END EXTI0_IRQn 0 */
@@ -243,6 +247,10 @@ void EXTI1_IRQHandler(void)
 	{
 		//FALLING TRIGGER
 		motor_array[0].limit_sw[1].status=HAL_GPIO_ReadPin(motor_array[0].limit_sw[1].gpio_port,motor_array[0].limit_sw[1].pin_number);
+		if(motor_array[0].command.command_id==15)
+		{
+			motor_array[0].self_check_counter--;
+		}
 	}
   /* USER CODE END EXTI1_IRQn 0 */
   HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_1);
@@ -261,6 +269,10 @@ void EXTI2_IRQHandler(void)
 	{
 		//FALLING TRIGGER
 		motor_array[0].limit_sw[2].status=HAL_GPIO_ReadPin(motor_array[0].limit_sw[2].gpio_port,motor_array[0].limit_sw[2].pin_number);
+		if(motor_array[0].command.command_id==15)
+		{
+			motor_array[0].self_check_counter--;
+		}
 	}
   /* USER CODE END EXTI2_IRQn 0 */
   HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_2);
@@ -279,6 +291,10 @@ void EXTI3_IRQHandler(void)
 	{
 		//FALLING TRIGGER
 		motor_array[0].limit_sw[3].status=HAL_GPIO_ReadPin(motor_array[0].limit_sw[3].gpio_port,motor_array[0].limit_sw[3].pin_number);
+		if(motor_array[0].command.command_id==15)
+		{
+			motor_array[0].self_check_counter--;
+		}
 	}
   /* USER CODE END EXTI3_IRQn 0 */
   HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_3);
@@ -297,6 +313,10 @@ void EXTI4_IRQHandler(void)
 	{
 		//FALLING TRIGGER
 		motor_array[2].limit_sw[0].status=HAL_GPIO_ReadPin(motor_array[2].limit_sw[0].gpio_port,motor_array[2].limit_sw[0].pin_number);
+		if(motor_array[2].command.command_id==17)
+		{
+			motor_array[2].self_check_counter--;
+		}
 	}
   /* USER CODE END EXTI4_IRQn 0 */
   HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_4);
@@ -491,26 +511,46 @@ void EXTI9_5_IRQHandler(void)
 	{
 		//FALLING TRIGGER
 		motor_array[2].limit_sw[1].status=HAL_GPIO_ReadPin(motor_array[2].limit_sw[1].gpio_port,motor_array[2].limit_sw[1].pin_number);
+		if(motor_array[2].command.command_id==17)
+		{
+			motor_array[2].self_check_counter--;
+		}
 	}
 	if(__HAL_GPIO_EXTI_GET_IT(GPIO_PIN_6)!=RESET)
 	{
 		//FALLING TRIGGER
 		motor_array[2].limit_sw[2].status=HAL_GPIO_ReadPin(motor_array[2].limit_sw[2].gpio_port,motor_array[2].limit_sw[2].pin_number);
+		if(motor_array[2].command.command_id==17)
+		{
+			motor_array[2].self_check_counter--;
+		}
 	}
 	if(__HAL_GPIO_EXTI_GET_IT(GPIO_PIN_7)!=RESET)
 	{
 		//FALLING TRIGGER
 		motor_array[3].limit_sw[0].status=HAL_GPIO_ReadPin(motor_array[3].limit_sw[0].gpio_port,motor_array[3].limit_sw[0].pin_number);
+		if(motor_array[3].command.command_id==18)
+		{
+			motor_array[3].self_check_counter--;
+		}
 	}
 	if(__HAL_GPIO_EXTI_GET_IT(GPIO_PIN_8)!=RESET)
 	{
 		//FALLING TRIGGER
 		motor_array[3].limit_sw[1].status=HAL_GPIO_ReadPin(motor_array[3].limit_sw[1].gpio_port,motor_array[3].limit_sw[1].pin_number);
+		if(motor_array[3].command.command_id==18)
+		{
+			motor_array[3].self_check_counter--;
+		}
 	}
 	if(__HAL_GPIO_EXTI_GET_IT(GPIO_PIN_9)!=RESET)
 	{
 		//FALLING TRIGGER
 		motor_array[3].limit_sw[2].status=HAL_GPIO_ReadPin(motor_array[3].limit_sw[2].gpio_port,motor_array[3].limit_sw[2].pin_number);
+		if(motor_array[3].command.command_id==18)
+		{
+			motor_array[3].self_check_counter--;
+		}
 	}
   /* USER CODE END EXTI9_5_IRQn 0 */
   HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_5);

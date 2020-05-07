@@ -241,9 +241,9 @@ uint8_t motor_array_init(void)
 			motor_array[2].position_value.tp[i]=((uint32_t)data[0] << 24) | ((uint32_t)data[1] << 16) | ((uint32_t)data[2] << 8) | ((uint32_t)data[3]);
 		}
 	}
-	//测试代码
+	//测试代码,3号电机，天窗运行方向夹持
 	motor_array[2].position_value.tp[0]=0xFFFF4AAF;
-	motor_array[2].position_value.tp[1]=0;
+	motor_array[2].position_value.tp[1]=0xFFFFFF2C;
 	motor_array[2].position_value.tp[2]=0xFFFF5C93;
 	motor_array[2].position_value.if_tp_already=0x01;
 	
@@ -264,7 +264,7 @@ uint8_t motor_array_init(void)
 	}
 	//测试代码
 	motor_array[3].position_value.tp[0]=0x0000BF8C;
-	motor_array[3].position_value.tp[1]=0;
+	motor_array[3].position_value.tp[1]=0x00000089;
 	motor_array[3].position_value.tp[2]=0x0000AD0F;
 	motor_array[3].position_value.if_tp_already=0x01;
 	
@@ -1620,6 +1620,7 @@ int command_6(uint8_t* data,uint32_t para)
 	motor_array[0].command.command_id=0x0F;           //命令id填充为8
 	motor_array[0].command.command_status=0x01;       //命令执行中
 	motor_array[0].command.if_return=if_return;       //执行完成是否需要回复帧
+	motor_array[0].command.command_union=6;
 	//暂时设置为8，实际情况中需要根据tp和当前位置计算,所有位置都是触发8个上下沿，但当天窗的完全关闭点不为光电开关点时，天窗有14个上下沿，其他也是如此
 	motor_array[0].self_check_counter=8;
 	//command_15(&cmd6_stage,if_return);
@@ -4476,6 +4477,7 @@ int command_17(uint8_t* data,uint32_t para)
 	QUEUE_STRUCT command_seq_l0[9];
 	//填充序列
 	uint8_t command_seq_counter=0;
+	
 	if(__fabs(motor_array[2].position_value.tp[0] - motor_array[2].position_value.current_position)>COMPLETE_JUDGE)
 	{
 		memcpy(&command_seq_l0[3*command_seq_counter],command_seq_l1,3*sizeof(QUEUE_STRUCT));
@@ -4484,6 +4486,7 @@ int command_17(uint8_t* data,uint32_t para)
 	else{
 		motor_array[2].self_check_counter++;
 	}
+	
 	if(__fabs(motor_array[2].position_value.tp[1] - motor_array[2].position_value.current_position)>COMPLETE_JUDGE)
 	{
 		memcpy(&command_seq_l0[3*command_seq_counter],command_seq_l2,3*sizeof(QUEUE_STRUCT));
@@ -4493,6 +4496,7 @@ int command_17(uint8_t* data,uint32_t para)
 	{
 		motor_array[2].self_check_counter++;
 	}
+	/*
 	if(__fabs(motor_array[2].position_value.tp[2] - motor_array[2].position_value.current_position)>COMPLETE_JUDGE)
 	{
 		memcpy(&command_seq_l0[3*command_seq_counter],command_seq_l3,3*sizeof(QUEUE_STRUCT));
@@ -4502,6 +4506,7 @@ int command_17(uint8_t* data,uint32_t para)
 	{
 		motor_array[2].self_check_counter++;
 	}
+	*/
 	//解析数据
 	uint8_t if_return=para;     //自检命令没有参数
 	//动作序列压入队列
@@ -4803,6 +4808,7 @@ int command_18(uint8_t* data,uint32_t para)
 	{
 		motor_array[3].self_check_counter++;
 	}
+	/*
 	if(__fabs(motor_array[3].position_value.tp[2] - motor_array[3].position_value.current_position)>COMPLETE_JUDGE)
 	{
 		memcpy(&command_seq_l0[3*command_seq_counter],command_seq_l3,3*sizeof(QUEUE_STRUCT));
@@ -4812,6 +4818,7 @@ int command_18(uint8_t* data,uint32_t para)
 	{
 		motor_array[3].self_check_counter++;
 	}
+	*/
 	//解析数据
 	uint8_t if_return=para;     //自检命令没有参数
 	//动作序列压入队列
