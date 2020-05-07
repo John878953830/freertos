@@ -5249,10 +5249,22 @@ int command_20(uint8_t* data,uint32_t para)
 	//填充命令属性
 	motor_array[2].command.command_union=0x14;
 	motor_array[3].command.command_union=0x14;
-	motor_array[2].command.command_status=0x01;
-	motor_array[3].command.command_status=0x01;
-	subindex_for_cmd20=0;
-	command_13(data,para);
+	
+	//需要根据位置值添加不同的命令值
+	if(__fabs(motor_array[2].position_value.current_position-motor_array[2].position_value.tp[2])<COMPLETE_JUDGE 
+		 && __fabs(motor_array[3].position_value.current_position-motor_array[3].position_value.tp[2]<COMPLETE_JUDGE))
+	{
+		motor_array[3].command.command_status=2;
+		subindex_for_cmd20=1;
+	}
+	else
+	{
+		motor_array[2].command.command_status=0x01;
+	  motor_array[3].command.command_status=0x01;
+	  subindex_for_cmd20=0;
+	  command_13(data,para);
+	}
+	
 	//command_14(data,para);
 	
 	return 0;
@@ -5438,7 +5450,8 @@ void result_parse_2(uint8_t* data, uint8_t num)
 							}
 						}
 					}
-					if((grating_value.if_have_target==1 && grating_value.status_angle==0) || grating_value.if_have_target==0)     //如果光栅角度正常，发送下一帧动作， tp0 位置， 完全夹紧
+					//if((grating_value.if_have_target==1 && grating_value.status_angle==0) || grating_value.if_have_target==0)     //如果光栅角度正常，发送下一帧动作， tp0 位置， 完全夹紧
+					if(0)
 					{
 						if((__fabs(motor_array[num].position_value.current_position-motor_array[num].position_value.tp[0])>COMPLETE_JUDGE) && (num==2 || num==3) && motor_array[num].command.data_0 == 1 )
 						{
@@ -5814,6 +5827,9 @@ void result_parse_2(uint8_t* data, uint8_t num)
 					{
 						self_check_counter_6=0;
 						cmd6_if_return=0;
+						motor_array[0].command.command_union=0;
+						motor_array[2].command.command_union=0;
+						motor_array[3].command.command_union=0;
 						//向上位机发送cmd6 的总体自检返回帧
 						//向上位机发送开始自检数据帧
 						QUEUE_STRUCT tmp;
