@@ -5361,7 +5361,35 @@ void result_parse_2(uint8_t* data, uint8_t num)
 					frame_return.can_if_return=0x00;        //ÎÞÐè·µ»Ø
 					frame_return.length=4;
 					
-					return_error(frame_return.data,RETURN_OK);
+					if(motor_array[num].motor_error_code!=0x00000000)
+					{
+						switch(num)
+						{
+							case 0:
+							{
+								return_error(frame_return.data,ERROR_3058);
+								break;
+							}
+							case 1:
+							{
+								break;
+							}
+							case 2:
+							{
+								return_error(frame_return.data,ERROR_3060);
+								break;
+							}
+							case 3:
+							{
+								return_error(frame_return.data,ERROR_3059);
+								break;
+							}
+						}
+					}
+					else
+					{
+						return_error(frame_return.data,RETURN_OK);
+					}
 					if(motor_array[num].command.command_id==0x08 || 
 						 motor_array[num].command.command_id==0x08 ||
 					   motor_array[num].command.command_id==0x08)

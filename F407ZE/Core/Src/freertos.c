@@ -397,6 +397,7 @@ static void prvAutoReloadMotorStatusTimerCallback( TimerHandle_t xTimer )
 {
 	//读取电机状态的回调函数
 	uint8_t i=0;
+	/*
 	//获取电机错误码
 	for(i=0;i<4;i++) //
 	{
@@ -415,6 +416,39 @@ static void prvAutoReloadMotorStatusTimerCallback( TimerHandle_t xTimer )
 			pos_get.modbus_data_len_l=0x02;
 			pos_get.modbus_property=4;                   //错误码
 			portBASE_TYPE	status = xQueueSendToBack(send_queueHandle, &pos_get, 0);
+			if(status!=pdPASS)
+			{
+				#ifdef DEBUG_OUTPUT
+				printf("%s\n","queue overflow");
+				#endif
+			}
+			else
+			{
+				#ifdef DEBUG_OUTPUT
+				printf("%s\n","send command 7 succes to queue already");
+				#endif
+			}
+		}
+	}
+	*/
+	//获取电机扭矩
+	for(i=0;i<4;i++)
+	{
+		if(i==1)
+		{
+			continue;
+		}
+		else{
+			QUEUE_STRUCT speed_get;
+			speed_get.property=1;                          //485 send
+			speed_get.modbus_addr=i+1;                       //电机号
+			speed_get.modbus_func=0x03;                    //读多个寄存器
+			speed_get.modbus_addr_h=(uint8_t)(TORQUE_CURRENT_ADDR>>8);    //读当前扭矩
+			speed_get.modbus_addr_l=(uint8_t)(TORQUE_CURRENT_ADDR&0xFF);  
+			speed_get.modbus_data_len_h=0x00;
+			speed_get.modbus_data_len_l=0x02;
+			speed_get.modbus_property=3;                   //扭矩
+			portBASE_TYPE	status = xQueueSendToBack(send_queueHandle, &speed_get, 0);
 			if(status!=pdPASS)
 			{
 				#ifdef DEBUG_OUTPUT
@@ -1018,7 +1052,6 @@ void MX_FREERTOS_Init(void) {
 	
 
   /* add threads, ... */
-	
 	//初始化电机中的位置和一些其他的关键变量
 	motor_array_init();
 	//启动软件定时器
@@ -1026,78 +1059,8 @@ void MX_FREERTOS_Init(void) {
 	//定时器初始化
 	timer_start();
 	can_start();
-	
 	//使能电机
 	enable_motor();
-	
-	/*
-	enable_motor.property=1;                            //485 send
-	enable_motor.modbus_addr=2;
-	enable_motor.modbus_func=0x10;                      //写多个寄存器
-	enable_motor.modbus_addr_h=(uint8_t)(1008>>8);
-	enable_motor.modbus_addr_l=(uint8_t)(1008&0xFF);                   //电机485地址
-	//tmp.modbus_addr_h=0x03;
-	//tmp.modbus_addr_l=0xF2;
-	enable_motor.modbus_data_len_h=0x00;
-	enable_motor.modbus_data_len_l=0x02;
-	enable_motor.modbus_data_byte=0x04;
-	enable_motor.modbus_data_1=0x00;
-	enable_motor.modbus_data_2=0x01;
-	enable_motor.modbus_data_3=0x00;
-	enable_motor.modbus_data_4=0x00;
-	
-	modbus_send(enable_motor);
-	HAL_Delay(50);
-	*/
-	//
-	
-	/*
-	enable_motor.property=1;                            //485 send
-		enable_motor.modbus_addr=2;                       //电机号需要根据命令中的电机号赋值
-		enable_motor.modbus_func=0x10;                    //写多个寄存器
-		enable_motor.modbus_addr_h=(uint8_t)(3202>>8);
-		enable_motor.modbus_addr_l=(uint8_t)(3202&0xFF);        //写目标位置
-		enable_motor.modbus_data_len_h=0x00;
-		enable_motor.modbus_data_len_l=0x02;
-		enable_motor.modbus_data_byte=0x04;
-		enable_motor.modbus_data_1=0;                      //先赋值为命令中的数值，当前位置读取成功后修改值
-		enable_motor.modbus_data_2=0;                      //先赋值为命令中的数值，当前位置读取成功后修改值
-		enable_motor.modbus_data_3=0;                      //先赋值为命令中的数值，当前位置读取成功后修改值
-		enable_motor.modbus_data_4=0;                      //先赋值为命令中的数值，当前位置读取成功后修改值
-		
-		modbus_send(enable_motor);         //写位置
-		
-		HAL_Delay(50);
-		*/
-		/*
-		enable_motor.property=1;                            //485 send
-		enable_motor.modbus_addr=2;                       //电机号需要根据命令中的电机号赋值
-		enable_motor.modbus_func=0x10;                    //写多个寄存器
-		enable_motor.modbus_addr_h=(uint8_t)(2040>>8);
-		enable_motor.modbus_addr_l=(uint8_t)(2040&0xFF);        //写使能寄存器
-		enable_motor.modbus_data_len_h=0x00;
-		enable_motor.modbus_data_len_l=0x02;
-		enable_motor.modbus_data_byte=0x04;
-		enable_motor.modbus_data_1=0xFF;                     //使能寄存器全部写为FF
-		enable_motor.modbus_data_2=0xFF;                      
-		enable_motor.modbus_data_3=0xFF;                     
-		enable_motor.modbus_data_4=0xFF;
-modbus_send(enable_motor);         //写位置
-HAL_Delay(100);
-enable_motor.property=1;                            //485 send
-		enable_motor.modbus_addr=2;                       //电机号需要根据命令中的电机号赋值
-		enable_motor.modbus_func=0x10;                    //写多个寄存器
-		enable_motor.modbus_addr_h=(uint8_t)(2040>>8);
-		enable_motor.modbus_addr_l=(uint8_t)(2040&0xFF);        //写使能寄存器
-		enable_motor.modbus_data_len_h=0x00;
-		enable_motor.modbus_data_len_l=0x02;
-		enable_motor.modbus_data_byte=0x04;
-		enable_motor.modbus_data_1=0x00;                     //使能寄存器全部写为FF
-		enable_motor.modbus_data_2=0x00;                      
-		enable_motor.modbus_data_3=0x00;                     
-		enable_motor.modbus_data_4=0x00;
-modbus_send(enable_motor);         //写位置
-*/
   /* USER CODE END RTOS_THREADS */
 
 }
@@ -1258,7 +1221,6 @@ void start_tk_commu_monitor(void *argument)
 				motor_array[2].broadcast_timeout_flag=1;
 				motor_array[3].broadcast_timeout_flag=1;
 			}
-			
 			notify_use=0;
 		}
     osDelay(1);
@@ -1418,6 +1380,38 @@ void start_tk_sensor_monitor(void *argument)
 					}
 				}
 			}
+			//获取电机错误码
+			for(i=0;i<4;i++) //
+			{
+				if(i==1)
+				{
+					continue;
+				}
+				else{
+					QUEUE_STRUCT pos_get;
+					pos_get.property=1;                          //485 send
+					pos_get.modbus_addr=i+1;                       //电机号
+					pos_get.modbus_func=0x03;                    //读多个寄存器
+					pos_get.modbus_addr_h=(uint8_t)(ERROR_CODE_ADDR>>8);    //读电机错误码
+					pos_get.modbus_addr_l=(uint8_t)(ERROR_CODE_ADDR&0xFF);  
+					pos_get.modbus_data_len_h=0x00;
+					pos_get.modbus_data_len_l=0x02;
+					pos_get.modbus_property=4;                   //错误码
+					portBASE_TYPE	status = xQueueSendToBack(send_queueHandle, &pos_get, 0);
+					if(status!=pdPASS)
+					{
+						#ifdef DEBUG_OUTPUT
+						printf("%s\n","queue overflow");
+						#endif
+					}
+					else
+					{
+						#ifdef DEBUG_OUTPUT
+						printf("%s\n","send command 7 succes to queue already");
+						#endif
+					}
+				}
+			}
 			//获取电机速度
 			for(i=0;i<4;i++) //
 			{
@@ -1453,6 +1447,7 @@ void start_tk_sensor_monitor(void *argument)
 					}
 				}
 			}
+			/*
 			//获取电机扭矩
 			for(i=0;i<4;i++)
 			{
@@ -1485,7 +1480,7 @@ void start_tk_sensor_monitor(void *argument)
 					}
 				}
 			}
-			
+			*/
 			//获取电机目标位置
 			for(i=0;i<4;i++)
 			{
