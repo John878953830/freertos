@@ -3,9 +3,9 @@
 <title>Static Call Graph - [F407ZE\F407ZE.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image F407ZE\F407ZE.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060422: Last Updated: Fri May 08 04:24:13 2020
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060422: Last Updated: Fri May 08 10:34:20 2020
 <BR><P>
-<H3>Maximum Stack Usage =       1776 bytes + Unknown(Cycles, Untraceable Function Pointers)</H3><H3>
+<H3>Maximum Stack Usage =       1792 bytes + Unknown(Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
 result_parse_2 &rArr; command_18 &rArr; xQueueGenericSend &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
 <P>
@@ -474,7 +474,6 @@ Global Symbols
 </UL>
 <BR>[Called By]<UL><LI><a href="#[1c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;result_parse_2
 <LI><a href="#[14]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_20
-<LI><a href="#[9c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;prvAutoReloadTimerCallback
 </UL>
 
 <P><STRONG><a name="[ac]"></a>__aeabi_d2iz</STRONG> (Thumb, 62 bytes, Stack size 16 bytes, dfixi.o(.text))
@@ -490,7 +489,6 @@ Global Symbols
 <P><STRONG><a name="[177]"></a>__aeabi_cdcmpeq</STRONG> (Thumb, 0 bytes, Stack size 0 bytes, cdcmple.o(.text))
 <BR><BR>[Called By]<UL><LI><a href="#[1c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;result_parse_2
 <LI><a href="#[14]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_20
-<LI><a href="#[9c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;prvAutoReloadTimerCallback
 </UL>
 
 <P><STRONG><a name="[173]"></a>__aeabi_cdcmple</STRONG> (Thumb, 48 bytes, Stack size 0 bytes, cdcmple.o(.text))
@@ -1013,6 +1011,7 @@ Global Symbols
 
 <P><STRONG><a name="[b5]"></a>HAL_GPIO_ReadPin</STRONG> (Thumb, 10 bytes, Stack size 0 bytes, stm32f4xx_hal_gpio.o(i.HAL_GPIO_ReadPin))
 <BR><BR>[Called By]<UL><LI><a href="#[1b6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;switchGet
+<LI><a href="#[1c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;result_parse_2
 <LI><a href="#[13e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;motor_array_init
 <LI><a href="#[1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_1
 <LI><a href="#[43]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;EXTI9_5_IRQHandler
@@ -2182,15 +2181,15 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[1c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;result_parse_2
 </UL>
 
-<P><STRONG><a name="[0]"></a>command_0</STRONG> (Thumb, 322 bytes, Stack size 176 bytes, main.o(i.command_0))
-<BR><BR>[Stack]<UL><LI>Max Depth = 288<LI>Call Chain = command_0 &rArr; xQueueGenericSend &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
+<P><STRONG><a name="[0]"></a>command_0</STRONG> (Thumb, 318 bytes, Stack size 168 bytes, main.o(i.command_0))
+<BR><BR>[Stack]<UL><LI>Max Depth = 280<LI>Call Chain = command_0 &rArr; xQueueGenericSend &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
 </UL>
 <BR>[Calls]<UL><LI><a href="#[b2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__2printf
 <LI><a href="#[16b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueGenericSend
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> main.o(.data)
 </UL>
-<P><STRONG><a name="[1]"></a>command_1</STRONG> (Thumb, 240 bytes, Stack size 88 bytes, main.o(i.command_1))
+<P><STRONG><a name="[1]"></a>command_1</STRONG> (Thumb, 236 bytes, Stack size 88 bytes, main.o(i.command_1))
 <BR><BR>[Stack]<UL><LI>Max Depth = 200<LI>Call Chain = command_1 &rArr; xQueueGenericSend &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
 </UL>
 <BR>[Calls]<UL><LI><a href="#[144]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_GPIO_WritePin
@@ -2203,7 +2202,7 @@ Global Symbols
 <P><STRONG><a name="[a]"></a>command_10</STRONG> (Thumb, 4 bytes, Stack size 0 bytes, main.o(i.command_10))
 <BR>[Address Reference Count : 1]<UL><LI> main.o(.data)
 </UL>
-<P><STRONG><a name="[b]"></a>command_11</STRONG> (Thumb, 712 bytes, Stack size 376 bytes, main.o(i.command_11))
+<P><STRONG><a name="[b]"></a>command_11</STRONG> (Thumb, 710 bytes, Stack size 376 bytes, main.o(i.command_11))
 <BR><BR>[Stack]<UL><LI>Max Depth = 488<LI>Call Chain = command_11 &rArr; xQueueGenericSend &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
 </UL>
 <BR>[Calls]<UL><LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_i2d
@@ -2223,7 +2222,7 @@ Global Symbols
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> main.o(.data)
 </UL>
-<P><STRONG><a name="[d]"></a>command_13</STRONG> (Thumb, 812 bytes, Stack size 384 bytes, main.o(i.command_13))
+<P><STRONG><a name="[d]"></a>command_13</STRONG> (Thumb, 800 bytes, Stack size 384 bytes, main.o(i.command_13))
 <BR><BR>[Stack]<UL><LI>Max Depth = 496<LI>Call Chain = command_13 &rArr; xQueueGenericSend &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
 </UL>
 <BR>[Calls]<UL><LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_i2d
@@ -2237,7 +2236,7 @@ Global Symbols
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> main.o(.data)
 </UL>
-<P><STRONG><a name="[e]"></a>command_14</STRONG> (Thumb, 782 bytes, Stack size 384 bytes, main.o(i.command_14))
+<P><STRONG><a name="[e]"></a>command_14</STRONG> (Thumb, 774 bytes, Stack size 384 bytes, main.o(i.command_14))
 <BR><BR>[Stack]<UL><LI>Max Depth = 496<LI>Call Chain = command_14 &rArr; xQueueGenericSend &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
 </UL>
 <BR>[Calls]<UL><LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_i2d
@@ -2297,15 +2296,15 @@ Global Symbols
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> main.o(.data)
 </UL>
-<P><STRONG><a name="[13]"></a>command_19</STRONG> (Thumb, 660 bytes, Stack size 176 bytes, main.o(i.command_19))
-<BR><BR>[Stack]<UL><LI>Max Depth = 288<LI>Call Chain = command_19 &rArr; xQueueGenericSend &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
+<P><STRONG><a name="[13]"></a>command_19</STRONG> (Thumb, 644 bytes, Stack size 168 bytes, main.o(i.command_19))
+<BR><BR>[Stack]<UL><LI>Max Depth = 280<LI>Call Chain = command_19 &rArr; xQueueGenericSend &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
 </UL>
 <BR>[Calls]<UL><LI><a href="#[b2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__2printf
 <LI><a href="#[16b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueGenericSend
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> main.o(.data)
 </UL>
-<P><STRONG><a name="[2]"></a>command_2</STRONG> (Thumb, 330 bytes, Stack size 104 bytes, main.o(i.command_2))
+<P><STRONG><a name="[2]"></a>command_2</STRONG> (Thumb, 326 bytes, Stack size 104 bytes, main.o(i.command_2))
 <BR><BR>[Stack]<UL><LI>Max Depth = 296<LI>Call Chain = command_2 &rArr; iic_rw &rArr; HAL_I2C_Master_Receive &rArr; I2C_MasterRequestRead &rArr; I2C_WaitOnMasterAddressFlagUntilTimeout
 </UL>
 <BR>[Calls]<UL><LI><a href="#[176]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;iic_rw
@@ -2346,8 +2345,8 @@ Global Symbols
 <P><STRONG><a name="[1a]"></a>command_26</STRONG> (Thumb, 4 bytes, Stack size 0 bytes, main.o(i.command_26))
 <BR>[Address Reference Count : 1]<UL><LI> main.o(.data)
 </UL>
-<P><STRONG><a name="[3]"></a>command_3</STRONG> (Thumb, 298 bytes, Stack size 112 bytes, main.o(i.command_3))
-<BR><BR>[Stack]<UL><LI>Max Depth = 304<LI>Call Chain = command_3 &rArr; iic_rw &rArr; HAL_I2C_Master_Receive &rArr; I2C_MasterRequestRead &rArr; I2C_WaitOnMasterAddressFlagUntilTimeout
+<P><STRONG><a name="[3]"></a>command_3</STRONG> (Thumb, 298 bytes, Stack size 104 bytes, main.o(i.command_3))
+<BR><BR>[Stack]<UL><LI>Max Depth = 296<LI>Call Chain = command_3 &rArr; iic_rw &rArr; HAL_I2C_Master_Receive &rArr; I2C_MasterRequestRead &rArr; I2C_WaitOnMasterAddressFlagUntilTimeout
 </UL>
 <BR>[Calls]<UL><LI><a href="#[176]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;iic_rw
 <LI><a href="#[b2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__2printf
@@ -2374,7 +2373,7 @@ Global Symbols
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> main.o(.data)
 </UL>
-<P><STRONG><a name="[7]"></a>command_7</STRONG> (Thumb, 448 bytes, Stack size 112 bytes, main.o(i.command_7))
+<P><STRONG><a name="[7]"></a>command_7</STRONG> (Thumb, 444 bytes, Stack size 112 bytes, main.o(i.command_7))
 <BR><BR>[Stack]<UL><LI>Max Depth = 304<LI>Call Chain = command_7 &rArr; iic_rw &rArr; HAL_I2C_Master_Receive &rArr; I2C_MasterRequestRead &rArr; I2C_WaitOnMasterAddressFlagUntilTimeout
 </UL>
 <BR>[Calls]<UL><LI><a href="#[176]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;iic_rw
@@ -2397,7 +2396,7 @@ Global Symbols
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> main.o(.data)
 </UL>
-<P><STRONG><a name="[9]"></a>command_9</STRONG> (Thumb, 396 bytes, Stack size 104 bytes, main.o(i.command_9))
+<P><STRONG><a name="[9]"></a>command_9</STRONG> (Thumb, 392 bytes, Stack size 104 bytes, main.o(i.command_9))
 <BR><BR>[Stack]<UL><LI>Max Depth = 216<LI>Call Chain = command_9 &rArr; xQueueGenericSend &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
 </UL>
 <BR>[Calls]<UL><LI><a href="#[b2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__2printf
@@ -2646,14 +2645,15 @@ Global Symbols
 <P><STRONG><a name="[1b]"></a>result_parse_1</STRONG> (Thumb, 42 bytes, Stack size 0 bytes, main.o(i.result_parse_1))
 <BR>[Address Reference Count : 1]<UL><LI> main.o(.data)
 </UL>
-<P><STRONG><a name="[1c]"></a>result_parse_2</STRONG> (Thumb, 2444 bytes, Stack size 120 bytes, main.o(i.result_parse_2))
-<BR><BR>[Stack]<UL><LI>Max Depth = 1776<LI>Call Chain = result_parse_2 &rArr; command_18 &rArr; xQueueGenericSend &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
+<P><STRONG><a name="[1c]"></a>result_parse_2</STRONG> (Thumb, 2502 bytes, Stack size 136 bytes, main.o(i.result_parse_2))
+<BR><BR>[Stack]<UL><LI>Max Depth = 1792<LI>Call Chain = result_parse_2 &rArr; command_18 &rArr; xQueueGenericSend &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
 </UL>
 <BR>[Calls]<UL><LI><a href="#[ab]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_ui2d
 <LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_i2d
 <LI><a href="#[174]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_cdrcmple
 <LI><a href="#[173]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_cdcmple
 <LI><a href="#[177]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_cdcmpeq
+<LI><a href="#[b5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_GPIO_ReadPin
 <LI><a href="#[12]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_18
 <LI><a href="#[11]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_17
 <LI><a href="#[170]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cmd_abs
@@ -3571,13 +3571,11 @@ Local Symbols
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> freertos.o(i.start_soft_timer)
 </UL>
-<P><STRONG><a name="[9c]"></a>prvAutoReloadTimerCallback</STRONG> (Thumb, 1526 bytes, Stack size 128 bytes, freertos.o(i.prvAutoReloadTimerCallback))
-<BR><BR>[Stack]<UL><LI>Max Depth = 240<LI>Call Chain = prvAutoReloadTimerCallback &rArr; xQueueGenericSend &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
+<P><STRONG><a name="[9c]"></a>prvAutoReloadTimerCallback</STRONG> (Thumb, 1398 bytes, Stack size 120 bytes, freertos.o(i.prvAutoReloadTimerCallback))
+<BR><BR>[Stack]<UL><LI>Max Depth = 232<LI>Call Chain = prvAutoReloadTimerCallback &rArr; xQueueGenericSend &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
 </UL>
-<BR>[Calls]<UL><LI><a href="#[ab]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_ui2d
-<LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_i2d
+<BR>[Calls]<UL><LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_i2d
 <LI><a href="#[173]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_cdcmple
-<LI><a href="#[177]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_cdcmpeq
 <LI><a href="#[b2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__2printf
 <LI><a href="#[16b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueGenericSend
 <LI><a href="#[16a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;uxQueueSpacesAvailable

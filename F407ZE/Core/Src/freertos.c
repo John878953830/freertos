@@ -121,7 +121,7 @@ static void prvAutoReloadTimerCallback( TimerHandle_t xTimer )
 		queue_id.data[3]&=0xFE;
 	}
 	//天窗位置
-	if(__fabs(motor_array[0].position_value.current_position-motor_array[0].position_value.tp[2]<COMPLETE_JUDGE))
+	if(__fabs(motor_array[0].position_value.current_position-motor_array[0].position_value.tp[2])<COMPLETE_JUDGE)
 	{
 		queue_id.data[3]|=0x02;
 	}
@@ -130,7 +130,7 @@ static void prvAutoReloadTimerCallback( TimerHandle_t xTimer )
 		queue_id.data[3]&=0xFD;
 	}
 	//前后夹紧电机位置
-	if(__fabs(motor_array[3].position_value.current_position-motor_array[3].position_value.tp[1]<COMPLETE_JUDGE))
+	if(__fabs(motor_array[3].position_value.current_position-motor_array[3].position_value.tp[1])<COMPLETE_JUDGE)
 	{
 		queue_id.data[3]|=0x04;
 	}
@@ -138,7 +138,7 @@ static void prvAutoReloadTimerCallback( TimerHandle_t xTimer )
 	{
 		queue_id.data[3]&=0xFB;
 	}
-	if(__fabs(motor_array[3].position_value.current_position-motor_array[3].position_value.tp[0]<COMPLETE_JUDGE))
+	if(__fabs(motor_array[3].position_value.current_position-motor_array[3].position_value.tp[2])<COMPLETE_JUDGE || __fabs(motor_array[3].position_value.current_position-motor_array[3].position_value.tp[0])<COMPLETE_JUDGE)
 	{
 		queue_id.data[3]|=0x08;
 	}
@@ -147,7 +147,7 @@ static void prvAutoReloadTimerCallback( TimerHandle_t xTimer )
 		queue_id.data[3]&=0xF7;
 	}
 	//左右夹紧电机位置
-	if(__fabs(motor_array[2].position_value.current_position-motor_array[2].position_value.tp[1]<COMPLETE_JUDGE))
+	if(__fabs(motor_array[2].position_value.current_position-motor_array[2].position_value.tp[1])<COMPLETE_JUDGE)
 	{
 		queue_id.data[3]|=0x10;
 	}
@@ -155,7 +155,7 @@ static void prvAutoReloadTimerCallback( TimerHandle_t xTimer )
 	{
 		queue_id.data[3]&=0xEF;
 	}
-	if(__fabs(motor_array[2].position_value.current_position-motor_array[2].position_value.tp[0]<COMPLETE_JUDGE))
+	if(__fabs(motor_array[2].position_value.current_position-motor_array[2].position_value.tp[2])<COMPLETE_JUDGE || __fabs(motor_array[2].position_value.current_position-motor_array[2].position_value.tp[0])<COMPLETE_JUDGE)
 	{
 		queue_id.data[3]|=0x20;
 	}
@@ -279,16 +279,16 @@ static void prvAutoReloadTimerCallback( TimerHandle_t xTimer )
 		{
 			if(i==2)
 			{
-				tmp_position=tmp_position*motor_array[3].speed_value.scal/10000;
+				tmp_position=tmp_position*(int32_t)(motor_array[3].speed_value.scal)/10000;
 			}
 			else
 			{
-			  tmp_position=tmp_position*motor_array[2].speed_value.scal/10000;
+			  tmp_position=tmp_position*(int32_t)(motor_array[2].speed_value.scal)/10000;
 			}
 		}
 		else
 		{
-			tmp_position=tmp_position*motor_array[i].speed_value.scal/10000;
+			tmp_position=tmp_position*(int32_t)(motor_array[i].speed_value.scal)/10000;
 		}
 		queue_id.data[0]=(uint8_t)((tmp_position >> 24) & 0xFF);
 		queue_id.data[1]=(uint8_t)((tmp_position >> 16) & 0xFF);
@@ -332,16 +332,19 @@ static void prvAutoReloadTimerCallback( TimerHandle_t xTimer )
 		queue_id.can_if_ack=0x00;        //can if ack
 		queue_id.can_version=0x00;       //can version
 		//导程变换
-		int32_t tmp_speed=__fabs(motor_array[i].speed_value.current_speed) < SPEED_JUDGE ? motor_array[i].speed_value.default_speed : motor_array[i].speed_value.current_speed;
+		//int32_t tmp_speed=__fabs(motor_array[i].speed_value.current_speed) < SPEED_JUDGE ? motor_array[i].speed_value.default_speed : motor_array[i].speed_value.current_speed;
+		int32_t tmp_speed=motor_array[i].speed_value.current_speed;
 		if(i==2 || i==3)
 		{
 			if(i==2)
 			{
-				tmp_speed=__fabs(motor_array[3].speed_value.current_speed) < SPEED_JUDGE ? motor_array[3].speed_value.default_speed : motor_array[3].speed_value.current_speed;
+				//tmp_speed=__fabs(motor_array[3].speed_value.current_speed) < SPEED_JUDGE ? motor_array[3].speed_value.default_speed : motor_array[3].speed_value.current_speed;
+				tmp_speed=motor_array[3].speed_value.current_speed;
 			}
 			else
 			{
-				tmp_speed=__fabs(motor_array[2].speed_value.current_speed) < SPEED_JUDGE ? motor_array[2].speed_value.default_speed : motor_array[2].speed_value.current_speed;
+				//tmp_speed=__fabs(motor_array[2].speed_value.current_speed) < SPEED_JUDGE ? motor_array[2].speed_value.default_speed : motor_array[2].speed_value.current_speed;
+				tmp_speed=motor_array[2].speed_value.current_speed;
 			}
 		}
 		float tmp_speed_f=(float)tmp_speed*motor_array[i].speed_value.scal/10/60;
@@ -349,16 +352,19 @@ static void prvAutoReloadTimerCallback( TimerHandle_t xTimer )
 		{
 			if(i==2)
 			{
-				tmp_speed_f=(float)tmp_speed*motor_array[3].speed_value.scal/10/60;
+				//tmp_speed_f=(float)tmp_speed*motor_array[3].speed_value.scal/10/60;
+				tmp_speed_f=(float)tmp_speed*(int32_t)(motor_array[3].speed_value.scal)/10/60;
 			}
 			else
 			{
-				tmp_speed_f=(float)tmp_speed*motor_array[2].speed_value.scal/10/60;
+				//tmp_speed_f=(float)tmp_speed*motor_array[2].speed_value.scal/10/60;
+				tmp_speed_f=(float)tmp_speed*(int32_t)(motor_array[2].speed_value.scal)/10/60;
 			}
 		}
 		else
 		{
-			tmp_speed_f=(float)tmp_speed*motor_array[i].speed_value.scal/10/60;
+			//tmp_speed_f=(float)tmp_speed*motor_array[i].speed_value.scal/10/60;
+			tmp_speed_f=(float)tmp_speed*(int32_t)(motor_array[i].speed_value.scal)/10/60;
 		}
 		tmp_speed_f*=1000;
 		tmp_speed=(int32_t)tmp_speed_f;
@@ -2104,7 +2110,14 @@ void start_tk_result_process_rece_5(void *argument)
 				{
 					//解析收到的数据放入光栅结构体中
 					memcpy(grating_value.data,&(rece_cache_5[3]),6);
-					
+					/*
+					grating_value.data[0]=rece_cache_5[3];
+					grating_value.data[1]=rece_cache_5[4];
+					grating_value.data[2]=rece_cache_5[5];
+					grating_value.data[3]=rece_cache_5[6];
+					grating_value.data[4]=rece_cache_5[7];
+					grating_value.data[5]=rece_cache_5[8];
+					*/
 					modbus_list_head_5->if_over=0;
 					modbus_list_head_5=modbus_list_head_5->next;
 					if(modbus_list_head_5->if_over==1)

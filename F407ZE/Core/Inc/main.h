@@ -149,7 +149,7 @@ data[1]=(uint8_t)(((error+3000)>>16)&0xFF);\
 data[2]=(uint8_t)(((error+3000)>>8)&0xFF);\
 data[3]=(uint8_t)(((error+3000))&0xFF);     
 #define MODULE_OFFSET           3000
-#define RETURN_OK               0
+#define RETURN_OK               -3000
 #define ERROR_UNKNOWN           0xFF
 #define ERROR_FUNC_BUSY         0xFE
 #define ERROR_SEMA_NULL         0x01

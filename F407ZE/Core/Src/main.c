@@ -263,9 +263,9 @@ uint8_t motor_array_init(void)
 		}
 	}
 	//测试代码
-	motor_array[3].position_value.tp[0]=0x0000BF8C;
+	motor_array[3].position_value.tp[0]=0x0000AECE;//0x0000BF8C;
 	motor_array[3].position_value.tp[1]=0x00000089;
-	motor_array[3].position_value.tp[2]=0x0000AD0F;
+	motor_array[3].position_value.tp[2]=0x00009E44;
 	motor_array[3].position_value.if_tp_already=0x01;
 	
 	
@@ -3104,7 +3104,7 @@ int command_13(uint8_t* data,uint32_t para)
 		{
 			QUEUE_STRUCT tmp;
 			tmp.property=0x00;             //can send
-			tmp.can_command=0x0D;          //停止指令
+			tmp.can_command=0x0E;          //停止指令
 			tmp.can_if_ack=0x01;           //需要ACK
 			tmp.can_source=0x03;           //本模块
 			tmp.can_target=0x00;
@@ -3142,7 +3142,7 @@ int command_13(uint8_t* data,uint32_t para)
 		{
 			QUEUE_STRUCT tmp;
 			tmp.property=0x00;             //can send
-			tmp.can_command=0x0D;          //停止指令
+			tmp.can_command=0x0E;          //停止指令
 			tmp.can_if_ack=0x01;           //需要ACK
 			tmp.can_source=0x03;           //本模块
 			tmp.can_target=0x00;
@@ -3176,14 +3176,14 @@ int command_13(uint8_t* data,uint32_t para)
 		if(data[0]==0x00 || data[0]==0x01)
 		{
 			if((data[0]==0x00 && __fabs(motor_array[2].position_value.tp[1] - motor_array[2].position_value.current_position) < COMPLETE_JUDGE)
-				 || (data[0]==0x01 && __fabs(motor_array[2].position_value.tp[0] - motor_array[2].position_value.current_position) < COMPLETE_JUDGE))
+				 || (data[0]==0x01 && __fabs(motor_array[2].position_value.tp[2] - motor_array[2].position_value.current_position) < COMPLETE_JUDGE))
 			{
 				//当前位置已经处于误差限中
 				if(if_return == 0x01 && motor_array[2].command.command_union!=0x14)
 				{
 					QUEUE_STRUCT tmp;
 					tmp.property=0x00;             //can send
-					tmp.can_command=0x0D;          //停止指令
+					tmp.can_command=0x0E;          //停止指令
 					tmp.can_if_ack=0x01;           //需要ACK
 					tmp.can_source=0x03;           //本模块
 					tmp.can_target=0x00;
@@ -3222,7 +3222,7 @@ int command_13(uint8_t* data,uint32_t para)
 		}
 		//发送动作序列
 		//填充序列
-		command_seq_l1[0].can_command=0x0D;
+		command_seq_l1[0].can_command=0x0E;
 		command_seq_l1[0].modbus_addr=0x03;           //地址赋值为3号，前后夹紧电机
 		command_seq_l1[1].modbus_addr=0x03;
 		command_seq_l1[2].modbus_addr=0x03;
@@ -3248,7 +3248,7 @@ int command_13(uint8_t* data,uint32_t para)
 			
 		
 		//填充电机的命令结构体
-		motor_array[2].command.command_id=0x0D;           //命令id填充为8
+		motor_array[2].command.command_id=0x0E;           //命令id填充为8
 		motor_array[2].command.command_status=0x01;       //命令执行中
 		motor_array[2].command.if_return=if_return;       //执行完成是否需要回复帧
 		
@@ -3327,7 +3327,7 @@ int command_13(uint8_t* data,uint32_t para)
 		{
 			QUEUE_STRUCT tmp;
 			tmp.property=0x00;             //can send
-			tmp.can_command=0x0D;          //停止指令
+			tmp.can_command=0x0E;          //停止指令
 			tmp.can_if_ack=0x01;           //需要ACK
 			tmp.can_source=0x03;           //本模块
 			tmp.can_target=0x00;
@@ -3428,7 +3428,7 @@ int command_14(uint8_t* data,uint32_t para)
 		{
 			QUEUE_STRUCT tmp;
 			tmp.property=0x00;             //can send
-			tmp.can_command=0x0E;          //停止指令
+			tmp.can_command=0x0D;          //停止指令
 			tmp.can_if_ack=0x01;           //需要ACK
 			tmp.can_source=0x03;           //本模块
 			tmp.can_target=0x00;
@@ -3466,7 +3466,7 @@ int command_14(uint8_t* data,uint32_t para)
 		{
 			QUEUE_STRUCT tmp;
 			tmp.property=0x00;             //can send
-			tmp.can_command=0x0E;          //停止指令
+			tmp.can_command=0x0D;          //停止指令
 			tmp.can_if_ack=0x01;           //需要ACK
 			tmp.can_source=0x03;           //本模块
 			tmp.can_target=0x00;
@@ -3500,14 +3500,14 @@ int command_14(uint8_t* data,uint32_t para)
 		if(data[0]==0x00 || data[0]==0x01)
 		{
 			if((data[0]==0x00 && __fabs(motor_array[3].position_value.tp[1] - motor_array[3].position_value.current_position) < COMPLETE_JUDGE)
-				 || (data[0]==0x01 && __fabs(motor_array[3].position_value.tp[0] - motor_array[3].position_value.current_position) < COMPLETE_JUDGE))
+				 || (data[0]==0x01 && __fabs(motor_array[3].position_value.tp[2] - motor_array[3].position_value.current_position) < COMPLETE_JUDGE))
 			{
 				//当前位置已经处于误差限中
 				if(if_return == 0x01)
 				{
 					QUEUE_STRUCT tmp;
 					tmp.property=0x00;             //can send
-					tmp.can_command=0x0E;          //停止指令
+					tmp.can_command=0x0D;          //停止指令
 					tmp.can_if_ack=0x01;           //需要ACK
 					tmp.can_source=0x03;           //本模块
 					tmp.can_target=0x00;
@@ -3541,7 +3541,7 @@ int command_14(uint8_t* data,uint32_t para)
 		}
 		//发送动作序列
 		//填充序列
-		command_seq_l1[0].can_command=0x0E;
+		command_seq_l1[0].can_command=0x0D;
 		command_seq_l1[0].modbus_addr=0x04;           //地址赋值为4号，左右夹紧电机
 		command_seq_l1[1].modbus_addr=0x04;
 		command_seq_l1[2].modbus_addr=0x04;
@@ -3567,7 +3567,7 @@ int command_14(uint8_t* data,uint32_t para)
 			
 		
 		//填充电机的命令结构体
-		motor_array[3].command.command_id=0x0E;           //命令id填充为8
+		motor_array[3].command.command_id=0x0D;           //命令id填充为8
 		motor_array[3].command.command_status=0x01;       //命令执行中
 		motor_array[3].command.if_return=if_return;       //执行完成是否需要回复帧
 		
@@ -3646,7 +3646,7 @@ int command_14(uint8_t* data,uint32_t para)
 		{
 			QUEUE_STRUCT tmp;
 			tmp.property=0x00;             //can send
-			tmp.can_command=0x0E;          //停止指令
+			tmp.can_command=0x0D;          //停止指令
 			tmp.can_if_ack=0x01;           //需要ACK
 			tmp.can_source=0x03;           //本模块
 			tmp.can_target=0x00;
@@ -5377,12 +5377,13 @@ void result_parse_2(uint8_t* data, uint8_t num)
 					for(ti=0;ti<motor_array[num].limit_sw_number;ti++)
 					{
 						//if(__fabs(motor_array[num].position_value.tp[ti]-motor_array[num].position_value.current_position)<COMPLETE_JUDGE)
-						if(motor_array[num].limit_sw[ti].status==0)
+						if(HAL_GPIO_ReadPin(motor_array[num].limit_sw[ti].gpio_port,motor_array[num].limit_sw[ti].pin_number)==GPIO_PIN_RESET)
 						{
 							trigger_counter++;
 							tindex|=(1<<num);
 						}
 					}
+					
 					if(trigger_counter>1)
 					{
 						switch(num)
@@ -5407,6 +5408,7 @@ void result_parse_2(uint8_t* data, uint8_t num)
 							}
 						}
 					}
+					
 					if(trigger_counter==0)
 					{
 						switch(num)
@@ -5457,6 +5459,7 @@ void result_parse_2(uint8_t* data, uint8_t num)
 							}
 						}
 					}
+					
 					//if((grating_value.if_have_target==1 && grating_value.status_angle==0) || grating_value.if_have_target==0)     //如果光栅角度正常，发送下一帧动作， tp0 位置， 完全夹紧
 					if(0)
 					{
@@ -5537,7 +5540,7 @@ void result_parse_2(uint8_t* data, uint8_t num)
 					}
 					else
 					{
-						return_error(frame_return.data,ERROR_NEED_ROTATE);
+						//return_error(frame_return.data,ERROR_NEED_ROTATE);
 						taskENTER_CRITICAL();
 						portBASE_TYPE status = xQueueSendToBack(send_queueHandle, &frame_return, 0);
 						if(status!=pdPASS)
@@ -5554,6 +5557,7 @@ void result_parse_2(uint8_t* data, uint8_t num)
 						}
 						taskEXIT_CRITICAL();
 					}
+					
 				}
 			}
 			
