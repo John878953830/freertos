@@ -541,6 +541,7 @@ extern GRATING grating_value;
 extern uint8_t work_model;
 
 extern uint8_t subindex_for_cmd20;
+extern uint8_t subindex_for_cmd6;
 
 /* USER CODE END Private defines */
 

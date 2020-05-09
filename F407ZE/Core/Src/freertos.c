@@ -1783,20 +1783,7 @@ void start_tk_master_order(void *argument)
 								{
 									uint8_t data=0;
 									uint8_t para=tmp_if_return;
-									if(tmp_command_id==17 || tmp_command_id==18)
-									{
-										if(tmp_command_id==17)
-										{
-											command_to_function[18](&data,para);
-										}
-										else
-										{
-											command_to_function[17](&data,para);
-										}
-									}else
-									{
-										command_to_function[tmp_command_id](&data,para);
-									}
+									command_to_function[tmp_command_id](&data,para);
 								}
 								if(tmp_command_id==1  ||
 									 tmp_command_id==3  ||
