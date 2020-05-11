@@ -233,7 +233,7 @@ data[3]=(uint8_t)(((error+3000))&0xFF);
 #define GRATING_POWER_PIN       GPIO_PIN_3
 
 #define IIC_ADDRESS             0xA0
-#define EEPROM_CONFIG_LENGTH    0x0A
+#define EEPROM_CONFIG_LENGTH    0x99
 
 //电机指令地址
 #define P412_H                  (uint16_t)1824

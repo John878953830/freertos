@@ -210,7 +210,7 @@ uint8_t motor_array_init(void)
 	length=4;
 	rw_flag=0;
 	//读取EEPROM设置完成标志位
-	uint8_t tmp_flag=148;
+	uint8_t tmp_flag=153;
 	
 	if(iic_rw(rw_flag, tmp_addr,data,1)!=0)
 	{
@@ -246,7 +246,7 @@ uint8_t motor_array_init(void)
 	motor_array[0].position_value.if_tp_already=0x01;
 		
 	//3号电机
-	tmp_addr=28;                      //3号电机起始地址,tp1,2,3
+	tmp_addr=12;                      //3号电机起始地址,tp1,2,3
 	for(i=0;i<3;i++)
 	{
 		if(iic_rw(rw_flag, tmp_addr + i*4,data,length)!=0)
@@ -267,7 +267,7 @@ uint8_t motor_array_init(void)
 	motor_array[2].position_value.if_tp_already=0x01;
 	
 	//4号电机
-	tmp_addr=40;                      //4号电机起始地址
+	tmp_addr=24;                      //4号电机起始地址
 	for(i=0;i<3;i++)
 	{
 		if(iic_rw(rw_flag, tmp_addr + i*4,data,length)!=0)
@@ -289,7 +289,7 @@ uint8_t motor_array_init(void)
 	
 	
 	//导程存储区，48地址开始
-	tmp_addr=48;
+	tmp_addr=36;
 	for(i=0;i<4;i++)
 	{
 		if(iic_rw(rw_flag, tmp_addr + i*4,data,length)!=0)
@@ -307,7 +307,7 @@ uint8_t motor_array_init(void)
 	}
 	
 	//广播间隔时间存储区
-	tmp_addr=64;
+	tmp_addr=52;
 	if(iic_rw(rw_flag, tmp_addr,data,length)!=0)
 	{
 		//读取EEPROM出错
@@ -319,7 +319,7 @@ uint8_t motor_array_init(void)
 	}
 	
 	//默认速度存储区，存储电机运行的速度值
-	tmp_addr=68;
+	tmp_addr=56;
 	for(i=0;i<4;i++)
 	{
 		if(iic_rw(rw_flag, tmp_addr + i*4,data,length)!=0)
@@ -345,7 +345,7 @@ uint8_t motor_array_init(void)
 		}
 	}
 	//默认扭矩设置
-	tmp_addr=84;
+	tmp_addr=72;
 	for(i=0;i<4;i++)
 	{
 		if(iic_rw(rw_flag, tmp_addr + i*4,data,length)!=0)
@@ -367,7 +367,7 @@ uint8_t motor_array_init(void)
 		}
 	}
 	//最大速度设置，设置最大的速度值
-	tmp_addr=100;
+	tmp_addr=88;
 	for(i=0;i<4;i++)
 	{
 		if(iic_rw(rw_flag, tmp_addr + i*4,data,length)!=0)
@@ -385,7 +385,7 @@ uint8_t motor_array_init(void)
 		
 	}
 	//最大行程设置，是脉冲数设置，超过这个脉冲数停止电机
-	tmp_addr=116;
+	tmp_addr=104;
 	for(i=0;i<4;i++)
 	{
 		if(iic_rw(rw_flag, tmp_addr + i*4,data,length)!=0)
@@ -402,7 +402,7 @@ uint8_t motor_array_init(void)
 		motor_array[i].position_value.position_max=200;
 	}
 	//最小行程设置
-	tmp_addr=132;
+	tmp_addr=120;
 	for(i=0;i<4;i++)
 	{
 		if(iic_rw(rw_flag, tmp_addr + i*4,data,length)!=0)
@@ -419,7 +419,7 @@ uint8_t motor_array_init(void)
 		motor_array[i].position_value.position_min=-200;
 	}
 	//校准速度设置
-	tmp_addr=148;
+	tmp_addr=136;
 	for(i=0;i<4;i++)
 	{
 		if(iic_rw(rw_flag, tmp_addr + i*4,data,length)!=0)

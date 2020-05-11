@@ -3,11 +3,11 @@
 <title>Static Call Graph - [F407ZE\F407ZE.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image F407ZE\F407ZE.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060422: Last Updated: Sat May 09 20:16:19 2020
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060422: Last Updated: Mon May 11 11:08:44 2020
 <BR><P>
-<H3>Maximum Stack Usage =        600 bytes + Unknown(Cycles, Untraceable Function Pointers)</H3><H3>
+<H3>Maximum Stack Usage =       1024 bytes + Unknown(Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
-command_20 &rArr; command_13 &rArr; xQueueGenericSend &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
+main &rArr; MX_FREERTOS_Init &rArr; motor_array_init &rArr; iic_rw &rArr; HAL_I2C_Master_Receive &rArr; I2C_MasterRequestRead &rArr; I2C_WaitOnMasterAddressFlagUntilTimeout
 <P>
 <H3>
 Mutually Recursive functions
@@ -1635,7 +1635,7 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[13a]"></a>MX_FREERTOS_Init</STRONG> (Thumb, 360 bytes, Stack size 192 bytes, freertos.o(i.MX_FREERTOS_Init))
-<BR><BR>[Stack]<UL><LI>Max Depth = 448<LI>Call Chain = MX_FREERTOS_Init &rArr; motor_array_init &rArr; torque_set &rArr; xQueueGenericSend &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
+<BR><BR>[Stack]<UL><LI>Max Depth = 1024<LI>Call Chain = MX_FREERTOS_Init &rArr; motor_array_init &rArr; iic_rw &rArr; HAL_I2C_Master_Receive &rArr; I2C_MasterRequestRead &rArr; I2C_WaitOnMasterAddressFlagUntilTimeout
 </UL>
 <BR>[Calls]<UL><LI><a href="#[140]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;timer_start
 <LI><a href="#[13e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;motor_array_init
@@ -2307,7 +2307,7 @@ Global Symbols
 <BR>[Address Reference Count : 1]<UL><LI> main.o(.data)
 </UL>
 <P><STRONG><a name="[2]"></a>command_2</STRONG> (Thumb, 326 bytes, Stack size 104 bytes, main.o(i.command_2))
-<BR><BR>[Stack]<UL><LI>Max Depth = 296<LI>Call Chain = command_2 &rArr; iic_rw &rArr; HAL_I2C_Master_Receive &rArr; I2C_MasterRequestRead &rArr; I2C_WaitOnMasterAddressFlagUntilTimeout
+<BR><BR>[Stack]<UL><LI>Max Depth = 872<LI>Call Chain = command_2 &rArr; iic_rw &rArr; HAL_I2C_Master_Receive &rArr; I2C_MasterRequestRead &rArr; I2C_WaitOnMasterAddressFlagUntilTimeout
 </UL>
 <BR>[Calls]<UL><LI><a href="#[175]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;iic_rw
 <LI><a href="#[b2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__2printf
@@ -2348,7 +2348,7 @@ Global Symbols
 <BR>[Address Reference Count : 1]<UL><LI> main.o(.data)
 </UL>
 <P><STRONG><a name="[3]"></a>command_3</STRONG> (Thumb, 298 bytes, Stack size 104 bytes, main.o(i.command_3))
-<BR><BR>[Stack]<UL><LI>Max Depth = 296<LI>Call Chain = command_3 &rArr; iic_rw &rArr; HAL_I2C_Master_Receive &rArr; I2C_MasterRequestRead &rArr; I2C_WaitOnMasterAddressFlagUntilTimeout
+<BR><BR>[Stack]<UL><LI>Max Depth = 872<LI>Call Chain = command_3 &rArr; iic_rw &rArr; HAL_I2C_Master_Receive &rArr; I2C_MasterRequestRead &rArr; I2C_WaitOnMasterAddressFlagUntilTimeout
 </UL>
 <BR>[Calls]<UL><LI><a href="#[175]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;iic_rw
 <LI><a href="#[b2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__2printf
@@ -2373,7 +2373,7 @@ Global Symbols
 <BR>[Address Reference Count : 1]<UL><LI> main.o(.data)
 </UL>
 <P><STRONG><a name="[7]"></a>command_7</STRONG> (Thumb, 444 bytes, Stack size 112 bytes, main.o(i.command_7))
-<BR><BR>[Stack]<UL><LI>Max Depth = 304<LI>Call Chain = command_7 &rArr; iic_rw &rArr; HAL_I2C_Master_Receive &rArr; I2C_MasterRequestRead &rArr; I2C_WaitOnMasterAddressFlagUntilTimeout
+<BR><BR>[Stack]<UL><LI>Max Depth = 880<LI>Call Chain = command_7 &rArr; iic_rw &rArr; HAL_I2C_Master_Receive &rArr; I2C_MasterRequestRead &rArr; I2C_WaitOnMasterAddressFlagUntilTimeout
 </UL>
 <BR>[Calls]<UL><LI><a href="#[175]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;iic_rw
 <LI><a href="#[b2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__2printf
@@ -2437,8 +2437,8 @@ Global Symbols
 <LI><a href="#[1b8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;uxTaskGetSystemState
 </UL>
 
-<P><STRONG><a name="[175]"></a>iic_rw</STRONG> (Thumb, 240 bytes, Stack size 80 bytes, main.o(i.iic_rw))
-<BR><BR>[Stack]<UL><LI>Max Depth = 192<LI>Call Chain = iic_rw &rArr; HAL_I2C_Master_Receive &rArr; I2C_MasterRequestRead &rArr; I2C_WaitOnMasterAddressFlagUntilTimeout
+<P><STRONG><a name="[175]"></a>iic_rw</STRONG> (Thumb, 246 bytes, Stack size 656 bytes, main.o(i.iic_rw))
+<BR><BR>[Stack]<UL><LI>Max Depth = 768<LI>Call Chain = iic_rw &rArr; HAL_I2C_Master_Receive &rArr; I2C_MasterRequestRead &rArr; I2C_WaitOnMasterAddressFlagUntilTimeout
 </UL>
 <BR>[Calls]<UL><LI><a href="#[f1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_I2C_Master_Transmit
 <LI><a href="#[ed]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_I2C_Master_Receive
@@ -2462,7 +2462,7 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[7d]"></a>main</STRONG> (Thumb, 346 bytes, Stack size 0 bytes, main.o(i.main))
-<BR><BR>[Stack]<UL><LI>Max Depth = 448<LI>Call Chain = main &rArr; MX_FREERTOS_Init &rArr; motor_array_init &rArr; torque_set &rArr; xQueueGenericSend &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
+<BR><BR>[Stack]<UL><LI>Max Depth = 1024<LI>Call Chain = main &rArr; MX_FREERTOS_Init &rArr; motor_array_init &rArr; iic_rw &rArr; HAL_I2C_Master_Receive &rArr; I2C_MasterRequestRead &rArr; I2C_WaitOnMasterAddressFlagUntilTimeout
 </UL>
 <BR>[Calls]<UL><LI><a href="#[157]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MX_USART6_UART_Init
 <LI><a href="#[156]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MX_USART3_UART_Init
@@ -2549,7 +2549,7 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[13e]"></a>motor_array_init</STRONG> (Thumb, 1114 bytes, Stack size 64 bytes, main.o(i.motor_array_init))
-<BR><BR>[Stack]<UL><LI>Max Depth = 256<LI>Call Chain = motor_array_init &rArr; torque_set &rArr; xQueueGenericSend &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
+<BR><BR>[Stack]<UL><LI>Max Depth = 832<LI>Call Chain = motor_array_init &rArr; iic_rw &rArr; HAL_I2C_Master_Receive &rArr; I2C_MasterRequestRead &rArr; I2C_WaitOnMasterAddressFlagUntilTimeout
 </UL>
 <BR>[Calls]<UL><LI><a href="#[b5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_GPIO_ReadPin
 <LI><a href="#[186]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;torque_set
