@@ -123,7 +123,7 @@ extern uint8_t cmd6_if_return;                 //6号总体自检完成是否返回
 /* Exported macro ------------------------------------------------------------*/
 /* USER CODE BEGIN EM */
 //调试设置
-#define DEBUG_OUTPUT 0
+//#define DEBUG_OUTPUT 0
 #define COMPLETE_JUDGE          40            //滞留脉冲数误差限
 #define SPEED_JUDGE             40            //速度误差限
 //命令参数映射

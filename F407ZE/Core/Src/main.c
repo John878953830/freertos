@@ -2020,6 +2020,9 @@ int command_6(uint8_t* data,uint32_t para)
 	cmd18finish_flag=0;
 	//发送自检开始动作
 	xQueueSendToBack(send_queueHandle, &can_seq_for_cmd6[0], 0);
+	motor_array[0].command.command_status=1;
+	motor_array[2].command.command_status=1;
+	motor_array[3].command.command_status=1;
 	command_15(&self_check_counter_6,cmd6_if_return);
 	command_17(&data_for_cmd17,cmd6_if_return);
 	command_18(&data_for_cmd17,cmd6_if_return);
@@ -4855,7 +4858,7 @@ int command_19(uint8_t* data,uint32_t para)
 		}
 		case 4:
 		{
-			angle=-4000;
+			angle=-3000;
 			QUEUE_STRUCT tmp;
 			tmp.property=0x00;             //can send
 			tmp.can_command=0x13;          //停止指令
@@ -5134,7 +5137,7 @@ void result_parse_2(uint8_t* data, uint8_t num)
 		}
 		//执行完成判定
 		if((__fabs(motor_array[num].speed_value.current_speed_pre)>SPEED_JUDGE && __fabs(motor_array[num].speed_value.current_speed)<SPEED_JUDGE
-			 && motor_array[num].command.if_return==0x01))// || __fabs(motor_array[num].position_value.current_position-motor_array[num].position_value.target_position)<COMPLETE_JUDGE)
+			 && motor_array[num].command.if_return==0x01) || __fabs(motor_array[num].position_value.current_position-motor_array[num].position_value.target_position)<COMPLETE_JUDGE)
 		{
 			//执行完成标志置位
 			motor_array[num].command.command_status=0x02;
@@ -5146,9 +5149,11 @@ void result_parse_2(uint8_t* data, uint8_t num)
 			   motor_array[num].command.command_id==0x0D ||
 			   motor_array[num].command.command_id==0x0E)
 			{
-				if(motor_array[num].command.command_union!=0x14 && motor_array[num].command.command_union!=0x06)
+				if(motor_array[num].command.command_union!=0x14 && motor_array[num].command.command_union!=0x06 && motor_array[num].command.command_status==2)
 				{
 					motor_array[num].command.command_status=0;
+					motor_array[num].command.command_status=0;
+					//motor_array[num].command.command_id=0;
 					//发送返回帧
 					QUEUE_STRUCT frame_return;
 					frame_return.property=0x00;             //can send
@@ -5288,7 +5293,9 @@ void result_parse_2(uint8_t* data, uint8_t num)
 						}
 					}
 					taskENTER_CRITICAL();
+					
 					portBASE_TYPE status = xQueueSendToBack(send_queueHandle, &frame_return, 0);
+					motor_array[num].command.command_id=0;
 					if(status!=pdPASS)
 					{
 						#ifdef DEBUG_OUTPUT
@@ -5330,6 +5337,7 @@ void result_parse_2(uint8_t* data, uint8_t num)
 					//光栅判定
 					if((grating_value.if_have_target==1 && grating_value.status_angle==0) || grating_value.if_have_target==0)//光栅角度正常
 					{
+						HAL_Delay(100);
 						motor_array[2].command.command_status=0x01;
 						motor_array[2].command.if_return=1;
 						subindex_des=motor_array[2].position_value.tp[0];  //完全夹紧位
@@ -7010,45 +7018,12 @@ void cmd_abs(uint8_t num)
 	command_abs[2].modbus_addr=num + 1;
 	//发送指令
 	taskENTER_CRITICAL();
-	portBASE_TYPE status = xQueueSendToBack(send_queueHandle, &command_abs[0], 0);
-	if(status!=pdPASS)
-	{
-		#ifdef DEBUG_OUTPUT
-		printf("%s\n","queue overflow");
-		#endif
-	}
-	else
-	{
-		#ifdef DEBUG_OUTPUT
-		printf("%s\n","send command 7 error to queue already");
-		#endif
-	}
-	status = xQueueSendToBack(send_queueHandle, &command_abs[1], 0);
-	if(status!=pdPASS)
-	{
-		#ifdef DEBUG_OUTPUT
-		printf("%s\n","queue overflow");
-		#endif
-	}
-	else
-	{
-		#ifdef DEBUG_OUTPUT
-		printf("%s\n","send command 7 error to queue already");
-		#endif
-	}
-	status = xQueueSendToBack(send_queueHandle, &command_abs[2], 0);
-	if(status!=pdPASS)
-	{
-		#ifdef DEBUG_OUTPUT
-		printf("%s\n","queue overflow");
-		#endif
-	}
-	else
-	{
-		#ifdef DEBUG_OUTPUT
-		printf("%s\n","send command 7 error to queue already");
-		#endif
-	}
+	xQueueSendToBack(send_queueHandle, &command_abs[0], 0);
+	
+	xQueueSendToBack(send_queueHandle, &command_abs[1], 0);
+	
+	xQueueSendToBack(send_queueHandle, &command_abs[2], 0);
+	
 	taskEXIT_CRITICAL();
 	return;
 }
@@ -7132,7 +7107,7 @@ int main(void)
 	HAL_TIM_Base_DeInit(&htim13);
 	HAL_TIM_Base_Init(&htim13);
 	
-	modbus_list_head=modbus_list_gen(128);
+	modbus_list_head=modbus_list_gen(192);
 	modbus_list_head_5=modbus_list_gen(32);
 
 	

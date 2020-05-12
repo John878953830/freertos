@@ -1096,10 +1096,12 @@ void StartDefaultTask(void *argument)
 			//QUEUE_STRUCT tmp_5;
 			//modbus_send_sub_5(tmp_5);
 			//打印线程执行情况
+			/*
 			vTaskList((char *)&tklog);
 	    printf("%s\n",tklog);
 	    vTaskGetRunTimeStats((char *)&tklog);
 	    printf("%s\n",tklog);
+			*/
 			;
 		}
     osDelay(1);
@@ -2159,7 +2161,7 @@ void start_tk_result_process_rece_5(void *argument)
 								}
 							}
 						}
-						if(counter_0_1>=counter_2_3 && counter_4_5>=counter_2_3 && counter_2_3<3)
+						if(counter_0_1>counter_2_3 && counter_4_5>counter_2_3 && counter_2_3<3)
 						{
 							if(counter_0_1<4)
 							{
@@ -2177,7 +2179,7 @@ void start_tk_result_process_rece_5(void *argument)
 						else
 						{
 							//逆时针旋转40度
-							if(counter_0_1<counter_2_3 && counter_4_5<counter_2_3)
+							if((counter_0_1<=counter_2_3 && counter_4_5<=counter_2_3)|| counter_0_1>6)
 							{
 								if(counter_2_3>4 && counter_0_1<6)
 								{
