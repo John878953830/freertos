@@ -103,7 +103,9 @@ uint8_t data_for_cmd18=0;
 
 uint32_t subindex_des=0;
 
-
+uint8_t cmd15finish_flag=30;
+uint8_t cmd17finish_flag=30;
+uint8_t cmd18finish_flag=30;
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -2013,6 +2015,9 @@ int command_6(uint8_t* data,uint32_t para)
 	motor_array[2].command.command_union=0x06;
 	motor_array[3].command.command_union=0x06;
 	subindex_for_cmd6=0;
+	cmd15finish_flag=0;
+	cmd17finish_flag=0;
+	cmd18finish_flag=0;
 	//发送自检开始动作
 	xQueueSendToBack(send_queueHandle, &can_seq_for_cmd6[0], 0);
 	command_15(&self_check_counter_6,cmd6_if_return);
@@ -5582,6 +5587,10 @@ void result_parse_2(uint8_t* data, uint8_t num)
 						}
 						taskEXIT_CRITICAL();
 					}
+					if(motor_array[0].command.command_union==0x06)
+					{
+						cmd15finish_flag=2;
+					}
 				}
 			}
 		}
@@ -5691,6 +5700,10 @@ void result_parse_2(uint8_t* data, uint8_t num)
 						}
 						taskEXIT_CRITICAL();
 					}
+					if(motor_array[3].command.command_union==0x06)
+					{
+						cmd17finish_flag=2;
+					}
 				}
 			}
 		}
@@ -5794,6 +5807,10 @@ void result_parse_2(uint8_t* data, uint8_t num)
 						}
 						taskEXIT_CRITICAL();
 					}
+					if(motor_array[2].command.command_union==0x06)
+					{
+						cmd18finish_flag=2;
+					}
 				}
 			}
 		}
@@ -5828,16 +5845,64 @@ void result_parse_2(uint8_t* data, uint8_t num)
 				command_18(&data_for_cmd18,cmd6_if_return);
 			}
 			*/
-			if(subindex_for_cmd6==2 && motor_array[2].command.command_status==0x02)
+			//if(subindex_for_cmd6==2 && motor_array[2].command.command_status==0x02)
+			if(cmd15finish_flag==2 && cmd17finish_flag==2 && cmd18finish_flag==2
+ 				&& motor_array[0].command.command_status==2 && motor_array[2].command.command_status==2 && motor_array[3].command.command_status==2)
 			{
 				subindex_for_cmd6=30;
 				motor_array[0].command.command_union=0x00;
 				motor_array[2].command.command_union=0x00;
 			  motor_array[3].command.command_union=0x00;
+				
+				cmd15finish_flag=30;
+				cmd17finish_flag=30;
+				cmd18finish_flag=30;
 				//发送自检结果
+				/*
 				taskENTER_CRITICAL();
 				xQueueSendToBack(send_queueHandle, &can_seq_for_cmd6[11], 0);
 				taskEXIT_CRITICAL();
+				*/
+				if(sw_status_for_cmd15!=0)
+				{
+					taskENTER_CRITICAL();
+					xQueueSendToBack(send_queueHandle, &can_seq_for_cmd6[1], 0);
+					xQueueSendToBack(send_queueHandle, &can_seq_for_cmd6[4], 0);
+					taskEXIT_CRITICAL();
+				}
+				else
+				{
+					taskENTER_CRITICAL();
+					xQueueSendToBack(send_queueHandle, &can_seq_for_cmd6[3], 0);
+					xQueueSendToBack(send_queueHandle, &can_seq_for_cmd6[4], 0);
+					taskEXIT_CRITICAL();
+				}
+				if(sw_status_for_cmd17!=0)
+				{
+					taskENTER_CRITICAL();
+					xQueueSendToBack(send_queueHandle, &can_seq_for_cmd6[5], 0);
+					xQueueSendToBack(send_queueHandle, &can_seq_for_cmd6[8], 0);
+					taskEXIT_CRITICAL();
+				}
+				else
+				{
+					taskENTER_CRITICAL();
+					xQueueSendToBack(send_queueHandle, &can_seq_for_cmd6[7], 0);
+					xQueueSendToBack(send_queueHandle, &can_seq_for_cmd6[8], 0);
+					taskEXIT_CRITICAL();
+				}
+				if(sw_status_for_cmd18!=0)
+				{
+					taskENTER_CRITICAL();
+					xQueueSendToBack(send_queueHandle, &can_seq_for_cmd6[9], 0);
+					taskEXIT_CRITICAL();
+				}
+				else
+				{
+					taskENTER_CRITICAL();
+					xQueueSendToBack(send_queueHandle, &can_seq_for_cmd6[11], 0);
+					taskEXIT_CRITICAL();
+				}
 				if(cmd6_if_return==0x01)
 				{
 					cmd6_if_return=0;
