@@ -77,8 +77,8 @@
       <flags>2</flags>
       <showCmd>3</showCmd>
       <MinPosition>
-        <xPos>-32000</xPos>
-        <yPos>-32000</yPos>
+        <xPos>-1</xPos>
+        <yPos>-1</yPos>
       </MinPosition>
       <MaxPosition>
         <xPos>-1</xPos>
@@ -86,8 +86,8 @@
       </MaxPosition>
       <NormalPosition>
         <Top>0</Top>
-        <Left>-11</Left>
-        <Right>1429</Right>
+        <Left>-8</Left>
+        <Right>1432</Right>
         <Bottom>751</Bottom>
       </NormalPosition>
     </WindowPosition>
@@ -3390,9 +3390,9 @@
       <ActiveTab>0</ActiveTab>
       <Doc>
         <Name>../Core/Src/main.c</Name>
-        <ColumnNumber>29</ColumnNumber>
-        <TopLine>5306</TopLine>
-        <CurrentLine>5313</CurrentLine>
+        <ColumnNumber>95</ColumnNumber>
+        <TopLine>5034</TopLine>
+        <CurrentLine>5039</CurrentLine>
         <Folding>1</Folding>
         <ContractedFolders></ContractedFolders>
         <PaneID>0</PaneID>
@@ -3408,9 +3408,9 @@
       </Doc>
       <Doc>
         <Name>../Core/Src/freertos.c</Name>
-        <ColumnNumber>50</ColumnNumber>
-        <TopLine>1755</TopLine>
-        <CurrentLine>1786</CurrentLine>
+        <ColumnNumber>8</ColumnNumber>
+        <TopLine>805</TopLine>
+        <CurrentLine>1518</CurrentLine>
         <Folding>1</Folding>
         <ContractedFolders></ContractedFolders>
         <PaneID>0</PaneID>

@@ -3000,6 +3000,7 @@ int command_11(uint8_t* data,uint32_t para)
 			command_seq_l1[1].modbus_data_2=(uint8_t)((motor_array[0].position_value.tp[1]) & 0xFF);
 			command_seq_l1[1].modbus_data_3=(uint8_t)((motor_array[0].position_value.tp[1] >> 24) & 0xFF);
 			command_seq_l1[1].modbus_data_4=(uint8_t)((motor_array[0].position_value.tp[1] >> 16) & 0xFF);
+			motor_array[0].position_value.target_position=motor_array[0].position_value.tp[1];
 		}
 		if(data[0]==0x01)
 		{
@@ -3007,6 +3008,7 @@ int command_11(uint8_t* data,uint32_t para)
 		  command_seq_l1[1].modbus_data_2=(uint8_t)((motor_array[0].position_value.tp[2]) & 0xFF);
 		  command_seq_l1[1].modbus_data_3=(uint8_t)((motor_array[0].position_value.tp[2] >> 24) & 0xFF);
 		  command_seq_l1[1].modbus_data_4=(uint8_t)((motor_array[0].position_value.tp[2] >> 16) & 0xFF);
+			motor_array[0].position_value.target_position=motor_array[0].position_value.tp[2];
 		}
 			
 		
@@ -3627,6 +3629,7 @@ int command_13(uint8_t* data,uint32_t para)
 			command_seq_l1[1].modbus_data_3=(uint8_t)((motor_array[2].position_value.tp[1] >> 24) & 0xFF);
 			command_seq_l1[1].modbus_data_4=(uint8_t)((motor_array[2].position_value.tp[1] >> 16) & 0xFF);
 			motor_array[2].command.data_0=0;
+			motor_array[2].position_value.target_position=motor_array[2].position_value.tp[1];
 		}
 		if(data[0]==0x01)
 		{
@@ -3635,6 +3638,7 @@ int command_13(uint8_t* data,uint32_t para)
 		  command_seq_l1[1].modbus_data_3=(uint8_t)((motor_array[2].position_value.tp[2] >> 24) & 0xFF);
 		  command_seq_l1[1].modbus_data_4=(uint8_t)((motor_array[2].position_value.tp[2] >> 16) & 0xFF);
 			motor_array[2].command.data_0=1;
+			motor_array[2].position_value.target_position=motor_array[2].position_value.tp[2];
 		}
 			
 		
@@ -3946,6 +3950,7 @@ int command_14(uint8_t* data,uint32_t para)
 			command_seq_l1[1].modbus_data_3=(uint8_t)((motor_array[3].position_value.tp[1] >> 24) & 0xFF);
 			command_seq_l1[1].modbus_data_4=(uint8_t)((motor_array[3].position_value.tp[1] >> 16) & 0xFF);
 			motor_array[3].command.data_0=0;
+			motor_array[3].position_value.target_position=motor_array[3].position_value.tp[1];
 		}
 		if(data[0]==0x01)
 		{
@@ -3954,6 +3959,7 @@ int command_14(uint8_t* data,uint32_t para)
 		  command_seq_l1[1].modbus_data_3=(uint8_t)((motor_array[3].position_value.tp[2] >> 24) & 0xFF);
 		  command_seq_l1[1].modbus_data_4=(uint8_t)((motor_array[3].position_value.tp[2] >> 16) & 0xFF);
 			motor_array[3].command.data_0=1;
+			motor_array[3].position_value.target_position=motor_array[3].position_value.tp[2];
 		}
 			
 		
@@ -4984,20 +4990,80 @@ int command_20(uint8_t* data,uint32_t para)
 	//填充命令属性
 	motor_array[2].command.command_union=0x14;
 	motor_array[3].command.command_union=0x14;
-	
-	//需要根据位置值添加不同的命令值
-	if(__fabs(motor_array[2].position_value.current_position-motor_array[2].position_value.tp[2])<COMPLETE_JUDGE 
-		 && __fabs(motor_array[3].position_value.current_position-motor_array[3].position_value.tp[2]<COMPLETE_JUDGE))
+	motor_array[2].command.if_return=if_return;
+	motor_array[3].command.if_return=if_return;
+	if(data[0]==0)
 	{
-		motor_array[3].command.command_status=2;
-		subindex_for_cmd20=1;
+		motor_array[2].command.data_0=0;
+		motor_array[3].command.data_0=0;
+		if(__fabs(motor_array[2].position_value.current_position-motor_array[2].position_value.tp[1])<COMPLETE_JUDGE 
+			 && __fabs(motor_array[3].position_value.current_position-motor_array[3].position_value.tp[1]<COMPLETE_JUDGE)
+		   && if_return==1)
+		{
+			//都在误差限范围内，直接返回成功
+			QUEUE_STRUCT tmp;
+			tmp.property=0x00;             //can send
+			tmp.can_command=0x14;          //停止指令
+			tmp.can_if_ack=0x01;           //需要ACK
+			tmp.can_source=0x03;           //本模块
+			tmp.can_target=0x00;
+			tmp.can_priority=0x03;         //命令结束返回帧
+			tmp.can_if_last=0x00;
+			tmp.can_if_return=0x00;
+			tmp.length=4;
+			return_error(tmp.data,RETURN_OK);
+			portBASE_TYPE status = xQueueSendToBack(send_queueHandle, &tmp, 0);
+			if(status!=pdPASS)
+			{
+				#ifdef DEBUG_OUTPUT
+				printf("%s\n","queue overflow");
+				#endif
+			}
+			else
+			{
+				#ifdef DEBUG_OUTPUT
+				printf("%s\n","send command 7 error to queue already");
+				#endif
+			}
+			return 0;
+		}
+		if(__fabs(motor_array[2].position_value.current_position-motor_array[2].position_value.tp[1])<COMPLETE_JUDGE)
+		{
+			motor_array[2].command.command_status=2;
+		}
+		else
+		{
+			motor_array[2].command.command_status=1;
+			command_13(data,para);
+		}
+		if(__fabs(motor_array[3].position_value.current_position-motor_array[3].position_value.tp[1])<COMPLETE_JUDGE)
+		{
+			motor_array[3].command.command_status=2;
+		}
+		else
+		{
+			motor_array[3].command.command_status=1;
+			command_14(data,para);
+		}
 	}
-	else
+	if(data[0]==1)
 	{
-		motor_array[2].command.command_status=0x01;
-	  motor_array[3].command.command_status=0x01;
-	  subindex_for_cmd20=0;
-	  command_13(data,para);
+		motor_array[2].command.data_0=1;
+		motor_array[3].command.data_0=1;
+		//需要根据位置值添加不同的命令值
+		if(__fabs(motor_array[2].position_value.current_position-motor_array[2].position_value.tp[2])<COMPLETE_JUDGE 
+			 && __fabs(motor_array[3].position_value.current_position-motor_array[3].position_value.tp[2]<COMPLETE_JUDGE))
+		{
+			motor_array[3].command.command_status=2;
+			subindex_for_cmd20=1;
+		}
+		else
+		{
+			motor_array[2].command.command_status=0x01;
+			motor_array[3].command.command_status=0x01;
+			subindex_for_cmd20=0;
+			command_13(data,para);
+		}
 	}
 	
 	//command_14(data,para);
@@ -5062,8 +5128,8 @@ void result_parse_2(uint8_t* data, uint8_t num)
 			motor_array[num].current_status=0;
 		}
 		//执行完成判定
-		if(__fabs(motor_array[num].speed_value.current_speed_pre)>SPEED_JUDGE && __fabs(motor_array[num].speed_value.current_speed)<SPEED_JUDGE
-			 && motor_array[num].command.if_return==0x01)
+		if((__fabs(motor_array[num].speed_value.current_speed_pre)>SPEED_JUDGE && __fabs(motor_array[num].speed_value.current_speed)<SPEED_JUDGE
+			 && motor_array[num].command.if_return==0x01))// || __fabs(motor_array[num].position_value.current_position-motor_array[num].position_value.target_position)<COMPLETE_JUDGE)
 		{
 			//执行完成标志置位
 			motor_array[num].command.command_status=0x02;
@@ -5077,6 +5143,7 @@ void result_parse_2(uint8_t* data, uint8_t num)
 			{
 				if(motor_array[num].command.command_union!=0x14 && motor_array[num].command.command_union!=0x06)
 				{
+					motor_array[num].command.command_status=0;
 					//发送返回帧
 					QUEUE_STRUCT frame_return;
 					frame_return.property=0x00;             //can send
@@ -5240,96 +5307,155 @@ void result_parse_2(uint8_t* data, uint8_t num)
 		if(motor_array[2].command.command_union==0x14 && motor_array[3].command.command_union==0x14 
 			&& (motor_array[2].command.command_status==0x02 || motor_array[3].command.command_status==0x02))
 		{
-			
-			//第1段执行结束，准备执行第二段
-			if(subindex_for_cmd20==0 && motor_array[2].command.command_status==0x02)
+			if(motor_array[2].command.data_0==1 && motor_array[3].command.data_0==1)
 			{
-				motor_array[3].command.command_status=0x01;//标志置位为执行中
-				motor_array[3].command.if_return=1;
-				subindex_des=motor_array[3].position_value.tp[2];      //45度位置
-				motor_array[3].position_value.target_position=motor_array[3].position_value.tp[2];
-				cmd_abs(motor_array[3].id);
-				subindex_for_cmd20=1;
-			}
-			//第2段执行结束，准备执行第三段
-			if(subindex_for_cmd20==1 && motor_array[3].command.command_status==0x02)
-			{
-				//光栅判定
-				if((grating_value.if_have_target==1 && grating_value.status_angle==0) || grating_value.if_have_target==0)//光栅角度正常
+				//第1段执行结束，准备执行第二段
+				if(subindex_for_cmd20==0 && motor_array[2].command.command_status==0x02)
 				{
-					motor_array[2].command.command_status=0x01;
-					motor_array[2].command.if_return=1;
-					subindex_des=motor_array[2].position_value.tp[0];  //完全夹紧位
-					motor_array[2].position_value.target_position=motor_array[2].position_value.tp[0];
-					cmd_abs(motor_array[2].id);
-					subindex_for_cmd20=2;
+					motor_array[3].command.command_status=0x01;//标志置位为执行中
+					motor_array[3].command.if_return=1;
+					subindex_des=motor_array[3].position_value.tp[2];      //45度位置
+					motor_array[3].position_value.target_position=motor_array[3].position_value.tp[2];
+					cmd_abs(motor_array[3].id);
+					subindex_for_cmd20=1;
 				}
-				else
+				//第2段执行结束，准备执行第三段
+				if(subindex_for_cmd20==1 && motor_array[3].command.command_status==0x02)
 				{
-					motor_array[2].command.command_union=0x00;
-			    motor_array[3].command.command_union=0x00;
-					motor_array[2].command.if_return=0;
-					motor_array[3].command.if_return=0;
-					motor_array[2].command.command_status=0x02;
-					motor_array[3].command.command_status=0x02;
-					subindex_for_cmd20=30;
-					//发送返回帧
-					QUEUE_STRUCT frame_return;
-					frame_return.property=0x00;             //can send
-					frame_return.can_command=0x14;          
-					frame_return.can_if_ack=0x01;           //需要ACK
-					frame_return.can_source=0x03;           //本模块
-					frame_return.can_target=0x00;
-					frame_return.can_priority=0x03;         //命令结束返回帧
-					frame_return.can_if_last=0x00;          //无需拼接
-					frame_return.can_if_return=0x00;        //无需返回
-					frame_return.length=4;
-					return_error(frame_return.data,ERROR_NEED_ROTATE);
-					/*
-					frame_return.data[0]=0x00;              //错误码，0标识正常
-					frame_return.data[1]=0x00;              //执行结果， 1代表已完成
-					frame_return.data[2]=0x00;               //电机号
-					frame_return.data[3]=0x00;              //保留
-					*/
-					taskENTER_CRITICAL();
-					portBASE_TYPE status = xQueueSendToBack(send_queueHandle, &frame_return, 0);
-					if(status!=pdPASS)
+					//光栅判定
+					if((grating_value.if_have_target==1 && grating_value.status_angle==0) || grating_value.if_have_target==0)//光栅角度正常
 					{
-						#ifdef DEBUG_OUTPUT
-						printf("%s\n","queue overflow");
-						#endif
+						motor_array[2].command.command_status=0x01;
+						motor_array[2].command.if_return=1;
+						subindex_des=motor_array[2].position_value.tp[0];  //完全夹紧位
+						motor_array[2].position_value.target_position=motor_array[2].position_value.tp[0];
+						cmd_abs(motor_array[2].id);
+						subindex_for_cmd20=2;
 					}
 					else
 					{
-						#ifdef DEBUG_OUTPUT
-						printf("%s\n","send command 7 error to queue already");
-						#endif
+						motor_array[2].command.command_union=0x00;
+						motor_array[3].command.command_union=0x00;
+						motor_array[2].command.if_return=0;
+						motor_array[3].command.if_return=0;
+						motor_array[2].command.command_status=0x02;
+						motor_array[3].command.command_status=0x02;
+						subindex_for_cmd20=30;
+						//发送返回帧
+						QUEUE_STRUCT frame_return;
+						frame_return.property=0x00;             //can send
+						frame_return.can_command=0x14;          
+						frame_return.can_if_ack=0x01;           //需要ACK
+						frame_return.can_source=0x03;           //本模块
+						frame_return.can_target=0x00;
+						frame_return.can_priority=0x03;         //命令结束返回帧
+						frame_return.can_if_last=0x00;          //无需拼接
+						frame_return.can_if_return=0x00;        //无需返回
+						frame_return.length=4;
+						return_error(frame_return.data,ERROR_NEED_ROTATE);
+						/*
+						frame_return.data[0]=0x00;              //错误码，0标识正常
+						frame_return.data[1]=0x00;              //执行结果， 1代表已完成
+						frame_return.data[2]=0x00;               //电机号
+						frame_return.data[3]=0x00;              //保留
+						*/
+						taskENTER_CRITICAL();
+						portBASE_TYPE status = xQueueSendToBack(send_queueHandle, &frame_return, 0);
+						if(status!=pdPASS)
+						{
+							#ifdef DEBUG_OUTPUT
+							printf("%s\n","queue overflow");
+							#endif
+						}
+						else
+						{
+							#ifdef DEBUG_OUTPUT
+							printf("%s\n","send command 7 error to queue already");
+							#endif
+						}
+						taskEXIT_CRITICAL();
 					}
-					taskEXIT_CRITICAL();
+				}
+				/*
+				if(subindex_for_cmd20==2 && motor_array[2].command.command_status==0x02)
+				{
+					subindex_for_cmd20=3;
+					motor_array[3].command.command_status=0x01;
+					motor_array[3].command.if_return=1;
+					subindex_des=;                                         //放开的中间位置
+					motor_array[3].position_value.target_position=;        //放开的中间位置
+					cmd_abs(motor_array[3].id);
+					
+				}
+				*/
+				if(subindex_for_cmd20==2 && motor_array[2].command.command_status==0x02)
+				{
+					subindex_for_cmd20=3;
+					motor_array[3].command.command_status=0x01;
+					motor_array[3].command.if_return=1;
+					subindex_des=motor_array[3].position_value.tp[0];
+					motor_array[3].position_value.target_position=motor_array[3].position_value.tp[0];
+					cmd_abs(motor_array[3].id);
+					
+				}
+				if(subindex_for_cmd20==4 && motor_array[3].command.command_status==0x02)
+				{
+					motor_array[2].command.command_union=0x00;
+					motor_array[3].command.command_union=0x00;
+					
+					motor_array[2].command.command_status=0x00;
+					motor_array[3].command.command_status=0x00;
+					subindex_for_cmd20=30;
+					//if(motor_array[2].command.if_return==1 && motor_array[3].command.if_return==1)
+					{
+						motor_array[2].command.if_return=0;
+						motor_array[3].command.if_return=0;
+						//发送返回帧
+						QUEUE_STRUCT frame_return;
+						frame_return.property=0x00;             //can send
+						frame_return.can_command=0x14;          
+						frame_return.can_if_ack=0x01;           //需要ACK
+						frame_return.can_source=0x03;           //本模块
+						frame_return.can_target=0x00;
+						frame_return.can_priority=0x03;         //命令结束返回帧
+						frame_return.can_if_last=0x00;          //无需拼接
+						frame_return.can_if_return=0x00;        //无需返回
+						frame_return.length=4;
+						return_error(frame_return.data,RETURN_OK);
+						if(grating_value.if_have_target==0x04)
+						{
+							return_error(frame_return.data,ERROR_NEED_ROTATE);
+						}
+						taskENTER_CRITICAL();
+						portBASE_TYPE status = xQueueSendToBack(send_queueHandle, &frame_return, 0);
+						if(status!=pdPASS)
+						{
+							#ifdef DEBUG_OUTPUT
+							printf("%s\n","queue overflow");
+							#endif
+						}
+						else
+						{
+							#ifdef DEBUG_OUTPUT
+							printf("%s\n","send command 7 error to queue already");
+							#endif
+						}
+						taskEXIT_CRITICAL();
+					}
 				}
 			}
-			if(subindex_for_cmd20==2 && motor_array[2].command.command_status==0x02)
-			{
-				subindex_for_cmd20=3;
-				motor_array[3].command.command_status=0x01;
-				motor_array[3].command.if_return=1;
-				subindex_des=motor_array[3].position_value.tp[0];
-				motor_array[3].position_value.target_position=motor_array[3].position_value.tp[0];
-				cmd_abs(motor_array[3].id);
-				
-			}
-			if(subindex_for_cmd20==3 && motor_array[3].command.command_status==0x02)
+			if(motor_array[2].command.command_status==2 && motor_array[3].command.command_status==2)
 			{
 				motor_array[2].command.command_union=0x00;
 				motor_array[3].command.command_union=0x00;
 				
-				motor_array[2].command.command_status=0x02;
-				motor_array[3].command.command_status=0x02;
+				motor_array[2].command.command_status=0x00;
+				motor_array[3].command.command_status=0x00;
 				subindex_for_cmd20=30;
-				//if(motor_array[2].command.if_return==1 && motor_array[3].command.if_return==1)
+				if(motor_array[2].command.if_return==1 && motor_array[3].command.if_return==1)
 				{
 					motor_array[2].command.if_return=0;
-			  	motor_array[3].command.if_return=0;
+					motor_array[3].command.if_return=0;
 					//发送返回帧
 					QUEUE_STRUCT frame_return;
 					frame_return.property=0x00;             //can send
@@ -5490,7 +5616,7 @@ void result_parse_2(uint8_t* data, uint8_t num)
 				motor_array[3].position_value.target_position=motor_array[3].position_value.tp[0];
 				if(HAL_GPIO_ReadPin(motor_array[3].limit_sw[2].gpio_port,motor_array[3].limit_sw[2].pin_number)!=GPIO_PIN_RESET)
 				{
-					sw_status_for_cmd17|=0x01;
+					sw_status_for_cmd17|=0x04;
 				}
 				taskENTER_CRITICAL();
 				xQueueSendToBack(send_queueHandle, &cmd_seq_for_cmd17[6], 0);
@@ -5593,7 +5719,7 @@ void result_parse_2(uint8_t* data, uint8_t num)
 				motor_array[2].position_value.target_position=motor_array[2].position_value.tp[0];
 				if(HAL_GPIO_ReadPin(motor_array[2].limit_sw[2].gpio_port,motor_array[2].limit_sw[2].pin_number)!=GPIO_PIN_RESET)
 				{
-					sw_status_for_cmd18|=0x01;
+					sw_status_for_cmd18|=0x04;
 				}
 				taskENTER_CRITICAL();
 				xQueueSendToBack(send_queueHandle, &cmd_seq_for_cmd18[6], 0);

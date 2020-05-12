@@ -1481,6 +1481,7 @@ void start_tk_sensor_monitor(void *argument)
 				}
 			}
 			*/
+			/*
 			//获取电机目标位置
 			for(i=0;i<4;i++)
 			{
@@ -1512,7 +1513,9 @@ void start_tk_sensor_monitor(void *argument)
 						#endif
 					}
 				}
+				
 			}
+			*/
 			notify_use=0;
 		}
     osDelay(1);
