@@ -195,7 +195,7 @@ static void prvAutoReloadTimerCallback( TimerHandle_t xTimer )
 		{
 			if(i==2)
 			{
-				queue_id.can_command=0x0C+3;
+				queue_id.can_command=0x0C+2;
 				queue_id.data[0]=(uint8_t)((motor_array[3].motor_error_code >> 24) & 0xFF);
 		    queue_id.data[1]=(uint8_t)((motor_array[3].motor_error_code >> 16) & 0xFF);
 		    queue_id.data[2]=(uint8_t)((motor_array[3].motor_error_code >> 8) & 0xFF);
@@ -203,7 +203,7 @@ static void prvAutoReloadTimerCallback( TimerHandle_t xTimer )
 			}
 			else
 			{
-				queue_id.can_command=0x0C+2;
+				queue_id.can_command=0x0C+3;
 				queue_id.data[0]=(uint8_t)((motor_array[2].motor_error_code >> 24) & 0xFF);
 		    queue_id.data[1]=(uint8_t)((motor_array[2].motor_error_code >> 16) & 0xFF);
 		    queue_id.data[2]=(uint8_t)((motor_array[2].motor_error_code >> 8) & 0xFF);
@@ -251,11 +251,11 @@ static void prvAutoReloadTimerCallback( TimerHandle_t xTimer )
 		{
 			if(i==2)
 			{
-				queue_id.can_command=0x10 + 2*(3-1);
+				queue_id.can_command=0x10 + 2*(2-1);
 			}
 			else
 			{
-				queue_id.can_command=0x10 + 2*(2-1);
+				queue_id.can_command=0x10 + 2*(3-1);
 			}
 		}
 		queue_id.can_if_last=0x00;       //can if last
@@ -320,11 +320,11 @@ static void prvAutoReloadTimerCallback( TimerHandle_t xTimer )
 		{
 			if(i==2)
 			{
-				queue_id.can_command=0x10 + 2*(3-1) +1;
+				queue_id.can_command=0x10 + 2*(2-1) +1;
 			}
 			else
 			{
-				queue_id.can_command=0x10 + 2*(2-1) +1;
+				queue_id.can_command=0x10 + 2*(3-1) +1;
 			}
 		}
 		queue_id.can_if_last=0x00;       //can if last

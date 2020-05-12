@@ -4629,7 +4629,7 @@ int command_18(uint8_t* data,uint32_t para)
 			sw_status_for_cmd18|=0x01;
 		}
 		//更新命令状态为1
-		motor_array[2].command.command_id=0x11;
+		motor_array[2].command.command_id=0x12;
 		motor_array[2].command.if_return=if_return;
 	}
 	else
@@ -5382,7 +5382,7 @@ void result_parse_2(uint8_t* data, uint8_t num)
 				}
 				if(__fabs(cache_for_current_pos_cmd15-motor_array[0].position_value.tp[2])<COMPLETE_JUDGE)
 				{
-					subindex_for_cmd15=2;
+					subindex_for_cmd15=1;
 					motor_array[0].command.command_status=0x02;
 				}
 				else
@@ -5402,12 +5402,21 @@ void result_parse_2(uint8_t* data, uint8_t num)
 				{
 					sw_status_for_cmd15|=0x04;
 				}
-				taskENTER_CRITICAL();
-				xQueueSendToBack(send_queueHandle, &cmd_seq_for_cmd15[6], 0);
-				xQueueSendToBack(send_queueHandle, &cmd_seq_for_cmd15[7], 0);
-				xQueueSendToBack(send_queueHandle, &cmd_seq_for_cmd15[8], 0);
-				taskEXIT_CRITICAL();
-				subindex_for_cmd15=2;
+				if(__fabs(cache_for_current_pos_cmd15-motor_array[0].position_value.current_position)<COMPLETE_JUDGE)
+				{
+					subindex_for_cmd15=2;
+					motor_array[0].command.command_status=0x02;
+				}
+				else
+				{
+					
+					taskENTER_CRITICAL();
+					xQueueSendToBack(send_queueHandle, &cmd_seq_for_cmd15[6], 0);
+					xQueueSendToBack(send_queueHandle, &cmd_seq_for_cmd15[7], 0);
+					xQueueSendToBack(send_queueHandle, &cmd_seq_for_cmd15[8], 0);
+					taskEXIT_CRITICAL();
+					subindex_for_cmd15=2;
+				}
 			}
 			if(subindex_for_cmd15==2 && motor_array[0].command.command_status==2)
 			{
@@ -5678,6 +5687,7 @@ void result_parse_2(uint8_t* data, uint8_t num)
 				taskENTER_CRITICAL();
 				xQueueSendToBack(send_queueHandle, &can_seq_for_cmd6[3], 0);
 				xQueueSendToBack(send_queueHandle, &can_seq_for_cmd6[4], 0);
+				//motor_array[3].command.command_status=0x01;
 				taskEXIT_CRITICAL();
 				//清理cmd17电机的状态
 				motor_array[3].command.command_status=0x01;
