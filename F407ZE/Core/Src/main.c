@@ -2020,9 +2020,7 @@ int command_6(uint8_t* data,uint32_t para)
 	cmd18finish_flag=0;
 	//发送自检开始动作
 	xQueueSendToBack(send_queueHandle, &can_seq_for_cmd6[0], 0);
-	motor_array[0].command.command_status=1;
-	motor_array[2].command.command_status=1;
-	motor_array[3].command.command_status=1;
+	
 	command_15(&self_check_counter_6,cmd6_if_return);
 	command_17(&data_for_cmd17,cmd6_if_return);
 	command_18(&data_for_cmd17,cmd6_if_return);
@@ -5152,7 +5150,6 @@ void result_parse_2(uint8_t* data, uint8_t num)
 				if(motor_array[num].command.command_union!=0x14 && motor_array[num].command.command_union!=0x06 && motor_array[num].command.command_status==2)
 				{
 					motor_array[num].command.command_status=0;
-					motor_array[num].command.command_status=0;
 					//motor_array[num].command.command_id=0;
 					//发送返回帧
 					QUEUE_STRUCT frame_return;
@@ -5537,21 +5534,22 @@ void result_parse_2(uint8_t* data, uint8_t num)
 				{
 					sw_status_for_cmd15|=0x04;
 				}
+				motor_array[0].position_value.target_position=cache_for_current_pos_cmd15;
 				if(__fabs(cache_for_current_pos_cmd15-motor_array[0].position_value.current_position)<COMPLETE_JUDGE)
 				{
 					subindex_for_cmd15=2;
 					motor_array[0].command.command_status=0x02;
 				}
-				else
-				{
-					
+        else
+        {
+	
 					taskENTER_CRITICAL();
 					xQueueSendToBack(send_queueHandle, &cmd_seq_for_cmd15[6], 0);
 					xQueueSendToBack(send_queueHandle, &cmd_seq_for_cmd15[7], 0);
 					xQueueSendToBack(send_queueHandle, &cmd_seq_for_cmd15[8], 0);
 					taskEXIT_CRITICAL();
 					subindex_for_cmd15=2;
-				}
+        }
 			}
 			if(subindex_for_cmd15==2 && motor_array[0].command.command_status==2)
 			{
@@ -5854,8 +5852,7 @@ void result_parse_2(uint8_t* data, uint8_t num)
 			}
 			*/
 			//if(subindex_for_cmd6==2 && motor_array[2].command.command_status==0x02)
-			if(cmd15finish_flag==2 && cmd17finish_flag==2 && cmd18finish_flag==2
- 				&& motor_array[0].command.command_status==2 && motor_array[2].command.command_status==2 && motor_array[3].command.command_status==2)
+			if(cmd15finish_flag==2 && cmd17finish_flag==2 && cmd18finish_flag==2&& motor_array[2].command.command_status==0x02&& motor_array[3].command.command_status==0x02&& motor_array[0].command.command_status==0x02)
 			{
 				subindex_for_cmd6=30;
 				motor_array[0].command.command_union=0x00;
