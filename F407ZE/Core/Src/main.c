@@ -2016,7 +2016,8 @@ int command_6(uint8_t* data,uint32_t para)
 	//发送自检开始动作
 	xQueueSendToBack(send_queueHandle, &can_seq_for_cmd6[0], 0);
 	command_15(&self_check_counter_6,cmd6_if_return);
-	
+	command_17(&data_for_cmd17,cmd6_if_return);
+	command_18(&data_for_cmd17,cmd6_if_return);
 	return 0;
 }
 int command_7(uint8_t* data,uint32_t para)
@@ -5309,12 +5310,13 @@ void result_parse_2(uint8_t* data, uint8_t num)
 			}
 			if(subindex_for_cmd20==2 && motor_array[2].command.command_status==0x02)
 			{
+				subindex_for_cmd20=3;
 				motor_array[3].command.command_status=0x01;
 				motor_array[3].command.if_return=1;
 				subindex_des=motor_array[3].position_value.tp[0];
 				motor_array[3].position_value.target_position=motor_array[3].position_value.tp[0];
 				cmd_abs(motor_array[3].id);
-				subindex_for_cmd20=3;
+				
 			}
 			if(subindex_for_cmd20==3 && motor_array[3].command.command_status==0x02)
 			{
@@ -5324,7 +5326,7 @@ void result_parse_2(uint8_t* data, uint8_t num)
 				motor_array[2].command.command_status=0x02;
 				motor_array[3].command.command_status=0x02;
 				subindex_for_cmd20=30;
-				if(motor_array[2].command.if_return==1 && motor_array[3].command.if_return==1)
+				//if(motor_array[2].command.if_return==1 && motor_array[3].command.if_return==1)
 				{
 					motor_array[2].command.if_return=0;
 			  	motor_array[3].command.if_return=0;
@@ -5344,12 +5346,6 @@ void result_parse_2(uint8_t* data, uint8_t num)
 					{
 						return_error(frame_return.data,ERROR_NEED_ROTATE);
 					}
-					/*
-					frame_return.data[0]=0x00;              //错误码，0标识正常
-					frame_return.data[1]=0x00;              //执行结果， 1代表已完成
-					frame_return.data[2]=0x00;               //电机号
-					frame_return.data[3]=0x00;              //保留
-					*/
 					taskENTER_CRITICAL();
 					portBASE_TYPE status = xQueueSendToBack(send_queueHandle, &frame_return, 0);
 					if(status!=pdPASS)
@@ -5680,6 +5676,7 @@ void result_parse_2(uint8_t* data, uint8_t num)
 		if(motor_array[2].command.command_union==0x06 && motor_array[3].command.command_union==0x06 && motor_array[0].command.command_union==0x06 
 			&& (motor_array[2].command.command_status==0x02 || motor_array[3].command.command_status==0x02 || motor_array[0].command.command_status==0x02))
 		{
+			/*
 			if(subindex_for_cmd6==0 && motor_array[0].command.command_status==0x02)
 			{
 				subindex_for_cmd6=1;
@@ -5687,7 +5684,7 @@ void result_parse_2(uint8_t* data, uint8_t num)
 				taskENTER_CRITICAL();
 				xQueueSendToBack(send_queueHandle, &can_seq_for_cmd6[3], 0);
 				xQueueSendToBack(send_queueHandle, &can_seq_for_cmd6[4], 0);
-				//motor_array[3].command.command_status=0x01;
+				motor_array[3].command.command_status=0x01;
 				taskEXIT_CRITICAL();
 				//清理cmd17电机的状态
 				motor_array[3].command.command_status=0x01;
@@ -5704,6 +5701,7 @@ void result_parse_2(uint8_t* data, uint8_t num)
 				taskEXIT_CRITICAL();
 				command_18(&data_for_cmd18,cmd6_if_return);
 			}
+			*/
 			if(subindex_for_cmd6==2 && motor_array[2].command.command_status==0x02)
 			{
 				subindex_for_cmd6=30;
