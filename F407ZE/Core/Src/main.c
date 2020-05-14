@@ -324,11 +324,13 @@ uint8_t motor_array_init(void)
 	
 	//默认速度存储区，存储电机运行的速度值
 	tmp_addr=56;
+	taskENTER_CRITICAL();
 	for(i=0;i<4;i++)
 	{
 		if(iic_rw(rw_flag, tmp_addr + i*4,data,length)!=0)
 		{
 			//读取EEPROM出错
+			motor_array[i].speed_value.default_speed=20;
 			break;
 			;
 		}
@@ -348,6 +350,7 @@ uint8_t motor_array_init(void)
 			speed_set(i+1,motor_array[i].speed_value.default_speed);
 		}
 	}
+	taskEXIT_CRITICAL();
 	//默认扭矩设置
 	tmp_addr=72;
 	for(i=0;i<4;i++)
