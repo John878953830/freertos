@@ -106,6 +106,8 @@ uint32_t subindex_des=0;
 uint8_t cmd15finish_flag=30;
 uint8_t cmd17finish_flag=30;
 uint8_t cmd18finish_flag=30;
+
+uint8_t communication_reset_counter=0;
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -7152,7 +7154,7 @@ int main(void)
 	//HAL_GPIO_WritePin(GPIOE,GPIO_PIN_7,GPIO_PIN_SET);
 	HAL_GPIO_WritePin(GPIOD,GPIO_PIN_3,GPIO_PIN_SET);
 	printf("%s\n","start free rtos");
-	
+	HAL_Delay(3000);
 	
 	
   /* USER CODE END 2 */

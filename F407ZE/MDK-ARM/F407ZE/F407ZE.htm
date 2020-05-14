@@ -3,7 +3,7 @@
 <title>Static Call Graph - [F407ZE\F407ZE.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image F407ZE\F407ZE.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060422: Last Updated: Thu May 14 13:51:10 2020
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060422: Last Updated: Thu May 14 16:08:47 2020
 <BR><P>
 <H3>Maximum Stack Usage =       1000 bytes + Unknown(Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -951,6 +951,7 @@ Global Symbols
 <BR>[Calls]<UL><LI><a href="#[c7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_GetTick
 </UL>
 <BR>[Called By]<UL><LI><a href="#[1c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;result_parse_2
+<LI><a href="#[7d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 <LI><a href="#[170]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;iic_rw
 <LI><a href="#[96]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;start_tk_result_process_rece_5
 <LI><a href="#[94]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;start_tk_result_process_rece
@@ -1027,6 +1028,7 @@ Global Symbols
 <LI><a href="#[91]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;start_tk_master_order
 <LI><a href="#[92]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;start_tk_limit_sw
 <LI><a href="#[8b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;start_tk_conflict_monitor
+<LI><a href="#[87]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;StartDefaultTask
 </UL>
 
 <P><STRONG><a name="[c7]"></a>HAL_GetTick</STRONG> (Thumb, 6 bytes, Stack size 0 bytes, stm32f4xx_hal.o(i.HAL_GetTick))
@@ -1851,10 +1853,11 @@ Global Symbols
 <P><STRONG><a name="[23]"></a>NMI_Handler</STRONG> (Thumb, 2 bytes, Stack size 0 bytes, stm32f4xx_it.o(i.NMI_Handler))
 <BR>[Address Reference Count : 1]<UL><LI> startup_stm32f407xx.o(RESET)
 </UL>
-<P><STRONG><a name="[87]"></a>StartDefaultTask</STRONG> (Thumb, 62 bytes, Stack size 8 bytes, freertos.o(i.StartDefaultTask))
+<P><STRONG><a name="[87]"></a>StartDefaultTask</STRONG> (Thumb, 120 bytes, Stack size 8 bytes, freertos.o(i.StartDefaultTask))
 <BR><BR>[Stack]<UL><LI>Max Depth = 80<LI>Call Chain = StartDefaultTask &rArr; osDelay &rArr; vTaskDelay &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
 </UL>
-<BR>[Calls]<UL><LI><a href="#[156]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xTaskNotifyWait
+<BR>[Calls]<UL><LI><a href="#[142]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_GPIO_WritePin
+<LI><a href="#[156]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xTaskNotifyWait
 <LI><a href="#[158]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osDelay
 <LI><a href="#[157]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_GPIO_TogglePin
 </UL>
@@ -2370,7 +2373,7 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[7d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 </UL>
 
-<P><STRONG><a name="[7d]"></a>main</STRONG> (Thumb, 346 bytes, Stack size 0 bytes, main.o(i.main))
+<P><STRONG><a name="[7d]"></a>main</STRONG> (Thumb, 354 bytes, Stack size 0 bytes, main.o(i.main))
 <BR><BR>[Stack]<UL><LI>Max Depth = 1000<LI>Call Chain = main &rArr; MX_FREERTOS_Init &rArr; motor_array_init &rArr; iic_rw &rArr; HAL_I2C_Master_Receive &rArr; I2C_MasterRequestRead &rArr; I2C_WaitOnMasterAddressFlagUntilTimeout
 </UL>
 <BR>[Calls]<UL><LI><a href="#[155]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MX_USART6_UART_Init
@@ -2401,6 +2404,7 @@ Global Symbols
 <LI><a href="#[fe]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_TIM_Base_DeInit
 <LI><a href="#[f3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_Init
 <LI><a href="#[142]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_GPIO_WritePin
+<LI><a href="#[d8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_Delay
 <LI><a href="#[d4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_DMA_Init
 <LI><a href="#[d2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_DMA_DeInit
 <LI><a href="#[178]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;modbus_list_gen

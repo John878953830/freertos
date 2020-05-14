@@ -1093,6 +1093,25 @@ void StartDefaultTask(void *argument)
 			HAL_GPIO_TogglePin(GPIOB,GPIO_PIN_15);
 			time_counter++;
 			notify_use=0;
+			if(motor_communicate_flag[1]==1 || motor_communicate_flag[3]==1 || motor_communicate_flag[4]==1)
+			{
+				if(communication_reset_counter>6)
+				{
+					motor_communicate_flag[0]=0;           //电机通信错误标志表， 0 正常， 1：通信错误
+					motor_communicate_flag[1]=0;           //电机通信错误标志表， 0 正常， 1：通信错误
+					motor_communicate_flag[2]=0;           //电机通信错误标志表， 0 正常， 1：通信错误
+					motor_communicate_flag[3]=0;           //电机通信错误标志表， 0 正常， 1：通信错误
+					motor_communicate_flag[4]=0;           //电机通信错误标志表， 0 正常， 1：通信错误
+					motor_communicate_counter=0;
+					communication_reset_counter=0;
+					HAL_GPIO_WritePin(GPIOD,GPIO_PIN_10,GPIO_PIN_RESET);
+				}
+				else
+				{
+					communication_reset_counter++;
+				}
+			}
+			
 			//QUEUE_STRUCT tmp_5;
 			//modbus_send_sub_5(tmp_5);
 			//打印线程执行情况
