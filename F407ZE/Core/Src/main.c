@@ -242,9 +242,9 @@ uint8_t motor_array_init(void)
 		}
 	}
 	//测试代码
-	motor_array[0].position_value.tp[0]=0;
-	motor_array[0].position_value.tp[1]=0;
-	motor_array[0].position_value.tp[2]=0xFFF73690;
+	//motor_array[0].position_value.tp[0]=0;
+	//motor_array[0].position_value.tp[1]=0;
+	//motor_array[0].position_value.tp[2]=0xFFF73690;
 	motor_array[0].position_value.if_tp_already=0x01;
 		
 	//3号电机
@@ -263,9 +263,9 @@ uint8_t motor_array_init(void)
 		}
 	}
 	//测试代码,3号电机，天窗运行方向夹持
-	motor_array[2].position_value.tp[0]=0xFFFF4AAF;
-	motor_array[2].position_value.tp[1]=0xFFFFFF2C;
-	motor_array[2].position_value.tp[2]=0xFFFF5C93;
+	//motor_array[2].position_value.tp[0]=0xFFFF4AAF;
+	//motor_array[2].position_value.tp[1]=0xFFFFFF2C;
+	//motor_array[2].position_value.tp[2]=0xFFFF5C93;
 	motor_array[2].position_value.if_tp_already=0x01;
 	
 	//4号电机
@@ -284,9 +284,9 @@ uint8_t motor_array_init(void)
 		}
 	}
 	//测试代码
-	motor_array[3].position_value.tp[0]=0x0000AECE;//0x0000BF8C;
-	motor_array[3].position_value.tp[1]=0x00000089;
-	motor_array[3].position_value.tp[2]=0x00009E44;
+	//motor_array[3].position_value.tp[0]=0x0000AECE;//0x0000BF8C;
+	//motor_array[3].position_value.tp[1]=0x00000089;
+	//motor_array[3].position_value.tp[2]=0x00009E44;
 	motor_array[3].position_value.if_tp_already=0x01;
 	
 	
@@ -305,7 +305,7 @@ uint8_t motor_array_init(void)
 			motor_array[i].speed_value.scal=((uint32_t)data[0] << 24) | ((uint32_t)data[1] << 16) | ((uint32_t)data[2] << 8) | ((uint32_t)data[3]);
 		}
 		//测试代码
-		motor_array[i].speed_value.scal=210;
+		//motor_array[i].speed_value.scal=210;
 	}
 	
 	//广播间隔时间存储区
@@ -335,10 +335,10 @@ uint8_t motor_array_init(void)
 			motor_array[i].speed_value.default_speed=((uint32_t)data[0] << 24) | ((uint32_t)data[1] << 16) | ((uint32_t)data[2] << 8) | ((uint32_t)data[3]);
 		}
 		//测试代码
-		motor_array[i].speed_value.default_speed=50;
+		//motor_array[i].speed_value.default_speed=50;
 		if(i==0)
 		{
-			motor_array[0].speed_value.default_speed=180;
+			//motor_array[0].speed_value.default_speed=180;
 		}
 		//速度设置
 		if(i!=1)
@@ -361,7 +361,7 @@ uint8_t motor_array_init(void)
 			motor_array[i].torque_value.max_torque=((uint32_t)data[0] << 24) | ((uint32_t)data[1] << 16) | ((uint32_t)data[2] << 8) | ((uint32_t)data[3]);
 		}
 		//测试代码
-		motor_array[i].torque_value.max_torque=3000;
+		//motor_array[i].torque_value.max_torque=3000;
 		//默认扭矩设置
 		if(i!=1)
 		{
@@ -383,7 +383,7 @@ uint8_t motor_array_init(void)
 			motor_array[i].speed_value.max_speed=((uint32_t)data[0] << 24) | ((uint32_t)data[1] << 16) | ((uint32_t)data[2] << 8) | ((uint32_t)data[3]);
 		}
 		//测试代码
-		motor_array[i].speed_value.max_speed=200;
+		//motor_array[i].speed_value.max_speed=200;
 		
 	}
 	//最大行程设置，是脉冲数设置，超过这个脉冲数停止电机
@@ -401,7 +401,7 @@ uint8_t motor_array_init(void)
 			motor_array[i].position_value.position_max=((int32_t)data[0] << 24) | ((uint32_t)data[1] << 16) | ((uint32_t)data[2] << 8) | ((uint32_t)data[3]);
 		}
 		//测试代码
-		motor_array[i].position_value.position_max=200;
+		//motor_array[i].position_value.position_max=200;
 	}
 	//最小行程设置
 	tmp_addr=120;
@@ -418,7 +418,7 @@ uint8_t motor_array_init(void)
 			motor_array[i].position_value.position_min=((int32_t)data[0] << 24) | ((uint32_t)data[1] << 16) | ((uint32_t)data[2] << 8) | ((uint32_t)data[3]);
 		}
 		//测试代码
-		motor_array[i].position_value.position_min=-200;
+		//motor_array[i].position_value.position_min=-200;
 	}
 	//校准速度设置
 	tmp_addr=136;
@@ -435,7 +435,7 @@ uint8_t motor_array_init(void)
 			motor_array[i].speed_value.calibrate_speed=((int32_t)data[0] << 24) | ((uint32_t)data[1] << 16) | ((uint32_t)data[2] << 8) | ((uint32_t)data[3]);
 		}
 		//测试代码
-		motor_array[i].speed_value.calibrate_speed=50;//设置默认校准速度为50
+		//motor_array[i].speed_value.calibrate_speed=50;//设置默认校准速度为50
 	}
 	
 	
@@ -1889,10 +1889,12 @@ int command_3(uint8_t* data,uint32_t para)
 			}
 		}
 		else{
+			taskENTER_CRITICAL();
 			while(iic_rw(1,iic_cache,data,EEPROM_CONFIG_LENGTH - iic_cache)!=0)
 			{
 				vTaskDelay(1);
 			}
+			taskEXIT_CRITICAL();
 			iic_cache=0;
 			if(if_return==1)
 			{
@@ -5535,7 +5537,7 @@ void result_parse_2(uint8_t* data, uint8_t num)
 					sw_status_for_cmd15|=0x04;
 				}
 				motor_array[0].position_value.target_position=cache_for_current_pos_cmd15;
-				if(__fabs(cache_for_current_pos_cmd15-motor_array[0].position_value.current_position)<COMPLETE_JUDGE)
+				if(0)
 				{
 					subindex_for_cmd15=2;
 					motor_array[0].command.command_status=0x02;

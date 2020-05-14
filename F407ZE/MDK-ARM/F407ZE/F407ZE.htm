@@ -3,9 +3,9 @@
 <title>Static Call Graph - [F407ZE\F407ZE.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image F407ZE\F407ZE.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060422: Last Updated: Wed May 13 04:08:28 2020
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060422: Last Updated: Thu May 14 13:51:10 2020
 <BR><P>
-<H3>Maximum Stack Usage =       1024 bytes + Unknown(Cycles, Untraceable Function Pointers)</H3><H3>
+<H3>Maximum Stack Usage =       1000 bytes + Unknown(Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
 main &rArr; MX_FREERTOS_Init &rArr; motor_array_init &rArr; iic_rw &rArr; HAL_I2C_Master_Receive &rArr; I2C_MasterRequestRead &rArr; I2C_WaitOnMasterAddressFlagUntilTimeout
 <P>
@@ -1624,7 +1624,7 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[138]"></a>MX_FREERTOS_Init</STRONG> (Thumb, 360 bytes, Stack size 192 bytes, freertos.o(i.MX_FREERTOS_Init))
-<BR><BR>[Stack]<UL><LI>Max Depth = 1024<LI>Call Chain = MX_FREERTOS_Init &rArr; motor_array_init &rArr; iic_rw &rArr; HAL_I2C_Master_Receive &rArr; I2C_MasterRequestRead &rArr; I2C_WaitOnMasterAddressFlagUntilTimeout
+<BR><BR>[Stack]<UL><LI>Max Depth = 1000<LI>Call Chain = MX_FREERTOS_Init &rArr; motor_array_init &rArr; iic_rw &rArr; HAL_I2C_Master_Receive &rArr; I2C_MasterRequestRead &rArr; I2C_WaitOnMasterAddressFlagUntilTimeout
 </UL>
 <BR>[Calls]<UL><LI><a href="#[13e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;timer_start
 <LI><a href="#[13c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;motor_array_init
@@ -2269,12 +2269,14 @@ Global Symbols
 <P><STRONG><a name="[1a]"></a>command_26</STRONG> (Thumb, 4 bytes, Stack size 0 bytes, main.o(i.command_26))
 <BR>[Address Reference Count : 1]<UL><LI> main.o(.data)
 </UL>
-<P><STRONG><a name="[3]"></a>command_3</STRONG> (Thumb, 270 bytes, Stack size 104 bytes, main.o(i.command_3))
+<P><STRONG><a name="[3]"></a>command_3</STRONG> (Thumb, 280 bytes, Stack size 104 bytes, main.o(i.command_3))
 <BR><BR>[Stack]<UL><LI>Max Depth = 872<LI>Call Chain = command_3 &rArr; iic_rw &rArr; HAL_I2C_Master_Receive &rArr; I2C_MasterRequestRead &rArr; I2C_WaitOnMasterAddressFlagUntilTimeout
 </UL>
 <BR>[Calls]<UL><LI><a href="#[170]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;iic_rw
 <LI><a href="#[166]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueGenericSend
 <LI><a href="#[16f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;vTaskDelay
+<LI><a href="#[16d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;vPortExitCritical
+<LI><a href="#[16c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;vPortEnterCritical
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> main.o(.data)
 </UL>
@@ -2369,7 +2371,7 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[7d]"></a>main</STRONG> (Thumb, 346 bytes, Stack size 0 bytes, main.o(i.main))
-<BR><BR>[Stack]<UL><LI>Max Depth = 1024<LI>Call Chain = main &rArr; MX_FREERTOS_Init &rArr; motor_array_init &rArr; iic_rw &rArr; HAL_I2C_Master_Receive &rArr; I2C_MasterRequestRead &rArr; I2C_WaitOnMasterAddressFlagUntilTimeout
+<BR><BR>[Stack]<UL><LI>Max Depth = 1000<LI>Call Chain = main &rArr; MX_FREERTOS_Init &rArr; motor_array_init &rArr; iic_rw &rArr; HAL_I2C_Master_Receive &rArr; I2C_MasterRequestRead &rArr; I2C_WaitOnMasterAddressFlagUntilTimeout
 </UL>
 <BR>[Calls]<UL><LI><a href="#[155]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MX_USART6_UART_Init
 <LI><a href="#[154]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MX_USART3_UART_Init
@@ -2455,8 +2457,8 @@ Global Symbols
 <LI><a href="#[8d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;start_tk_grating_monitor
 </UL>
 
-<P><STRONG><a name="[13c]"></a>motor_array_init</STRONG> (Thumb, 1114 bytes, Stack size 64 bytes, main.o(i.motor_array_init))
-<BR><BR>[Stack]<UL><LI>Max Depth = 832<LI>Call Chain = motor_array_init &rArr; iic_rw &rArr; HAL_I2C_Master_Receive &rArr; I2C_MasterRequestRead &rArr; I2C_WaitOnMasterAddressFlagUntilTimeout
+<P><STRONG><a name="[13c]"></a>motor_array_init</STRONG> (Thumb, 1104 bytes, Stack size 40 bytes, main.o(i.motor_array_init))
+<BR><BR>[Stack]<UL><LI>Max Depth = 808<LI>Call Chain = motor_array_init &rArr; iic_rw &rArr; HAL_I2C_Master_Receive &rArr; I2C_MasterRequestRead &rArr; I2C_WaitOnMasterAddressFlagUntilTimeout
 </UL>
 <BR>[Calls]<UL><LI><a href="#[b3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_GPIO_ReadPin
 <LI><a href="#[181]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;torque_set
@@ -2549,7 +2551,7 @@ Global Symbols
 <P><STRONG><a name="[1b]"></a>result_parse_1</STRONG> (Thumb, 42 bytes, Stack size 0 bytes, main.o(i.result_parse_1))
 <BR>[Address Reference Count : 1]<UL><LI> main.o(.data)
 </UL>
-<P><STRONG><a name="[1c]"></a>result_parse_2</STRONG> (Thumb, 3616 bytes, Stack size 152 bytes, main.o(i.result_parse_2))
+<P><STRONG><a name="[1c]"></a>result_parse_2</STRONG> (Thumb, 3530 bytes, Stack size 152 bytes, main.o(i.result_parse_2))
 <BR><BR>[Stack]<UL><LI>Max Depth = 272<LI>Call Chain = result_parse_2 &rArr; cmd_abs &rArr; xQueueGenericSend &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
 </UL>
 <BR>[Calls]<UL><LI><a href="#[aa]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_ui2d
@@ -2893,6 +2895,7 @@ Global Symbols
 <BR><BR>[Called By]<UL><LI><a href="#[1c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;result_parse_2
 <LI><a href="#[17f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;modbus_send_sub
 <LI><a href="#[17d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;modbus_send
+<LI><a href="#[3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_3
 <LI><a href="#[12]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_18
 <LI><a href="#[11]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_17
 <LI><a href="#[f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_15
@@ -2918,6 +2921,7 @@ Global Symbols
 <BR><BR>[Called By]<UL><LI><a href="#[1c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;result_parse_2
 <LI><a href="#[17f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;modbus_send_sub
 <LI><a href="#[17d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;modbus_send
+<LI><a href="#[3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_3
 <LI><a href="#[12]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_18
 <LI><a href="#[11]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_17
 <LI><a href="#[f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;command_15
