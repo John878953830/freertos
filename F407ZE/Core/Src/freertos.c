@@ -1272,11 +1272,14 @@ void start_tk_conflict_monitor(void *argument)
 			#ifdef DEBUG_OUTPUT
 			printf("%s\n","start tk conflict monitor");
 			#endif
+			
 			uint8_t i=0;
+			/*
 			for(i=0;i<4;i++)
 			{
 				if(i==1)
 					continue;
+				
 				uint8_t j=0;
 				uint8_t counter=0;
 				for(j=0;j<motor_array[i].conflict_value.conflict_counter;j++)
@@ -1331,6 +1334,8 @@ void start_tk_conflict_monitor(void *argument)
 					motor_array[i].conflict_value.if_conflict=0;
 				}
 			}
+			*/
+			
 			if(work_model==0x01)
 			{
 				for(i=0;i<4;i++)
@@ -1338,6 +1343,317 @@ void start_tk_conflict_monitor(void *argument)
 					motor_array[i].conflict_value.if_conflict=0;
 				}
 			}
+			else
+			{
+				if(motor_array[0].command.command_union==0x06 && motor_array[2].command.command_union==0x06 && motor_array[3].command.command_union==0x06)
+				{
+					//自检碰撞检测
+					if(!(((motor_array[0].conflict_value.conflict_data_0 & motor_array[0].conflict_value.conflict_mask[0]) == motor_array[0].conflict_value.conflict_condition[0])
+						|| ((motor_array[0].conflict_value.conflict_data_0 & motor_array[0].conflict_value.conflict_mask[1]) == motor_array[0].conflict_value.conflict_condition[1])))
+					{
+						for(i=0;i<4;i++)
+						{
+							if(i==1)
+								continue;
+							motor_array[i].conflict_value.if_conflict=1;
+							//停止电机，电机号2
+							QUEUE_STRUCT enable_motor;
+				
+							enable_motor.property=1;                            //485 send
+							enable_motor.modbus_addr=i+1;
+							enable_motor.modbus_func=0x10;                      //写多个寄存器
+							enable_motor.modbus_addr_h=(uint8_t)(2040>>8);
+							enable_motor.modbus_addr_l=(uint8_t)(2040&0xFF);                   //电机485地址
+							enable_motor.modbus_data_len_h=0x00;
+							enable_motor.modbus_data_len_l=0x02;
+							enable_motor.modbus_data_byte=0x04;
+							enable_motor.modbus_data_1=0x08;
+							enable_motor.modbus_data_2=0x00;
+							enable_motor.modbus_data_3=0x00;
+							enable_motor.modbus_data_4=0x00;
+							
+							//modbus_send_sub(enable_motor);
+							portBASE_TYPE	status = xQueueSendToBack(send_queueHandle, &enable_motor, 0);
+							if(status!=pdPASS)
+							{
+								#ifdef DEBUG_OUTPUT
+								printf("%s\n","queue overflow");
+								#endif
+							}
+							else
+							{
+								#ifdef DEBUG_OUTPUT
+								printf("%s\n","send command 7 succes to queue already");
+								#endif
+							}
+						}
+					}
+					else
+					{
+						motor_array[0].conflict_value.if_conflict=0;
+						motor_array[2].conflict_value.if_conflict=0;
+						motor_array[3].conflict_value.if_conflict=0;
+					}
+				}
+				else
+				{
+					if(motor_array[0].command.command_union==0x14 && motor_array[2].command.command_union==0x14 && motor_array[3].command.command_union==0x14)
+					{
+						//cmd20 碰撞检测
+						if(!(((motor_array[3].conflict_value.conflict_data_0 & motor_array[3].conflict_value.conflict_mask[0]) == motor_array[3].conflict_value.conflict_condition[0])
+						|| ((motor_array[3].conflict_value.conflict_data_0 & motor_array[3].conflict_value.conflict_mask[1]) == motor_array[3].conflict_value.conflict_condition[1])))
+						{
+							motor_array[2].conflict_value.if_conflict=1;
+							motor_array[3].conflict_value.if_conflict=1;
+							QUEUE_STRUCT enable_motor;
+				
+							enable_motor.property=1;                            //485 send
+							enable_motor.modbus_addr=3;
+							enable_motor.modbus_func=0x10;                      //写多个寄存器
+							enable_motor.modbus_addr_h=(uint8_t)(2040>>8);
+							enable_motor.modbus_addr_l=(uint8_t)(2040&0xFF);                   //电机485地址
+							enable_motor.modbus_data_len_h=0x00;
+							enable_motor.modbus_data_len_l=0x02;
+							enable_motor.modbus_data_byte=0x04;
+							enable_motor.modbus_data_1=0x08;
+							enable_motor.modbus_data_2=0x00;
+							enable_motor.modbus_data_3=0x00;
+							enable_motor.modbus_data_4=0x00;
+							
+							//modbus_send_sub(enable_motor);
+							portBASE_TYPE	status = xQueueSendToBack(send_queueHandle, &enable_motor, 0);
+							if(status!=pdPASS)
+							{
+								#ifdef DEBUG_OUTPUT
+								printf("%s\n","queue overflow");
+								#endif
+							}
+							else
+							{
+								#ifdef DEBUG_OUTPUT
+								printf("%s\n","send command 7 succes to queue already");
+								#endif
+							}
+							enable_motor.modbus_addr=4;
+							status = xQueueSendToBack(send_queueHandle, &enable_motor, 0);
+							if(status!=pdPASS)
+							{
+								#ifdef DEBUG_OUTPUT
+								printf("%s\n","queue overflow");
+								#endif
+							}
+							else
+							{
+								#ifdef DEBUG_OUTPUT
+								printf("%s\n","send command 7 succes to queue already");
+								#endif
+							}
+						}
+						else
+						{
+							motor_array[2].conflict_value.if_conflict=1;
+							motor_array[3].conflict_value.if_conflict=1;
+						}
+					}
+					else
+					{
+						//其他命令碰撞检测
+						//天窗
+						if(motor_array[0].command.command_id==11 && motor_array[0].command.data_0==1)
+						{
+							if(!(((motor_array[0].conflict_value.conflict_data_0 & motor_array[0].conflict_value.conflict_mask[0]) == motor_array[0].conflict_value.conflict_condition[0])
+							|| ((motor_array[0].conflict_value.conflict_data_0 & motor_array[0].conflict_value.conflict_mask[2]) == motor_array[0].conflict_value.conflict_condition[2])))
+							{
+								motor_array[0].conflict_value.if_conflict=1;
+								//停止电机
+								QUEUE_STRUCT enable_motor;
+					
+								enable_motor.property=1;                            //485 send
+								enable_motor.modbus_addr=1;
+								enable_motor.modbus_func=0x10;                      //写多个寄存器
+								enable_motor.modbus_addr_h=(uint8_t)(2040>>8);
+								enable_motor.modbus_addr_l=(uint8_t)(2040&0xFF);                   //电机485地址
+								enable_motor.modbus_data_len_h=0x00;
+								enable_motor.modbus_data_len_l=0x02;
+								enable_motor.modbus_data_byte=0x04;
+								enable_motor.modbus_data_1=0x08;
+								enable_motor.modbus_data_2=0x00;
+								enable_motor.modbus_data_3=0x00;
+								enable_motor.modbus_data_4=0x00;
+								
+								//modbus_send_sub(enable_motor);
+								portBASE_TYPE	status = xQueueSendToBack(send_queueHandle, &enable_motor, 0);
+								if(status!=pdPASS)
+								{
+									#ifdef DEBUG_OUTPUT
+									printf("%s\n","queue overflow");
+									#endif
+								}
+								else
+								{
+									#ifdef DEBUG_OUTPUT
+									printf("%s\n","send command 7 succes to queue already");
+									#endif
+								}
+							}
+							else
+							{
+								motor_array[0].conflict_value.if_conflict=0;
+							}
+						}
+						else
+						{
+							motor_array[0].conflict_value.if_conflict=0;
+						}
+						
+						//2号电机，左右
+						if(motor_array[2].command.command_id==14)
+						{
+							//左右松开
+							if(!((((motor_array[2].conflict_value.conflict_data_0 & motor_array[2].conflict_value.conflict_mask[0]) == motor_array[2].conflict_value.conflict_condition[0])
+							|| ((motor_array[2].conflict_value.conflict_data_0 & motor_array[2].conflict_value.conflict_mask[1]) == motor_array[2].conflict_value.conflict_condition[1])))
+							&& motor_array[2].command.data_0==0)
+							{
+								motor_array[2].conflict_value.if_conflict=1;
+							}
+							else
+							{
+								motor_array[2].conflict_value.if_conflict=0;
+							}
+							//左右夹紧
+							if(!((((motor_array[2].conflict_value.conflict_data_0 & motor_array[2].conflict_value.conflict_mask[1]) == motor_array[2].conflict_value.conflict_condition[1])
+							|| ((motor_array[2].conflict_value.conflict_data_0 & motor_array[2].conflict_value.conflict_mask[2]) == motor_array[2].conflict_value.conflict_condition[2])))
+							&& motor_array[2].command.data_0==1)
+							{
+								motor_array[2].conflict_value.if_conflict=1;
+							}
+							else
+							{
+								motor_array[2].conflict_value.if_conflict=0;
+							}
+							if(motor_array[2].conflict_value.if_conflict==1)
+							{
+								//停止电机
+								QUEUE_STRUCT enable_motor;
+					
+								enable_motor.property=1;                            //485 send
+								enable_motor.modbus_addr=3;
+								enable_motor.modbus_func=0x10;                      //写多个寄存器
+								enable_motor.modbus_addr_h=(uint8_t)(2040>>8);
+								enable_motor.modbus_addr_l=(uint8_t)(2040&0xFF);                   //电机485地址
+								enable_motor.modbus_data_len_h=0x00;
+								enable_motor.modbus_data_len_l=0x02;
+								enable_motor.modbus_data_byte=0x04;
+								enable_motor.modbus_data_1=0x08;
+								enable_motor.modbus_data_2=0x00;
+								enable_motor.modbus_data_3=0x00;
+								enable_motor.modbus_data_4=0x00;
+								
+								//modbus_send_sub(enable_motor);
+								portBASE_TYPE	status = xQueueSendToBack(send_queueHandle, &enable_motor, 0);
+								if(status!=pdPASS)
+								{
+									#ifdef DEBUG_OUTPUT
+									printf("%s\n","queue overflow");
+									#endif
+								}
+								else
+								{
+									#ifdef DEBUG_OUTPUT
+									printf("%s\n","send command 7 succes to queue already");
+									#endif
+								}
+							}
+						}
+						//3号电机， 前后
+						if(motor_array[3].command.command_id==13)
+						{
+							if(!(((motor_array[3].conflict_value.conflict_data_0 & motor_array[3].conflict_value.conflict_mask[0]) == motor_array[3].conflict_value.conflict_condition[0])
+							|| ((motor_array[3].conflict_value.conflict_data_0 & motor_array[3].conflict_value.conflict_mask[1]) == motor_array[3].conflict_value.conflict_condition[1])))
+							{
+								if(motor_array[3].command.data_0==1)
+								{
+									motor_array[3].conflict_value.if_conflict=1;
+									//停止电机
+									QUEUE_STRUCT enable_motor;
+						
+									enable_motor.property=1;                            //485 send
+									enable_motor.modbus_addr=3;
+									enable_motor.modbus_func=0x10;                      //写多个寄存器
+									enable_motor.modbus_addr_h=(uint8_t)(2040>>8);
+									enable_motor.modbus_addr_l=(uint8_t)(2040&0xFF);                   //电机485地址
+									enable_motor.modbus_data_len_h=0x00;
+									enable_motor.modbus_data_len_l=0x02;
+									enable_motor.modbus_data_byte=0x04;
+									enable_motor.modbus_data_1=0x08;
+									enable_motor.modbus_data_2=0x00;
+									enable_motor.modbus_data_3=0x00;
+									enable_motor.modbus_data_4=0x00;
+									
+									//modbus_send_sub(enable_motor);
+									portBASE_TYPE	status = xQueueSendToBack(send_queueHandle, &enable_motor, 0);
+									if(status!=pdPASS)
+									{
+										#ifdef DEBUG_OUTPUT
+										printf("%s\n","queue overflow");
+										#endif
+									}
+									else
+									{
+										#ifdef DEBUG_OUTPUT
+										printf("%s\n","send command 7 succes to queue already");
+										#endif
+									}
+								}
+							}
+							else
+							{
+								motor_array[3].conflict_value.if_conflict=0;
+							}
+						}
+								
+					}
+				}
+				for(i=0;i<4;i++)
+				{
+					if(i==1)
+						continue;
+					if(motor_array[i].broadcast_timeout_flag==1)
+					{
+						motor_array[i].conflict_value.if_conflict=1;
+						//停止电机，电机号2
+						QUEUE_STRUCT enable_motor;
+			
+						enable_motor.property=1;                            //485 send
+						enable_motor.modbus_addr=i+1;
+						enable_motor.modbus_func=0x10;                      //写多个寄存器
+						enable_motor.modbus_addr_h=(uint8_t)(2040>>8);
+						enable_motor.modbus_addr_l=(uint8_t)(2040&0xFF);                   //电机485地址
+						enable_motor.modbus_data_len_h=0x00;
+						enable_motor.modbus_data_len_l=0x02;
+						enable_motor.modbus_data_byte=0x04;
+						enable_motor.modbus_data_1=0x08;
+						enable_motor.modbus_data_2=0x00;
+						enable_motor.modbus_data_3=0x00;
+						enable_motor.modbus_data_4=0x00;
+						
+						//modbus_send_sub(enable_motor);
+						portBASE_TYPE	status = xQueueSendToBack(send_queueHandle, &enable_motor, 0);
+						if(status!=pdPASS)
+						{
+							#ifdef DEBUG_OUTPUT
+							printf("%s\n","queue overflow");
+							#endif
+						}
+						else
+						{
+							#ifdef DEBUG_OUTPUT
+							printf("%s\n","send command 7 succes to queue already");
+							#endif
+						}
+					}
+				}
+		}
 			notify_use=0;
 		}
     osDelay(1);
@@ -1776,6 +2092,7 @@ void start_tk_master_order(void *argument)
 										{
 											motor_array[i].conflict_value.conflict_status[j]=(id.data[3]>>motor_array[i].conflict_value.conflict_number[j])&0x01;
 										}
+										motor_array[i].conflict_value.conflict_data_0=id.data[3];
 										//广播状态转换
 										if(motor_array[i].conflict_value.time<4)
 										{

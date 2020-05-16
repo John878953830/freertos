@@ -339,10 +339,10 @@ uint8_t motor_array_init(void)
 			motor_array[i].speed_value.default_speed=((uint32_t)data[0] << 24) | ((uint32_t)data[1] << 16) | ((uint32_t)data[2] << 8) | ((uint32_t)data[3]);
 		}
 		//测试代码
-		//motor_array[i].speed_value.default_speed=50;
+		motor_array[i].speed_value.default_speed=50;
 		if(i==0)
 		{
-			//motor_array[0].speed_value.default_speed=180;
+			motor_array[0].speed_value.default_speed=180;
 		}
 		//速度设置
 		if(i!=1)
@@ -450,6 +450,7 @@ uint8_t motor_array_init(void)
 	
 	
 	//初始化碰撞检测结构体的一些量
+	//碰撞信息读取配置
 	motor_array[0].conflict_value.conflict_counter=2;
 	motor_array[0].conflict_value.conflict_number[0]=2;
 	motor_array[0].conflict_value.conflict_number[1]=3;
@@ -461,6 +462,32 @@ uint8_t motor_array_init(void)
 	motor_array[3].conflict_value.conflict_counter=2;
 	motor_array[3].conflict_value.conflict_number[0]=2;
 	motor_array[3].conflict_value.conflict_number[1]=3;
+	
+	//碰撞条件个数，掩码，标准值配置
+	//天窗
+	motor_array[0].conflict_value.conflict_condition_counter=2;
+	motor_array[0].conflict_value.conflict_mask[0]=0x43;
+	motor_array[0].conflict_value.conflict_mask[1]=0x4F;
+	motor_array[0].conflict_value.conflict_mask[2]=0x0F;
+	motor_array[0].conflict_value.conflict_condition[0]=0x01;
+	motor_array[0].conflict_value.conflict_condition[1]=0x0E;
+	motor_array[0].conflict_value.conflict_condition[2]=0x0E;
+	//现在的左右
+	motor_array[2].conflict_value.conflict_condition_counter=4;
+	motor_array[2].conflict_value.conflict_mask[0]=0x4B;
+	motor_array[2].conflict_value.conflict_mask[1]=0x43;
+	motor_array[2].conflict_value.conflict_mask[2]=0x4F;
+	motor_array[2].conflict_value.conflict_condition[0]=0x0A;
+	motor_array[2].conflict_value.conflict_condition[1]=0x01;
+	motor_array[2].conflict_value.conflict_condition[2]=0x0E;
+	
+	//现在的前后
+	motor_array[3].conflict_value.conflict_condition_counter=2;
+	motor_array[3].conflict_value.conflict_mask[0]=0x43;
+	motor_array[3].conflict_value.conflict_mask[1]=0x4F;
+	motor_array[3].conflict_value.conflict_condition[0]=0x01;
+	motor_array[3].conflict_value.conflict_condition[1]=0x0E;
+	
 	
 	//初始化光栅结构体的一些量
 	grating_value.if_have_target=0;
@@ -3544,7 +3571,7 @@ int command_13(uint8_t* data,uint32_t para)
 	if(motor_array[2].position_value.if_tp_already==0x01)
 	{
 		//碰撞检测判定，不管是否需要返回帧，强制发送
-		if(motor_array[2 - 1].conflict_value.if_conflict==0x01)
+		if(motor_array[3 - 1].conflict_value.if_conflict==0x01)
 		{
 			QUEUE_STRUCT tmp;
 			tmp.property=0x00;             //can send
@@ -3870,7 +3897,7 @@ int command_14(uint8_t* data,uint32_t para)
 	if(motor_array[3].position_value.if_tp_already==0x01)
 	{
 		//碰撞检测判定，不管是否需要返回帧，强制发送
-		if(motor_array[3 - 1].conflict_value.if_conflict==0x01)
+		if(motor_array[4 - 1].conflict_value.if_conflict==0x01)
 		{
 			QUEUE_STRUCT tmp;
 			tmp.property=0x00;             //can send
@@ -5865,6 +5892,10 @@ void result_parse_2(uint8_t* data, uint8_t num)
 				motor_array[0].command.command_union=0x00;
 				motor_array[2].command.command_union=0x00;
 			  motor_array[3].command.command_union=0x00;
+				
+				motor_array[0].command.command_id=0;
+				motor_array[2].command.command_id=0;
+				motor_array[3].command.command_id=0;
 				
 				cmd15finish_flag=30;
 				cmd17finish_flag=30;

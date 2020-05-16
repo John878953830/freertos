@@ -320,6 +320,10 @@ typedef struct conflict_struct{
 	uint8_t conflict_status[8];                 //表示碰撞检测状态点位的状态
 	uint8_t conflict_number[8];                 //表示碰撞检测所要检测的状态点的位置
 	uint8_t conflict_counter;                   //表示碰撞检测点位的总个数，最大为8
+	uint8_t conflict_condition[8];              //表示碰撞条件的标准值
+	uint8_t conflict_mask[8];                   //表示相应条件的掩码
+	uint8_t conflict_condition_counter;         //表示碰撞条件的个数
+	uint8_t conflict_data_0;                    //存储低8位的接收到的广播数据
 	uint8_t if_conflict;                        //0: 无碰撞 1：存在碰撞
 	uint32_t time;                              //表示上次收到的广播的时间
 }CONFLICT_STRUCT;
