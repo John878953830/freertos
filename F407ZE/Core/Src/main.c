@@ -2908,6 +2908,8 @@ int command_11(uint8_t* data,uint32_t para)
 	uint8_t data_len=(uint8_t)(para & 0x0F);
 	uint8_t if_return=(para>>4)&0x01;
 	uint8_t if_last=(para>>5)&0x01;
+	motor_array[0].command.data_0=data[0];
+	
 	if(if_last!=0x00 || data_len!=1 || data[0]>1)
 	{
 		if(if_return == 0x01)
@@ -2945,10 +2947,18 @@ int command_11(uint8_t* data,uint32_t para)
 		}
 		return ERROR_COMMAND_11_FAIL;
 	}
+	if(motor_array[0].command.data_0==1)
+	{
+		motor_array[0].conflict_value.if_conflict=1;
+	}
+	if(work_model==1)
+	{
+		motor_array[0].conflict_value.if_conflict=0;
+	}
 	if(motor_array[0].position_value.if_tp_already==0x01)
 	{
 		//碰撞检测判定，不管是否需要返回帧，强制发送
-		if(motor_array[1 - 1].conflict_value.if_conflict==0x01)
+		if((motor_array[1 - 1].conflict_value.if_conflict==0x01 && motor_array[0].command.data_0==1))
 		{
 			QUEUE_STRUCT tmp;
 			tmp.property=0x00;             //can send
@@ -3041,6 +3051,7 @@ int command_11(uint8_t* data,uint32_t para)
 			command_seq_l1[1].modbus_data_3=(uint8_t)((motor_array[0].position_value.tp[1] >> 24) & 0xFF);
 			command_seq_l1[1].modbus_data_4=(uint8_t)((motor_array[0].position_value.tp[1] >> 16) & 0xFF);
 			motor_array[0].position_value.target_position=motor_array[0].position_value.tp[1];
+			motor_array[0].command.data_0=0;
 		}
 		if(data[0]==0x01)
 		{
@@ -3049,6 +3060,7 @@ int command_11(uint8_t* data,uint32_t para)
 		  command_seq_l1[1].modbus_data_3=(uint8_t)((motor_array[0].position_value.tp[2] >> 24) & 0xFF);
 		  command_seq_l1[1].modbus_data_4=(uint8_t)((motor_array[0].position_value.tp[2] >> 16) & 0xFF);
 			motor_array[0].position_value.target_position=motor_array[0].position_value.tp[2];
+			motor_array[0].command.data_0=1;
 		}
 			
 		
@@ -5169,7 +5181,8 @@ void result_parse_2(uint8_t* data, uint8_t num)
 		}
 		//执行完成判定
 		if((__fabs(motor_array[num].speed_value.current_speed_pre)>SPEED_JUDGE && __fabs(motor_array[num].speed_value.current_speed)<SPEED_JUDGE
-			 && motor_array[num].command.if_return==0x01) || __fabs(motor_array[num].position_value.current_position-motor_array[num].position_value.target_position)<COMPLETE_JUDGE)
+			 && motor_array[num].command.if_return==0x01) || 
+		(__fabs(motor_array[num].position_value.current_position-motor_array[num].position_value.target_position)<COMPLETE_JUDGE && (motor_array[num].command.command_union==0x06 || motor_array[num].command.command_union==0x14)))
 		{
 			//执行完成标志置位
 			motor_array[num].command.command_status=0x02;
@@ -5492,6 +5505,9 @@ void result_parse_2(uint8_t* data, uint8_t num)
 			{
 				motor_array[2].command.command_union=0x00;
 				motor_array[3].command.command_union=0x00;
+				
+				motor_array[2].command.command_id=0;
+				motor_array[3].command.command_id=0;
 				
 				motor_array[2].command.command_status=0x00;
 				motor_array[3].command.command_status=0x00;

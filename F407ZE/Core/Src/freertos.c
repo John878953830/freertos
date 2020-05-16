@@ -1464,6 +1464,7 @@ void start_tk_conflict_monitor(void *argument)
 							if(!(((motor_array[0].conflict_value.conflict_data_0 & motor_array[0].conflict_value.conflict_mask[0]) == motor_array[0].conflict_value.conflict_condition[0])
 							|| ((motor_array[0].conflict_value.conflict_data_0 & motor_array[0].conflict_value.conflict_mask[2]) == motor_array[0].conflict_value.conflict_condition[2])))
 							{
+								
 								motor_array[0].conflict_value.if_conflict=1;
 								//停止电机
 								QUEUE_STRUCT enable_motor;
@@ -1620,36 +1621,77 @@ void start_tk_conflict_monitor(void *argument)
 						continue;
 					if(motor_array[i].broadcast_timeout_flag==1)
 					{
-						motor_array[i].conflict_value.if_conflict=1;
-						//停止电机，电机号2
-						QUEUE_STRUCT enable_motor;
-			
-						enable_motor.property=1;                            //485 send
-						enable_motor.modbus_addr=i+1;
-						enable_motor.modbus_func=0x10;                      //写多个寄存器
-						enable_motor.modbus_addr_h=(uint8_t)(2040>>8);
-						enable_motor.modbus_addr_l=(uint8_t)(2040&0xFF);                   //电机485地址
-						enable_motor.modbus_data_len_h=0x00;
-						enable_motor.modbus_data_len_l=0x02;
-						enable_motor.modbus_data_byte=0x04;
-						enable_motor.modbus_data_1=0x08;
-						enable_motor.modbus_data_2=0x00;
-						enable_motor.modbus_data_3=0x00;
-						enable_motor.modbus_data_4=0x00;
-						
-						//modbus_send_sub(enable_motor);
-						portBASE_TYPE	status = xQueueSendToBack(send_queueHandle, &enable_motor, 0);
-						if(status!=pdPASS)
+						if(motor_array[0].command.data_0==0 && i==0)
 						{
-							#ifdef DEBUG_OUTPUT
-							printf("%s\n","queue overflow");
-							#endif
+							motor_array[0].conflict_value.if_conflict=0;
 						}
 						else
 						{
-							#ifdef DEBUG_OUTPUT
-							printf("%s\n","send command 7 succes to queue already");
-							#endif
+							motor_array[i].conflict_value.if_conflict=1;
+							//停止电机，电机号2
+							QUEUE_STRUCT enable_motor;
+				
+							enable_motor.property=1;                            //485 send
+							enable_motor.modbus_addr=i+1;
+							enable_motor.modbus_func=0x10;                      //写多个寄存器
+							enable_motor.modbus_addr_h=(uint8_t)(2040>>8);
+							enable_motor.modbus_addr_l=(uint8_t)(2040&0xFF);                   //电机485地址
+							enable_motor.modbus_data_len_h=0x00;
+							enable_motor.modbus_data_len_l=0x02;
+							enable_motor.modbus_data_byte=0x04;
+							enable_motor.modbus_data_1=0x08;
+							enable_motor.modbus_data_2=0x00;
+							enable_motor.modbus_data_3=0x00;
+							enable_motor.modbus_data_4=0x00;
+							
+							//modbus_send_sub(enable_motor);
+							portBASE_TYPE	status = xQueueSendToBack(send_queueHandle, &enable_motor, 0);
+							if(status!=pdPASS)
+							{
+								#ifdef DEBUG_OUTPUT
+								printf("%s\n","queue overflow");
+								#endif
+							}
+							else
+							{
+								#ifdef DEBUG_OUTPUT
+								printf("%s\n","send command 7 succes to queue already");
+								#endif
+							}
+						}
+						if(i==2 || i==3)
+						{
+							motor_array[i].conflict_value.if_conflict=1;
+							//停止电机，电机号2
+							QUEUE_STRUCT enable_motor;
+				
+							enable_motor.property=1;                            //485 send
+							enable_motor.modbus_addr=i+1;
+							enable_motor.modbus_func=0x10;                      //写多个寄存器
+							enable_motor.modbus_addr_h=(uint8_t)(2040>>8);
+							enable_motor.modbus_addr_l=(uint8_t)(2040&0xFF);                   //电机485地址
+							enable_motor.modbus_data_len_h=0x00;
+							enable_motor.modbus_data_len_l=0x02;
+							enable_motor.modbus_data_byte=0x04;
+							enable_motor.modbus_data_1=0x08;
+							enable_motor.modbus_data_2=0x00;
+							enable_motor.modbus_data_3=0x00;
+							enable_motor.modbus_data_4=0x00;
+							
+							//modbus_send_sub(enable_motor);
+							portBASE_TYPE	status = xQueueSendToBack(send_queueHandle, &enable_motor, 0);
+							if(status!=pdPASS)
+							{
+								#ifdef DEBUG_OUTPUT
+								printf("%s\n","queue overflow");
+								#endif
+							}
+							else
+							{
+								#ifdef DEBUG_OUTPUT
+								printf("%s\n","send command 7 succes to queue already");
+								#endif
+							}
 						}
 					}
 				}
