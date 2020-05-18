@@ -112,7 +112,7 @@ static void prvAutoReloadTimerCallback( TimerHandle_t xTimer )
 	//计算填充数据
 	queue_id.data[3]=0x00;
 	//天窗位置
-	if(__fabs(motor_array[0].position_value.current_position-motor_array[0].position_value.tp[1])<COMPLETE_JUDGE)
+	if(__fabs(motor_array[0].position_value.current_position-motor_array[0].position_value.tp[1])<COMPLETE_JUDGE*150)
 	{
 		queue_id.data[3]|=0x01;
 	}
@@ -121,7 +121,7 @@ static void prvAutoReloadTimerCallback( TimerHandle_t xTimer )
 		queue_id.data[3]&=0xFE;
 	}
 	//天窗位置
-	if(__fabs(motor_array[0].position_value.current_position-motor_array[0].position_value.tp[2])<COMPLETE_JUDGE)
+	if(__fabs(motor_array[0].position_value.current_position-motor_array[0].position_value.tp[2])<COMPLETE_JUDGE*150)
 	{
 		queue_id.data[3]|=0x02;
 	}

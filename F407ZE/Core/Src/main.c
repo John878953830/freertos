@@ -337,12 +337,20 @@ uint8_t motor_array_init(void)
 		else
 		{
 			motor_array[i].speed_value.default_speed=((uint32_t)data[0] << 24) | ((uint32_t)data[1] << 16) | ((uint32_t)data[2] << 8) | ((uint32_t)data[3]);
+			if(motor_array[i].speed_value.default_speed==0)
+			{
+				motor_array[i].speed_value.default_speed=50;
+				if(i==0)
+				{
+					motor_array[0].speed_value.default_speed=180;
+				}
+			}
 		}
 		//测试代码
-		motor_array[i].speed_value.default_speed=50;
+		//motor_array[i].speed_value.default_speed=50;
 		if(i==0)
 		{
-			motor_array[0].speed_value.default_speed=180;
+			//motor_array[0].speed_value.default_speed=180;
 		}
 		//速度设置
 		if(i!=1)
