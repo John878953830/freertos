@@ -1461,7 +1461,7 @@ QUEUE_STRUCT can_seq_for_cmd6[12]=
 		.can_source=0x03,           //本模块
 		.can_target=0x00,
 		.can_priority=0x05,         //数据帧
-		.can_if_last=0x01,          //拼接位置1
+		.can_if_last=0x00,          //拼接位置1
 		.can_if_return=0x00,
 		.length=4,
 		.data[0]=(uint8_t)((CMD6_START_SELFCHECK_ERR0_3 + MODULE_OFFSET)>>24),
@@ -1477,7 +1477,7 @@ QUEUE_STRUCT can_seq_for_cmd6[12]=
 		.can_source=0x03,           //本模块
 		.can_target=0x00,
 		.can_priority=0x05,         //数据帧
-		.can_if_last=0x01,          //拼接位置1
+		.can_if_last=0x00,          //拼接位置1
 		.can_if_return=0x00,
 		.length=4,
 		.data[0]=(uint8_t)((CMD6_START_SELFCHECK_ERR1_3 + MODULE_OFFSET)>>24),
@@ -5262,6 +5262,7 @@ void result_parse_2(uint8_t* data, uint8_t num)
 					for(ti=0;ti<motor_array[num].limit_sw_number;ti++)
 					{
 						//if(__fabs(motor_array[num].position_value.tp[ti]-motor_array[num].position_value.current_position)<COMPLETE_JUDGE)
+						HAL_Delay(1);
 						if(HAL_GPIO_ReadPin(motor_array[num].limit_sw[ti].gpio_port,motor_array[num].limit_sw[ti].pin_number)==GPIO_PIN_RESET)
 						{
 							trigger_counter++;
