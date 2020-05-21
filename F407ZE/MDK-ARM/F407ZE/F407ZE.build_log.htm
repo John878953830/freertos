@@ -27,22 +27,18 @@ Project File Date:  04/26/2020
 <h2>Output:</h2>
 *** Using Compiler 'V5.06 update 4 (build 422)', folder: 'D:\Keil_v5\ARM\ARMCC\Bin'
 Build target 'F407ZE'
-compiling main.c...
-../Core/Src/main.c(209): warning:  #177-D: variable "addr"  was declared but never referenced
-  	uint8_t rw_flag=0,addr=0,length=0;
-../Core/Src/main.c(210): warning:  #177-D: variable "j"  was declared but never referenced
-  	uint16_t i=0,j=0;
-../Core/Src/main.c(217): warning:  #177-D: variable "tmp_flag"  was declared but never referenced
-  	uint8_t tmp_flag=153;
-../Core/Src/main.c(1510): warning:  #177-D: variable "status"  was declared but never referenced
-  	GPIO_PinState status;
-../Core/Src/main.c(6330): warning:  #177-D: variable "txdata"  was declared but never referenced
-  	uint8_t txdata[2*EEPROM_CONFIG_LENGTH]={0};
-../Core/Src/main.c: 5 warnings, 0 errors
+compiling freertos.c...
+../Core/Src/freertos.c(2081): warning:  #177-D: variable "i"  was declared but never referenced
+  			uint8_t i=0;
+../Core/Src/freertos.c(2202): warning:  #177-D: variable "tmp_can_version"  was declared but never referenced
+  					uint8_t tmp_can_version=(id.RxHeader.ExtId & MASK_VERSION) >> 0;
+../Core/Src/freertos.c(2168): warning:  #550-D: variable "notify_use"  was set but never used
+  	uint32_t notify_use=0;
+../Core/Src/freertos.c: 3 warnings, 0 errors
 linking...
-Program Size: Code=53464 RO-data=2824 RW-data=4272 ZI-data=87464  
+Program Size: Code=53868 RO-data=2824 RW-data=4272 ZI-data=87464  
 FromELF: creating hex file...
-"F407ZE\F407ZE.axf" - 0 Error(s), 5 Warning(s).
+"F407ZE\F407ZE.axf" - 0 Error(s), 3 Warning(s).
 
 <h2>Software Packages used:</h2>
 
@@ -60,7 +56,7 @@ Package Vendor: ARM
 <h2>Collection of Component Files used:</h2>
 
    * Component: ARM::CMSIS:CORE:5.3.0
-Build Time Elapsed:  00:00:08
+Build Time Elapsed:  00:00:04
 </pre>
 </body>
 </html>

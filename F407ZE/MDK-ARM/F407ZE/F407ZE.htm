@@ -3,7 +3,7 @@
 <title>Static Call Graph - [F407ZE\F407ZE.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image F407ZE\F407ZE.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060422: Last Updated: Tue May 19 10:22:45 2020
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060422: Last Updated: Thu May 21 19:26:53 2020
 <BR><P>
 <H3>Maximum Stack Usage =       1000 bytes + Unknown(Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -2131,7 +2131,7 @@ Global Symbols
 <P><STRONG><a name="[a]"></a>command_10</STRONG> (Thumb, 4 bytes, Stack size 0 bytes, main.o(i.command_10))
 <BR>[Address Reference Count : 1]<UL><LI> main.o(.data)
 </UL>
-<P><STRONG><a name="[b]"></a>command_11</STRONG> (Thumb, 634 bytes, Stack size 376 bytes, main.o(i.command_11))
+<P><STRONG><a name="[b]"></a>command_11</STRONG> (Thumb, 618 bytes, Stack size 376 bytes, main.o(i.command_11))
 <BR><BR>[Stack]<UL><LI>Max Depth = 488<LI>Call Chain = command_11 &rArr; xQueueGenericSend &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
 </UL>
 <BR>[Calls]<UL><LI><a href="#[a8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_i2d
@@ -2620,7 +2620,7 @@ Global Symbols
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> freertos.o(i.MX_FREERTOS_Init)
 </UL>
-<P><STRONG><a name="[8a]"></a>start_tk_commu_monitor</STRONG> (Thumb, 102 bytes, Stack size 8 bytes, freertos.o(i.start_tk_commu_monitor))
+<P><STRONG><a name="[8a]"></a>start_tk_commu_monitor</STRONG> (Thumb, 112 bytes, Stack size 8 bytes, freertos.o(i.start_tk_commu_monitor))
 <BR><BR>[Stack]<UL><LI>Max Depth = 80<LI>Call Chain = start_tk_commu_monitor &rArr; osDelay &rArr; vTaskDelay &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
 </UL>
 <BR>[Calls]<UL><LI><a href="#[156]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xTaskNotifyWait
@@ -2628,12 +2628,14 @@ Global Symbols
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> freertos.o(i.MX_FREERTOS_Init)
 </UL>
-<P><STRONG><a name="[8b]"></a>start_tk_conflict_monitor</STRONG> (Thumb, 1098 bytes, Stack size 72 bytes, freertos.o(i.start_tk_conflict_monitor))
+<P><STRONG><a name="[8b]"></a>start_tk_conflict_monitor</STRONG> (Thumb, 1496 bytes, Stack size 72 bytes, freertos.o(i.start_tk_conflict_monitor))
 <BR><BR>[Stack]<UL><LI>Max Depth = 184<LI>Call Chain = start_tk_conflict_monitor &rArr; xQueueGenericSend &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
 </UL>
 <BR>[Calls]<UL><LI><a href="#[156]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xTaskNotifyWait
 <LI><a href="#[158]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osDelay
 <LI><a href="#[166]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueGenericSend
+<LI><a href="#[16d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;vPortExitCritical
+<LI><a href="#[16c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;vPortEnterCritical
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> freertos.o(i.MX_FREERTOS_Init)
 </UL>
@@ -2658,7 +2660,7 @@ Global Symbols
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> freertos.o(i.MX_FREERTOS_Init)
 </UL>
-<P><STRONG><a name="[91]"></a>start_tk_master_order</STRONG> (Thumb, 540 bytes, Stack size 168 bytes, freertos.o(i.start_tk_master_order))
+<P><STRONG><a name="[91]"></a>start_tk_master_order</STRONG> (Thumb, 548 bytes, Stack size 168 bytes, freertos.o(i.start_tk_master_order))
 <BR><BR>[Stack]<UL><LI>Max Depth = 280<LI>Call Chain = start_tk_master_order &rArr; xQueueReceive &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
 </UL>
 <BR>[Calls]<UL><LI><a href="#[142]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_GPIO_WritePin
@@ -2910,6 +2912,7 @@ Global Symbols
 <LI><a href="#[18b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;prvAddNewTaskToReadyList
 <LI><a href="#[156]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xTaskNotifyWait
 <LI><a href="#[19f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueReceive
+<LI><a href="#[8b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;start_tk_conflict_monitor
 <LI><a href="#[1ad]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueSemaphoreTake
 <LI><a href="#[166]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueGenericSend
 <LI><a href="#[165]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;uxQueueSpacesAvailable
@@ -2937,6 +2940,7 @@ Global Symbols
 <LI><a href="#[18b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;prvAddNewTaskToReadyList
 <LI><a href="#[156]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xTaskNotifyWait
 <LI><a href="#[19f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueReceive
+<LI><a href="#[8b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;start_tk_conflict_monitor
 <LI><a href="#[1ad]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueSemaphoreTake
 <LI><a href="#[166]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueGenericSend
 <LI><a href="#[165]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;uxQueueSpacesAvailable

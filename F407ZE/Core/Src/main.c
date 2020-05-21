@@ -2957,7 +2957,7 @@ int command_11(uint8_t* data,uint32_t para)
 	}
 	if(motor_array[0].command.data_0==1)
 	{
-		motor_array[0].conflict_value.if_conflict=1;
+		//motor_array[0].conflict_value.if_conflict=1;
 	}
 	if(work_model==1)
 	{

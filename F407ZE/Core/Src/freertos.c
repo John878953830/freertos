@@ -1235,12 +1235,15 @@ void start_tk_commu_monitor(void *argument)
 			}
 			else
 			{
-				motor_array[0].conflict_value.time=4;
-				motor_array[2].conflict_value.time=4;
-				motor_array[3].conflict_value.time=4;
+				motor_array[0].conflict_value.time=10;
+				motor_array[2].conflict_value.time=10;
+				motor_array[3].conflict_value.time=10;
 				motor_array[0].broadcast_timeout_flag=1;
 				motor_array[2].broadcast_timeout_flag=1;
 				motor_array[3].broadcast_timeout_flag=1;
+				motor_array[0].conflict_value.if_conflict=1;
+				motor_array[2].conflict_value.if_conflict=1;
+				motor_array[3].conflict_value.if_conflict=1;
 			}
 			notify_use=0;
 		}
@@ -1386,6 +1389,36 @@ void start_tk_conflict_monitor(void *argument)
 								printf("%s\n","send command 7 succes to queue already");
 								#endif
 							}
+							
+							//向主机发送返回帧
+							if(motor_array[0].command.if_return==1)
+							{
+								enable_motor.property=0x00;             //can send
+								enable_motor.can_command=0x06;          
+								enable_motor.can_if_ack=0x01;           //需要ACK
+								enable_motor.can_source=0x03;           //本模块
+								enable_motor.can_target=0x00;
+								enable_motor.can_priority=0x03;         //命令结束返回帧
+								enable_motor.can_if_last=0x00;          //无需拼接
+								enable_motor.can_if_return=0x00;        //无需返回
+								enable_motor.length=4;
+								return_error(enable_motor.data,ERROR_COMMAND_CONFLICT_DETECT);
+								taskENTER_CRITICAL();
+								portBASE_TYPE status = xQueueSendToBack(send_queueHandle, &enable_motor, 0);
+								if(status!=pdPASS)
+								{
+									#ifdef DEBUG_OUTPUT
+									printf("%s\n","queue overflow");
+									#endif
+								}
+								else
+								{
+									#ifdef DEBUG_OUTPUT
+									printf("%s\n","send command 7 error to queue already");
+									#endif
+								}
+								taskEXIT_CRITICAL();
+							}
 						}
 					}
 					else
@@ -1448,11 +1481,41 @@ void start_tk_conflict_monitor(void *argument)
 								printf("%s\n","send command 7 succes to queue already");
 								#endif
 							}
+							//向主机发送返回帧
+							if(motor_array[2].command.if_return==1)
+							{
+								enable_motor.property=0x00;             //can send
+								enable_motor.can_command=0x14;          
+								enable_motor.can_if_ack=0x01;           //需要ACK
+								enable_motor.can_source=0x03;           //本模块
+								enable_motor.can_target=0x00;
+								enable_motor.can_priority=0x03;         //命令结束返回帧
+								enable_motor.can_if_last=0x00;          //无需拼接
+								enable_motor.can_if_return=0x00;        //无需返回
+								enable_motor.length=4;
+								return_error(enable_motor.data,ERROR_COMMAND_CONFLICT_DETECT);
+								taskENTER_CRITICAL();
+								portBASE_TYPE status = xQueueSendToBack(send_queueHandle, &enable_motor, 0);
+								if(status!=pdPASS)
+								{
+									#ifdef DEBUG_OUTPUT
+									printf("%s\n","queue overflow");
+									#endif
+								}
+								else
+								{
+									#ifdef DEBUG_OUTPUT
+									printf("%s\n","send command 7 error to queue already");
+									#endif
+								}
+								taskEXIT_CRITICAL();
+							}
+							
 						}
 						else
 						{
-							motor_array[2].conflict_value.if_conflict=1;
-							motor_array[3].conflict_value.if_conflict=1;
+							motor_array[2].conflict_value.if_conflict=0;
+							motor_array[3].conflict_value.if_conflict=0;
 						}
 					}
 					else
@@ -1495,6 +1558,36 @@ void start_tk_conflict_monitor(void *argument)
 									#ifdef DEBUG_OUTPUT
 									printf("%s\n","send command 7 succes to queue already");
 									#endif
+								}
+								
+								//向主机发送返回帧
+								if(motor_array[0].command.if_return==1)
+								{
+									enable_motor.property=0x00;             //can send
+									enable_motor.can_command=0x0B;          
+									enable_motor.can_if_ack=0x01;           //需要ACK
+									enable_motor.can_source=0x03;           //本模块
+									enable_motor.can_target=0x00;
+									enable_motor.can_priority=0x03;         //命令结束返回帧
+									enable_motor.can_if_last=0x00;          //无需拼接
+									enable_motor.can_if_return=0x00;        //无需返回
+									enable_motor.length=4;
+									return_error(enable_motor.data,ERROR_COMMAND_CONFLICT_DETECT);
+									taskENTER_CRITICAL();
+									portBASE_TYPE status = xQueueSendToBack(send_queueHandle, &enable_motor, 0);
+									if(status!=pdPASS)
+									{
+										#ifdef DEBUG_OUTPUT
+										printf("%s\n","queue overflow");
+										#endif
+									}
+									else
+									{
+										#ifdef DEBUG_OUTPUT
+										printf("%s\n","send command 7 error to queue already");
+										#endif
+									}
+									taskEXIT_CRITICAL();
 								}
 							}
 							else
@@ -1564,6 +1657,36 @@ void start_tk_conflict_monitor(void *argument)
 									printf("%s\n","send command 7 succes to queue already");
 									#endif
 								}
+								
+								//向主机发送返回帧
+								if(motor_array[2].command.if_return==1)
+								{
+									enable_motor.property=0x00;             //can send
+									enable_motor.can_command=0x0E;          
+									enable_motor.can_if_ack=0x01;           //需要ACK
+									enable_motor.can_source=0x03;           //本模块
+									enable_motor.can_target=0x00;
+									enable_motor.can_priority=0x03;         //命令结束返回帧
+									enable_motor.can_if_last=0x00;          //无需拼接
+									enable_motor.can_if_return=0x00;        //无需返回
+									enable_motor.length=4;
+									return_error(enable_motor.data,ERROR_COMMAND_CONFLICT_DETECT);
+									taskENTER_CRITICAL();
+									portBASE_TYPE status = xQueueSendToBack(send_queueHandle, &enable_motor, 0);
+									if(status!=pdPASS)
+									{
+										#ifdef DEBUG_OUTPUT
+										printf("%s\n","queue overflow");
+										#endif
+									}
+									else
+									{
+										#ifdef DEBUG_OUTPUT
+										printf("%s\n","send command 7 error to queue already");
+										#endif
+									}
+									taskEXIT_CRITICAL();
+								}
 							}
 						}
 						//3号电机， 前后
@@ -1604,6 +1727,35 @@ void start_tk_conflict_monitor(void *argument)
 										#ifdef DEBUG_OUTPUT
 										printf("%s\n","send command 7 succes to queue already");
 										#endif
+									}
+									//向主机发送返回帧
+									if(motor_array[3].command.if_return==1)
+									{
+										enable_motor.property=0x00;             //can send
+										enable_motor.can_command=0x0D;          
+										enable_motor.can_if_ack=0x01;           //需要ACK
+										enable_motor.can_source=0x03;           //本模块
+										enable_motor.can_target=0x00;
+										enable_motor.can_priority=0x03;         //命令结束返回帧
+										enable_motor.can_if_last=0x00;          //无需拼接
+										enable_motor.can_if_return=0x00;        //无需返回
+										enable_motor.length=4;
+										return_error(enable_motor.data,ERROR_COMMAND_CONFLICT_DETECT);
+										taskENTER_CRITICAL();
+										portBASE_TYPE status = xQueueSendToBack(send_queueHandle, &enable_motor, 0);
+										if(status!=pdPASS)
+										{
+											#ifdef DEBUG_OUTPUT
+											printf("%s\n","queue overflow");
+											#endif
+										}
+										else
+										{
+											#ifdef DEBUG_OUTPUT
+											printf("%s\n","send command 7 error to queue already");
+											#endif
+										}
+										taskEXIT_CRITICAL();
 									}
 								}
 							}
@@ -2135,17 +2287,25 @@ void start_tk_master_order(void *argument)
 											motor_array[i].conflict_value.conflict_status[j]=(id.data[3]>>motor_array[i].conflict_value.conflict_number[j])&0x01;
 										}
 										motor_array[i].conflict_value.conflict_data_0=id.data[3];
+										//motor_array[i].conflict_value.if_conflict=0;
 										//广播状态转换
-										if(motor_array[i].conflict_value.time<4)
-										{
-											motor_array[i].conflict_value.time=0;
-										}
 										if(motor_array[i].broadcast_timeout_flag==1)
 										{
 											//超时标志清除
 											motor_array[i].broadcast_timeout_flag=0;
 											motor_array[i].conflict_value.time=0;
+											motor_array[i].conflict_value.if_conflict=0;
 										}
+										else
+										{
+											//motor_array[i].conflict_value.if_conflict=0;
+											if(motor_array[i].command.command_id==0)
+											{
+												motor_array[i].conflict_value.if_conflict=0;
+											}
+											motor_array[i].conflict_value.time=0;
+										}
+										
 									}
 								}
 							}
