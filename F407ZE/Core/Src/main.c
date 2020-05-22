@@ -2955,14 +2955,6 @@ int command_11(uint8_t* data,uint32_t para)
 		}
 		return ERROR_COMMAND_11_FAIL;
 	}
-	if(motor_array[0].command.data_0==1)
-	{
-		//motor_array[0].conflict_value.if_conflict=1;
-	}
-	if(work_model==1)
-	{
-		motor_array[0].conflict_value.if_conflict=0;
-	}
 	if(motor_array[0].position_value.if_tp_already==0x01)
 	{
 		//碰撞检测判定，不管是否需要返回帧，强制发送
@@ -3591,7 +3583,7 @@ int command_13(uint8_t* data,uint32_t para)
 	if(motor_array[2].position_value.if_tp_already==0x01)
 	{
 		//碰撞检测判定，不管是否需要返回帧，强制发送
-		if(motor_array[3 - 1].conflict_value.if_conflict==0x01)
+		if(0)//motor_array[3 - 1].conflict_value.if_conflict==0x01)
 		{
 			QUEUE_STRUCT tmp;
 			tmp.property=0x00;             //can send
@@ -3917,7 +3909,7 @@ int command_14(uint8_t* data,uint32_t para)
 	if(motor_array[3].position_value.if_tp_already==0x01)
 	{
 		//碰撞检测判定，不管是否需要返回帧，强制发送
-		if(motor_array[4 - 1].conflict_value.if_conflict==0x01)
+		if(0)//motor_array[4 - 1].conflict_value.if_conflict==0x01)
 		{
 			QUEUE_STRUCT tmp;
 			tmp.property=0x00;             //can send
