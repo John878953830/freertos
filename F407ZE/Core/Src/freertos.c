@@ -2633,9 +2633,19 @@ void start_tk_result_process_rece_5(void *argument)
 								}
 								else
 								{
-									//角度不正常，顺时针旋转80度
-								  grating_value.if_have_target=1;
-								  grating_value.status_angle=0x11;
+									if(counter_0_1>5)
+									{
+										//角度不正常，顺时针旋转80度
+										grating_value.if_have_target=1;
+										grating_value.status_angle=0x11;
+									}
+									else
+									{
+										//角度正常，无需旋转
+										grating_value.if_have_target=1;
+										grating_value.status_angle=0;
+									}
+									
 								}
 							}
 							else

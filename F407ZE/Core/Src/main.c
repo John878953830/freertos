@@ -1621,12 +1621,6 @@ int command_0(uint8_t* data,uint32_t para)
 		tmp.can_if_return=0x00;
 		tmp.length=4;
 		return_error(tmp.data,RETURN_OK);
-		/*
-		tmp.data[0]=0x00;
-		tmp.data[1]=0x00;
-		tmp.data[2]=0x00;
-		tmp.data[3]=0x00;
-		*/
 		BaseType_t status_q = xQueueSendToBack(send_queueHandle, &tmp, 0);
 		if(status_q!=pdPASS)
 		{
@@ -5239,15 +5233,6 @@ void result_parse_2(uint8_t* data, uint8_t num)
 					{
 						return_error(frame_return.data,RETURN_OK);
 					}
-					if(motor_array[num].command.command_id==0x08 || 
-						 motor_array[num].command.command_id==0x08 ||
-					   motor_array[num].command.command_id==0x08)
-					{
-						if(grating_value.if_have_target==0x04)
-						{
-							return_error(frame_return.data,ERROR_NEED_ROTATE);
-						}
-					}
 					uint8_t trigger_counter=0,ti=0;
 					uint8_t tindex=0;
 					//光电开关是否触发判定
@@ -5480,10 +5465,12 @@ void result_parse_2(uint8_t* data, uint8_t num)
 						frame_return.can_if_return=0x00;        //无需返回
 						frame_return.length=4;
 						return_error(frame_return.data,RETURN_OK);
+						/*
 						if(grating_value.if_have_target==0x04)
 						{
 							return_error(frame_return.data,ERROR_NEED_ROTATE);
 						}
+						*/
 						taskENTER_CRITICAL();
 						portBASE_TYPE status = xQueueSendToBack(send_queueHandle, &frame_return, 0);
 						if(status!=pdPASS)
@@ -5529,10 +5516,12 @@ void result_parse_2(uint8_t* data, uint8_t num)
 					frame_return.can_if_return=0x00;        //无需返回
 					frame_return.length=4;
 					return_error(frame_return.data,RETURN_OK);
+					/*
 					if(grating_value.if_have_target==0x04)
 					{
 						return_error(frame_return.data,ERROR_NEED_ROTATE);
 					}
+					*/
 					taskENTER_CRITICAL();
 					portBASE_TYPE status = xQueueSendToBack(send_queueHandle, &frame_return, 0);
 					if(status!=pdPASS)
