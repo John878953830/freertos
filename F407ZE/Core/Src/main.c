@@ -5295,7 +5295,7 @@ void result_parse_2(uint8_t* data, uint8_t num)
 							{
 								if(__fabs(motor_array[0].position_value.current_position-motor_array[0].position_value.tp[2])<COMPLETE_JUDGE)
 								{
-									return_error(frame_return.data,ERROR_3048);
+									//return_error(frame_return.data,ERROR_3048);
 								}
 								if(__fabs(motor_array[0].position_value.current_position-motor_array[0].position_value.tp[1])<COMPLETE_JUDGE)
 								{
