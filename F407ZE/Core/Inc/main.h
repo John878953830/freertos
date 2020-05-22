@@ -147,7 +147,8 @@ extern uint8_t cmd6_if_return;                 //6号总体自检完成是否返回
 data[0]=(uint8_t)(((error+3000)>>24)&0xFF);\
 data[1]=(uint8_t)(((error+3000)>>16)&0xFF);\
 data[2]=(uint8_t)(((error+3000)>>8)&0xFF);\
-data[3]=(uint8_t)(((error+3000))&0xFF);     
+data[3]=(uint8_t)(((error+3000))&0xFF);\
+HAL_GPIO_WritePin(GPIOB,GPIO_PIN_14,GPIO_PIN_RESET);
 #define MODULE_OFFSET           3000
 #define RETURN_OK               -3000
 #define ERROR_UNKNOWN           0xFF

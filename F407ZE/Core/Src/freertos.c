@@ -2281,10 +2281,8 @@ void start_tk_master_order(void *argument)
 										command_to_function[tmp_command_id](data,para);
 									}
 								}
-								HAL_GPIO_WritePin(GPIOB,GPIO_PIN_14,GPIO_PIN_RESET);
+								//HAL_GPIO_WritePin(GPIOB,GPIO_PIN_14,GPIO_PIN_RESET);
 							}
-						//根据命令电机映射表找到要动作的电机，并将参数压入电机中的命令结构
-						//uint8_t motor_id=command_to_motor[tmp_command_id];
 						}
 					}
 					else
