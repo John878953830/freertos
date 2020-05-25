@@ -1235,18 +1235,21 @@ void start_tk_commu_monitor(void *argument)
 			}
 			else
 			{
-				motor_array[0].conflict_value.time=10;
-				motor_array[2].conflict_value.time=10;
-				motor_array[3].conflict_value.time=10;
-				motor_array[0].broadcast_timeout_flag=1;
-				motor_array[2].broadcast_timeout_flag=1;
-				motor_array[3].broadcast_timeout_flag=1;
-				motor_array[0].conflict_value.if_conflict=1;
-				motor_array[2].conflict_value.if_conflict=1;
-				motor_array[3].conflict_value.if_conflict=1;
-				motor_array[0].conflict_value.conflict_data_0=0;
-				motor_array[2].conflict_value.conflict_data_0=0;
-				motor_array[3].conflict_value.conflict_data_0=0;
+				if(work_model==0)
+				{
+					motor_array[0].conflict_value.time=10;
+					motor_array[2].conflict_value.time=10;
+					motor_array[3].conflict_value.time=10;
+					motor_array[0].broadcast_timeout_flag=1;
+					motor_array[2].broadcast_timeout_flag=1;
+					motor_array[3].broadcast_timeout_flag=1;
+					motor_array[0].conflict_value.if_conflict=1;
+					motor_array[2].conflict_value.if_conflict=1;
+					motor_array[3].conflict_value.if_conflict=1;
+					motor_array[0].conflict_value.conflict_data_0=0;
+					motor_array[2].conflict_value.conflict_data_0=0;
+					motor_array[3].conflict_value.conflict_data_0=0;
+				}
 			}
 			notify_use=0;
 		}
@@ -2563,7 +2566,7 @@ void start_tk_result_process_rece_5(void *argument)
 						modbus_status_5=0;
 						modbus_time_flag_5=0;
 					}
-					if((grating_value.data[0] | grating_value.data[1] | grating_value.data[2] | grating_value.data[3] | grating_value.data[4] | grating_value.data[5])==0x00)
+					if((grating_value.data[0] | grating_value.data[1] | grating_value.data[2] | grating_value.data[4] | grating_value.data[5])==0x00 && (grating_value.data[3] ==0x10 || grating_value.data[3] ==0))
 					{
 						grating_value.if_have_target=0;
 						grating_value.status=0;
@@ -2571,7 +2574,7 @@ void start_tk_result_process_rece_5(void *argument)
 					else
 					{
 						//三段统计
-						uint8_t counter_0_1=0, counter_2_3=0,counter_4_5=0;
+						uint8_t counter_0_1=0, counter_2_3=0,counter_4_5=0,all_counter=0;
 						uint8_t itc=0,jtc=0;
 						for(itc=0;itc<6;itc++)
 						{
@@ -2606,183 +2609,69 @@ void start_tk_result_process_rece_5(void *argument)
 								}
 							}
 						}
-						if(counter_0_1>counter_2_3 && counter_4_5>counter_2_3 && counter_2_3<3)
+						
+						all_counter=counter_0_1+counter_2_3+counter_4_5;
+						//taskENTER_CRITICAL();
+						//计算最大距离
+						uint8_t i=0, j=0;
+						left=0;
+						right=0;//left right start min = 0
+						for(i=0;i<6;i++)
 						{
-							if(counter_0_1<4)
+							uint8_t tmp=grating_value.data[i];
+							uint8_t k=0;
+							for(k=0;k<8;k++)
 							{
-								//计算最大距离
-								uint8_t i=0, j=0;
-								uint8_t left=0,right=0;//left right start min = 0
-								for(i=0;i<6;i++)
+								if(((tmp<<k)&0x80)==0x80)
 								{
-									uint8_t tmp=grating_value.data[i];
-									uint8_t k=0;
-									for(k=0;k<8;k++)
-									{
-										if(((tmp<<k)&0x80)==0x80)
-										{
-											goto LEFT_OVER;
-										}
-										left++;
-									}
+									goto LEFT_OVER;
 								}
-								LEFT_OVER:
-								grating_value.min_point=left;
-								for(i=6;i>0;i--)
-								{
-									uint8_t tmp=grating_value.data[i-1];
-									uint8_t k=0;
-									for(k=0;k<8;k++)
-									{
-										if(((tmp>>k)&0x01)==0x01)
-										{
-											goto RIGHT_OVER;
-										}
-										right++;
-									}
-								}
-								RIGHT_OVER:
-								right=47-right;
-								grating_value.max_point=right;
-								if(__fabs(left-right)<DISTANCE_45)
-								{
-									//角度正常，无需旋转
-									grating_value.if_have_target=1;
-									grating_value.status_angle=0;
-								}
-								else
-								{
-									//角度正常，无需旋转
-									grating_value.if_have_target=4;
-									grating_value.status_angle=0;
-								}
-								
+								left++;
 							}
-							else
+						}
+						LEFT_OVER:
+						grating_value.min_point=left;
+						for(i=6;i>0;i--)
+						{
+							uint8_t tmp=grating_value.data[i-1];
+							uint8_t k=0;
+							for(k=0;k<8;k++)
 							{
-								//角度不正常，顺时针旋转80度
+								if(((tmp>>k)&0x01)==0x01)
+								{
+									goto RIGHT_OVER;
+								}
+								right++;
+							}
+						}
+						RIGHT_OVER:
+						right=47-right;
+						grating_value.max_point=right;
+						
+						if(__fabs(left-right)<DISTANCE_45)
+						{
+							//角度正常，无需旋转
+							grating_value.if_have_target=1;
+							grating_value.status_angle=0;
+							if(all_counter>ALL_MAX)
+							{
 								grating_value.if_have_target=1;
 								grating_value.status_angle=0x11;
 							}
 						}
 						else
 						{
-							//逆时针旋转40度
-							if((counter_0_1<=counter_2_3 && counter_4_5<=counter_2_3)|| counter_0_1>6)
+							//角度正常，无需旋转
+							grating_value.if_have_target=4;
+							grating_value.status_angle=0;
+							if(all_counter>ALL_MAX)
 							{
-								if(counter_2_3>4 && counter_0_1<6)
-								{
-									grating_value.if_have_target=4;
-									grating_value.status_angle=0;
-								}
-								else
-								{
-									if(counter_0_1>5)
-									{
-										//角度不正常，顺时针旋转80度
-										grating_value.if_have_target=1;
-										grating_value.status_angle=0x11;
-									}
-									else
-									{
-										uint8_t i=0, j=0;
-										uint8_t left=0,right=0;//left right start min = 0
-										for(i=0;i<6;i++)
-										{
-											uint8_t tmp=grating_value.data[i];
-											uint8_t k=0;
-											for(k=0;k<8;k++)
-											{
-												if(((tmp<<k)&0x80)==0x80)
-												{
-													goto LEFT_OVER_1;
-												}
-												left++;
-											}
-										}
-										LEFT_OVER_1:
-										grating_value.min_point=left;
-										for(i=6;i>0;i--)
-										{
-											uint8_t tmp=grating_value.data[i-1];
-											uint8_t k=0;
-											for(k=0;k<8;k++)
-											{
-												if(((tmp>>k)&0x01)==0x01)
-												{
-													goto RIGHT_OVER_1;
-												}
-												right++;
-											}
-										}
-										RIGHT_OVER_1:
-										right=47-right;
-										grating_value.max_point=right;
-										if(__fabs(left-right)<DISTANCE_45)
-										{
-											//角度正常，无需旋转
-											grating_value.if_have_target=1;
-											grating_value.status_angle=0;
-										}
-										else
-										{
-											//角度正常，无需旋转
-											grating_value.if_have_target=4;
-											grating_value.status_angle=0;
-										}
-									}
-									
-								}
+								grating_value.if_have_target=1;
+								grating_value.status_angle=0x11;
 							}
-							else
-							{
-								uint8_t i=0, j=0;
-								uint8_t left=0,right=0;//left right start min = 0
-								for(i=0;i<6;i++)
-								{
-									uint8_t tmp=grating_value.data[i];
-									uint8_t k=0;
-									for(k=0;k<8;k++)
-									{
-										if(((tmp<<k)&0x80)==0x80)
-										{
-											goto LEFT_OVER_2;
-										}
-										left++;
-									}
-								}
-								LEFT_OVER_2:
-								grating_value.min_point=left;
-								for(i=6;i>0;i--)
-								{
-									uint8_t tmp=grating_value.data[i-1];
-									uint8_t k=0;
-									for(k=0;k<8;k++)
-									{
-										if(((tmp>>k)&0x01)==0x01)
-										{
-											goto RIGHT_OVER_2;
-										}
-										right++;
-									}
-								}
-								RIGHT_OVER_2:
-								right=47-right;
-								grating_value.max_point=right;
-								if(__fabs(left-right)<DISTANCE_45)
-								{
-									//角度正常，无需旋转
-									grating_value.if_have_target=1;
-									grating_value.status_angle=0;
-								}
-								else
-								{
-									//角度正常，无需旋转
-									grating_value.if_have_target=4;
-									grating_value.status_angle=0;
-								}
-							}
-						}	
+						}
+						//taskEXIT_CRITICAL();
+            						
 					}
 				}
 			}

@@ -155,7 +155,7 @@
         <Bp>
           <Number>0</Number>
           <Type>0</Type>
-          <LineNumber>333</LineNumber>
+          <LineNumber>335</LineNumber>
           <EnabledFlag>1</EnabledFlag>
           <Address>134253426</Address>
           <ByteObject>0</ByteObject>
@@ -166,7 +166,7 @@
           <BreakIfRCount>1</BreakIfRCount>
           <Filename>../Core/Src/main.c</Filename>
           <ExecCommand></ExecCommand>
-          <Expression>\\F407ZE\../Core/Src/main.c\333</Expression>
+          <Expression>\\F407ZE\../Core/Src/main.c\335</Expression>
         </Bp>
       </Breakpoint>
       <WatchWindow1>
@@ -229,6 +229,21 @@
           <count>11</count>
           <WinNumber>1</WinNumber>
           <ItemText>work_model</ItemText>
+        </Ww>
+        <Ww>
+          <count>12</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>right</ItemText>
+        </Ww>
+        <Ww>
+          <count>13</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>right</ItemText>
+        </Ww>
+        <Ww>
+          <count>14</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>left</ItemText>
         </Ww>
       </WatchWindow1>
       <MemoryWindow1>

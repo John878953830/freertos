@@ -108,6 +108,8 @@ uint8_t cmd17finish_flag=30;
 uint8_t cmd18finish_flag=30;
 
 uint8_t communication_reset_counter=0;
+
+uint8_t left=0,right=0;
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -5372,6 +5374,10 @@ void result_parse_2(uint8_t* data, uint8_t num)
 						motor_array[2].command.if_return=1;
 						subindex_des=motor_array[2].position_value.tp[0];  //完全夹紧位
 						motor_array[2].position_value.target_position=motor_array[2].position_value.tp[0];
+						
+						//speed_set(3,10);
+						//speed_set(4,10);
+						HAL_Delay(100);
 						cmd_abs(motor_array[2].id);
 						subindex_for_cmd20=2;
 					}
@@ -5384,6 +5390,9 @@ void result_parse_2(uint8_t* data, uint8_t num)
 						motor_array[2].command.command_status=0x02;
 						motor_array[3].command.command_status=0x02;
 						subindex_for_cmd20=30;
+						//speed_set(3,10);
+						//speed_set(4,10);
+						
 						//发送返回帧
 						QUEUE_STRUCT frame_return;
 						frame_return.property=0x00;             //can send
@@ -5504,6 +5513,9 @@ void result_parse_2(uint8_t* data, uint8_t num)
 				{
 					motor_array[2].command.if_return=0;
 					motor_array[3].command.if_return=0;
+					
+					//speed_set(3,motor_array[2].speed_value.default_speed);
+					//speed_set(4,motor_array[3].speed_value.default_speed);
 					//发送返回帧
 					QUEUE_STRUCT frame_return;
 					frame_return.property=0x00;             //can send
