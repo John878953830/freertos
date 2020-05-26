@@ -110,6 +110,8 @@ uint8_t cmd18finish_flag=30;
 uint8_t communication_reset_counter=0;
 
 uint8_t left=0,right=0;
+
+int32_t speed_terminal=10;
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -2992,7 +2994,7 @@ int command_11(uint8_t* data,uint32_t para)
 		//检测当前位置是否为目标位置
 		if(data[0]==0x00 || data[0]==0x01)
 		{
-			if(__fabs(motor_array[0].position_value.tp[1+data[0]] - motor_array[0].position_value.current_position) < COMPLETE_JUDGE)
+			if(__fabs(motor_array[0].position_value.tp[1+data[0]] - motor_array[0].position_value.current_position) < COMPLETE_JUDGE*150)
 			{
 				//当前位置已经处于误差限中
 				if(if_return == 0x01)
@@ -4898,7 +4900,7 @@ int command_19(uint8_t* data,uint32_t para)
 		}
 		case 4:
 		{
-			angle=-3000;
+			angle=-2000;
 			QUEUE_STRUCT tmp;
 			tmp.property=0x00;             //can send
 			tmp.can_command=0x13;          //停止指令
@@ -5375,8 +5377,9 @@ void result_parse_2(uint8_t* data, uint8_t num)
 						subindex_des=motor_array[2].position_value.tp[0];  //完全夹紧位
 						motor_array[2].position_value.target_position=motor_array[2].position_value.tp[0];
 						
-						//speed_set(3,10);
-						//speed_set(4,10);
+					  //speed_set(3,speed_terminal);
+						//speed_set(4,speed_terminal);
+						
 						HAL_Delay(100);
 						cmd_abs(motor_array[2].id);
 						subindex_for_cmd20=2;

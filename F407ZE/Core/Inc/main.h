@@ -142,7 +142,7 @@ extern uint8_t cmd6_if_return;                 //6号总体自检完成是否返回
 #define DISTANCE_MIDDLE_DELTA     5           //中轴方向判定误差限, 大于此值时认为机头朝左或右
 #define DISTANCE_LIMIT_MIN        2
 
-#define ALL_MAX                  22           //ZONG SHU
+#define ALL_MAX                  23           //ZONG SHU
 
 //错误码
 #define return_error(data, error)\

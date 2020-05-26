@@ -2664,11 +2664,7 @@ void start_tk_result_process_rece_5(void *argument)
 							//角度正常，无需旋转
 							grating_value.if_have_target=4;
 							grating_value.status_angle=0;
-							if(all_counter>ALL_MAX)
-							{
-								grating_value.if_have_target=1;
-								grating_value.status_angle=0x11;
-							}
+							
 						}
 						//taskEXIT_CRITICAL();
             						
