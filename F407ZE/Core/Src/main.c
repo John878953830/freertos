@@ -5067,8 +5067,8 @@ int command_20(uint8_t* data,uint32_t para)
 	{
 		motor_array[2].command.data_0=0;
 		motor_array[3].command.data_0=0;
-		if(__fabs(motor_array[2].position_value.current_position-motor_array[2].position_value.tp[1])<COMPLETE_JUDGE 
-			 && __fabs(motor_array[3].position_value.current_position-motor_array[3].position_value.tp[1]<COMPLETE_JUDGE)
+		if(__fabs(motor_array[2].position_value.current_position-motor_array[2].position_value.tp[1])<COMPLETE_JUDGE*5 
+			 && __fabs(motor_array[3].position_value.current_position-motor_array[3].position_value.tp[1]<COMPLETE_JUDGE*5)
 		   && if_return==1)
 		{
 			//都在误差限范围内，直接返回成功
@@ -5098,7 +5098,7 @@ int command_20(uint8_t* data,uint32_t para)
 			}
 			return 0;
 		}
-		if(__fabs(motor_array[2].position_value.current_position-motor_array[2].position_value.tp[1])<COMPLETE_JUDGE)
+		if(__fabs(motor_array[2].position_value.current_position-motor_array[2].position_value.tp[1])<COMPLETE_JUDGE*5)
 		{
 			motor_array[2].command.command_status=2;
 		}
@@ -5107,7 +5107,7 @@ int command_20(uint8_t* data,uint32_t para)
 			motor_array[2].command.command_status=1;
 			command_13(data,para);
 		}
-		if(__fabs(motor_array[3].position_value.current_position-motor_array[3].position_value.tp[1])<COMPLETE_JUDGE)
+		if(__fabs(motor_array[3].position_value.current_position-motor_array[3].position_value.tp[1])<COMPLETE_JUDGE*5)
 		{
 			motor_array[3].command.command_status=2;
 		}
@@ -5122,8 +5122,8 @@ int command_20(uint8_t* data,uint32_t para)
 		motor_array[2].command.data_0=1;
 		motor_array[3].command.data_0=1;
 		//需要根据位置值添加不同的命令值
-		if(__fabs(motor_array[2].position_value.current_position-motor_array[2].position_value.tp[2])<COMPLETE_JUDGE 
-			 && __fabs(motor_array[3].position_value.current_position-motor_array[3].position_value.tp[2]<COMPLETE_JUDGE))
+		if(__fabs(motor_array[2].position_value.current_position-motor_array[2].position_value.tp[2])<COMPLETE_JUDGE*5 
+			 && __fabs(motor_array[3].position_value.current_position-motor_array[3].position_value.tp[2])<COMPLETE_JUDGE*5)
 		{
 			motor_array[3].command.command_status=2;
 			subindex_for_cmd20=1;
