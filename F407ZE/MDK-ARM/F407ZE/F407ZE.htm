@@ -3,7 +3,7 @@
 <title>Static Call Graph - [F407ZE\F407ZE.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image F407ZE\F407ZE.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060422: Last Updated: Tue May 26 17:20:15 2020
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060422: Last Updated: Wed May 27 10:34:31 2020
 <BR><P>
 <H3>Maximum Stack Usage =       1000 bytes + Unknown(Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -2111,8 +2111,8 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[89]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;start_tk_send_order
 </UL>
 
-<P><STRONG><a name="[13f]"></a>can_start</STRONG> (Thumb, 116 bytes, Stack size 48 bytes, main.o(i.can_start))
-<BR><BR>[Stack]<UL><LI>Max Depth = 136<LI>Call Chain = can_start &rArr; HAL_CAN_Init &rArr; HAL_CAN_MspInit &rArr; HAL_GPIO_Init
+<P><STRONG><a name="[13f]"></a>can_start</STRONG> (Thumb, 160 bytes, Stack size 56 bytes, main.o(i.can_start))
+<BR><BR>[Stack]<UL><LI>Max Depth = 144<LI>Call Chain = can_start &rArr; HAL_CAN_Init &rArr; HAL_CAN_MspInit &rArr; HAL_GPIO_Init
 </UL>
 <BR>[Calls]<UL><LI><a href="#[ce]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_CAN_Start
 <LI><a href="#[c5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_CAN_Init
@@ -2667,7 +2667,7 @@ Global Symbols
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> freertos.o(i.MX_FREERTOS_Init)
 </UL>
-<P><STRONG><a name="[8b]"></a>start_tk_conflict_monitor</STRONG> (Thumb, 1160 bytes, Stack size 72 bytes, freertos.o(i.start_tk_conflict_monitor))
+<P><STRONG><a name="[8b]"></a>start_tk_conflict_monitor</STRONG> (Thumb, 1204 bytes, Stack size 72 bytes, freertos.o(i.start_tk_conflict_monitor))
 <BR><BR>[Stack]<UL><LI>Max Depth = 184<LI>Call Chain = start_tk_conflict_monitor &rArr; xQueueGenericSend &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
 </UL>
 <BR>[Calls]<UL><LI><a href="#[142]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_GPIO_WritePin

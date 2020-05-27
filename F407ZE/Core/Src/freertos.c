@@ -1227,7 +1227,7 @@ void start_tk_commu_monitor(void *argument)
 			#ifdef DEBUG_OUTPUT
 			printf("%s\n","start tk communicate monitor");
 			#endif
-			if(motor_array[0].conflict_value.time<4)
+			if(motor_array[0].conflict_value.time<8)
 			{
 				motor_array[0].conflict_value.time++;
 				motor_array[2].conflict_value.time++;
@@ -1359,10 +1359,26 @@ void start_tk_conflict_monitor(void *argument)
 				 || (motor_array[0].conflict_value.conflict_mask[1] & motor_array[0].conflict_value.conflict_data_0)==motor_array[0].conflict_value.conflict_condition[1])
 				{
 					motor_array[0].conflict_value.if_conflict=0;
+					if(grating_value.if_have_target==0)
+					{
+						motor_array[0].conflict_value.if_conflict=0;
+					}
+					else
+					{
+						motor_array[0].conflict_value.if_conflict=1;
+					}
 				}
 				else
 				{
-					motor_array[0].conflict_value.if_conflict=1;
+					if(grating_value.if_have_target==0)
+					{
+						motor_array[0].conflict_value.if_conflict=0;
+					}
+					else
+					{
+						motor_array[0].conflict_value.if_conflict=1;
+					}
+					//motor_array[0].conflict_value.if_conflict=1;
 					if(motor_array[0].command.data_0==1)
 					{
 						motor_array[0].command.command_id=0;
