@@ -1578,6 +1578,27 @@ int command_0(uint8_t* data,uint32_t para)
 			printf("%s\n","send command 0 error to queue already");
 			#endif
 		}
+		
+		//发送执行完成指令
+		tmp.property=0x00;             //can send
+		tmp.can_command=motor_array[i].command.command_id;          
+		tmp.can_if_ack=0x01;           //需要ACK
+		tmp.can_source=0x03;           //本模块
+		tmp.can_target=0x00;
+		tmp.can_priority=0x03;         //命令结束返回帧
+		tmp.can_if_last=0x00;          //无需拼接
+		tmp.can_if_return=0x00;        //无需返回
+		tmp.length=4;
+		return_error(tmp.data,RETURN_OK);
+		xQueueSendToBack(send_queueHandle, &tmp, 0);
+		
+		//motor_array[i].position_value.target_position=0;
+		motor_array[i].command.command_id=0;
+		motor_array[i].command.command_union=0;
+		motor_array[i].command.command_status=0;
+		subindex_for_cmd20=30;
+		subindex_for_cmd6=30;
+		
 		/*
 		if(status!=GPIO_PIN_RESET)
 		{

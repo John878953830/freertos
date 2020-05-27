@@ -130,7 +130,7 @@ static void prvAutoReloadTimerCallback( TimerHandle_t xTimer )
 		queue_id.data[3]&=0xFD;
 	}
 	//前后夹紧电机位置
-	if(__fabs(motor_array[3].position_value.current_position-motor_array[3].position_value.tp[1])<COMPLETE_JUDGE)
+	if(__fabs(motor_array[3].position_value.current_position-motor_array[3].position_value.tp[1])<COMPLETE_JUDGE*5)
 	{
 		queue_id.data[3]|=0x04;
 	}
@@ -147,7 +147,7 @@ static void prvAutoReloadTimerCallback( TimerHandle_t xTimer )
 		queue_id.data[3]&=0xF7;
 	}
 	//左右夹紧电机位置
-	if(__fabs(motor_array[2].position_value.current_position-motor_array[2].position_value.tp[1])<COMPLETE_JUDGE)
+	if(__fabs(motor_array[2].position_value.current_position-motor_array[2].position_value.tp[1])<COMPLETE_JUDGE*5)
 	{
 		queue_id.data[3]|=0x10;
 	}
