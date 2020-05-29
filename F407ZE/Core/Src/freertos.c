@@ -138,7 +138,7 @@ static void prvAutoReloadTimerCallback( TimerHandle_t xTimer )
 	{
 		queue_id.data[3]&=0xFB;
 	}
-	if(__fabs(motor_array[3].position_value.current_position-motor_array[3].position_value.tp[2])<COMPLETE_JUDGE || __fabs(motor_array[3].position_value.current_position-motor_array[3].position_value.tp[0])<COMPLETE_JUDGE)
+	if(__fabs(motor_array[3].position_value.current_position-motor_array[3].position_value.tp[2])<COMPLETE_JUDGE*5 || __fabs(motor_array[3].position_value.current_position-motor_array[3].position_value.tp[0])<COMPLETE_JUDGE*5)
 	{
 		queue_id.data[3]|=0x08;
 	}
@@ -155,7 +155,7 @@ static void prvAutoReloadTimerCallback( TimerHandle_t xTimer )
 	{
 		queue_id.data[3]&=0xEF;
 	}
-	if(__fabs(motor_array[2].position_value.current_position-motor_array[2].position_value.tp[2])<COMPLETE_JUDGE || __fabs(motor_array[2].position_value.current_position-motor_array[2].position_value.tp[0])<COMPLETE_JUDGE)
+	if(__fabs(motor_array[2].position_value.current_position-motor_array[2].position_value.tp[2])<COMPLETE_JUDGE*5 || __fabs(motor_array[2].position_value.current_position-motor_array[2].position_value.tp[0])<COMPLETE_JUDGE*5)
 	{
 		queue_id.data[3]|=0x20;
 	}
