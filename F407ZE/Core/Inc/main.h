@@ -137,7 +137,7 @@ extern uint8_t cmd6_if_return;                 //6号总体自检完成是否返回
 #define ENABLE_POSTURE_POWER     3
 
 #define DISTANCE_MIN             26           //130/5,  飞机机腿间距
-#define DISTANCE_45              33           //45度时的遮挡距离
+#define DISTANCE_45              36           //45度时的遮挡距离
 #define DISTANCE_DELTA            3           //误差限，3组间距15mm
 #define DISTANCE_MIDDLE_DELTA     5           //中轴方向判定误差限, 大于此值时认为机头朝左或右
 #define DISTANCE_LIMIT_MIN        2

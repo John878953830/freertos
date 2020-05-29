@@ -1243,7 +1243,14 @@ void start_tk_commu_monitor(void *argument)
 					motor_array[0].broadcast_timeout_flag=1;
 					motor_array[2].broadcast_timeout_flag=1;
 					motor_array[3].broadcast_timeout_flag=1;
-					motor_array[0].conflict_value.if_conflict=1;
+					if(motor_array[0].command.data_0==1)
+					{
+					  motor_array[0].conflict_value.if_conflict=1;
+					}
+					else
+					{
+						motor_array[0].conflict_value.if_conflict=0;
+					}
 					motor_array[2].conflict_value.if_conflict=1;
 					motor_array[3].conflict_value.if_conflict=1;
 					motor_array[0].conflict_value.conflict_data_0=0;
@@ -1365,7 +1372,11 @@ void start_tk_conflict_monitor(void *argument)
 					}
 					else
 					{
-						motor_array[0].conflict_value.if_conflict=1;
+						if(motor_array[0].command.data_0==1)
+						{
+							
+						  motor_array[0].conflict_value.if_conflict=1;
+						}
 					}
 				}
 				else
@@ -1376,7 +1387,11 @@ void start_tk_conflict_monitor(void *argument)
 					}
 					else
 					{
-						motor_array[0].conflict_value.if_conflict=1;
+						if(motor_array[0].command.data_0==1)
+						{
+							
+						  motor_array[0].conflict_value.if_conflict=1;
+						}
 					}
 					//motor_array[0].conflict_value.if_conflict=1;
 					if(motor_array[0].command.data_0==1)
