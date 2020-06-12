@@ -354,7 +354,7 @@ uint8_t motor_array_init(void)
 		//motor_array[i].speed_value.default_speed=50;
 		if(i==0)
 		{
-			//motor_array[0].speed_value.default_speed=180;
+			//motor_array[0].speed_value.default_speed=300;
 		}
 		//速度设置
 		if(i!=1)
@@ -1580,8 +1580,17 @@ int command_0(uint8_t* data,uint32_t para)
 		}
 		
 		//发送执行完成指令
+		taskENTER_CRITICAL();
 		tmp.property=0x00;             //can send
-		tmp.can_command=motor_array[i].command.command_id;          
+		tmp.can_command=motor_array[i].command.command_id;
+		if(motor_array[i].command.command_union==0x14)
+		{
+			tmp.can_command=0x14;
+		}
+		if(motor_array[i].command.command_union==0x06)
+		{
+			tmp.can_command=0x06;
+		}       
 		tmp.can_if_ack=0x01;           //需要ACK
 		tmp.can_source=0x03;           //本模块
 		tmp.can_target=0x00;
@@ -1591,6 +1600,7 @@ int command_0(uint8_t* data,uint32_t para)
 		tmp.length=4;
 		return_error(tmp.data,RETURN_OK);
 		xQueueSendToBack(send_queueHandle, &tmp, 0);
+		taskEXIT_CRITICAL();
 		
 		//motor_array[i].position_value.target_position=0;
 		motor_array[i].command.command_id=0;
@@ -5122,11 +5132,18 @@ int command_20(uint8_t* data,uint32_t para)
 		motor_array[2].command.data_0=1;
 		motor_array[3].command.data_0=1;
 		//需要根据位置值添加不同的命令值
-		if(__fabs(motor_array[2].position_value.current_position-motor_array[2].position_value.tp[2])<COMPLETE_JUDGE*5 
-			 && __fabs(motor_array[3].position_value.current_position-motor_array[3].position_value.tp[2])<COMPLETE_JUDGE*5)
+		if(__fabs(motor_array[2].position_value.current_position-motor_array[2].position_value.tp[2])<COMPLETE_JUDGE*5)
 		{
-			motor_array[3].command.command_status=2;
-			subindex_for_cmd20=1;
+			if(__fabs(motor_array[3].position_value.current_position-motor_array[3].position_value.tp[2])<COMPLETE_JUDGE*5)
+			{
+				motor_array[3].command.command_status=2;
+			  subindex_for_cmd20=1;
+			}
+			else
+			{
+				motor_array[2].command.command_status=0x02;
+				subindex_for_cmd20=0;
+			}
 		}
 		else
 		{

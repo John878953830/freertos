@@ -1555,6 +1555,7 @@ void start_tk_conflict_monitor(void *argument)
 					{
 						if(motor_array[2].command.data_0==0)
 						{
+							motor_array[2].conflict_value.if_conflict=0;
 							if((motor_array[2].conflict_value.conflict_mask[0] & motor_array[2].conflict_value.conflict_data_0)==motor_array[2].conflict_value.conflict_condition[0]
 						  || (motor_array[2].conflict_value.conflict_mask[1] & motor_array[2].conflict_value.conflict_data_0)==motor_array[2].conflict_value.conflict_condition[1])
 							{
@@ -1562,6 +1563,7 @@ void start_tk_conflict_monitor(void *argument)
 							}
 							else
 							{
+								/*
 								//停止电机
 								motor_array[2].command.command_id=0;
 								//停止电机，并发送错误ID
@@ -1630,6 +1632,7 @@ void start_tk_conflict_monitor(void *argument)
 									}
 									taskEXIT_CRITICAL();
 								}
+								*/
 							}
 						}
 						if(motor_array[2].command.data_0==1)
@@ -1637,10 +1640,11 @@ void start_tk_conflict_monitor(void *argument)
 							if((motor_array[2].conflict_value.conflict_mask[0] & motor_array[2].conflict_value.conflict_data_0)==motor_array[2].conflict_value.conflict_condition[0]
 							|| (motor_array[2].conflict_value.conflict_mask[2] & motor_array[2].conflict_value.conflict_data_0)==motor_array[2].conflict_value.conflict_condition[2])
 							{
-								;
+								motor_array[2].conflict_value.if_conflict=0;
 							}
 							else
 							{
+								motor_array[2].conflict_value.if_conflict=1;
 								//停止电机
 								motor_array[2].command.command_id=0;
 								//停止电机，并发送错误ID
@@ -1714,9 +1718,10 @@ void start_tk_conflict_monitor(void *argument)
 				}
 				else
 				{
-					motor_array[3].conflict_value.if_conflict=1;
+					//motor_array[3].conflict_value.if_conflict=1;
 					if(motor_array[3].command.data_0==1)
 					{
+						motor_array[3].conflict_value.if_conflict=1;
 						motor_array[3].command.command_id=0;
 						//停止电机，并发送错误ID
 						QUEUE_STRUCT enable_motor;
