@@ -216,6 +216,7 @@ HAL_GPIO_WritePin(GPIOB,GPIO_PIN_14,GPIO_PIN_RESET);
 #define ERROR_3058                               0x3A              //天窗电机驱动器错误，具体错误信息查看广播数据
 #define ERROR_3059                               0x3B              //新前后夹紧电机驱动器错误，具体信息查看广播数据
 #define ERROR_3060                               0x3C              //新左右夹紧电机驱动器错误，具体信息查看广播数据
+#define ERROR_3061                               0x3D
 
 
 //帧结构掩码

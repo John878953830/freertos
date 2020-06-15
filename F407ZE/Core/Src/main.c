@@ -5498,6 +5498,13 @@ void result_parse_2(uint8_t* data, uint8_t num)
 					
 					motor_array[2].command.command_status=0x00;
 					motor_array[3].command.command_status=0x00;
+					
+					motor_array[2].command.data_0=0;
+					motor_array[3].command.data_0=0;
+					
+					motor_array[2].command.data_0=0;
+					motor_array[3].command.data_0=0;
+					
 					subindex_for_cmd20=30;
 					//if(motor_array[2].command.if_return==1 && motor_array[3].command.if_return==1)
 					{
@@ -5549,6 +5556,13 @@ void result_parse_2(uint8_t* data, uint8_t num)
 				
 				motor_array[2].command.command_status=0x00;
 				motor_array[3].command.command_status=0x00;
+				
+				motor_array[2].command.data_0=0;
+				motor_array[3].command.data_0=0;
+					
+				motor_array[2].command.data_0=0;
+				motor_array[3].command.data_0=0;
+				
 				subindex_for_cmd20=30;
 				if(motor_array[2].command.if_return==1 && motor_array[3].command.if_return==1)
 				{

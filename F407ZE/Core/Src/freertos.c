@@ -1532,7 +1532,7 @@ void start_tk_conflict_monitor(void *argument)
 								enable_motor.can_if_last=0x00;          //无需拼接
 								enable_motor.can_if_return=0x00;        //无需返回
 								enable_motor.length=4;
-								return_error(enable_motor.data,ERROR_COMMAND_CONFLICT_DETECT);
+								return_error(enable_motor.data,ERROR_3061);
 								taskENTER_CRITICAL();
 								portBASE_TYPE status = xQueueSendToBack(send_queueHandle, &enable_motor, 0);
 								if(status!=pdPASS)
@@ -1563,7 +1563,7 @@ void start_tk_conflict_monitor(void *argument)
 							}
 							else
 							{
-								/*
+								
 								//停止电机
 								motor_array[2].command.command_id=0;
 								//停止电机，并发送错误ID
@@ -1632,7 +1632,6 @@ void start_tk_conflict_monitor(void *argument)
 									}
 									taskEXIT_CRITICAL();
 								}
-								*/
 							}
 						}
 						if(motor_array[2].command.data_0==1)
