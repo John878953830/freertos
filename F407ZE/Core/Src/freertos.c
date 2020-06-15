@@ -147,7 +147,7 @@ static void prvAutoReloadTimerCallback( TimerHandle_t xTimer )
 		queue_id.data[3]&=0xF7;
 	}
 	//×óÓÒ¼Ð½ôµç»úÎ»ÖÃ
-	if(__fabs(motor_array[2].position_value.current_position-motor_array[2].position_value.tp[1])<COMPLETE_JUDGE*5)
+	if(__fabs(motor_array[2].position_value.current_position-motor_array[2].position_value.tp[1])<COMPLETE_JUDGE*5 || HAL_GPIO_ReadPin(motor_array[2].limit_sw[1].gpio_port,motor_array[2].limit_sw[1].pin_number)==GPIO_PIN_RESET)
 	{
 		queue_id.data[3]|=0x10;
 	}
