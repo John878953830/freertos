@@ -1430,6 +1430,8 @@ void start_tk_conflict_monitor(void *argument)
 						//向主机发送返回帧
 						if(motor_array[0].command.if_return==1)
 						{
+							motor_array[0].command.if_return=0;
+							motor_array[0].command.if_return=0;
 							enable_motor.property=0x00;             //can send
 							if(motor_array[0].command.command_union==0x06)
 							{
@@ -1452,6 +1454,8 @@ void start_tk_conflict_monitor(void *argument)
 							enable_motor.length=4;
 							return_error(enable_motor.data,ERROR_COMMAND_CONFLICT_DETECT);
 							taskENTER_CRITICAL();
+							motor_array[0].command.if_return=0;
+							motor_array[0].command.if_return=0;
 							portBASE_TYPE status = xQueueSendToBack(send_queueHandle, &enable_motor, 0);
 							if(status!=pdPASS)
 							{
@@ -1523,6 +1527,8 @@ void start_tk_conflict_monitor(void *argument)
 							//向主机发送返回帧
 							if(motor_array[0].command.if_return==1)
 							{
+								motor_array[0].command.if_return=0;
+								motor_array[0].command.if_return=0;
 								enable_motor.property=0x00;             //can send
 								enable_motor.can_command=0x14;         
 								enable_motor.can_if_ack=0x01;           //需要ACK
@@ -1534,6 +1540,8 @@ void start_tk_conflict_monitor(void *argument)
 								enable_motor.length=4;
 								return_error(enable_motor.data,ERROR_3061);
 								taskENTER_CRITICAL();
+								motor_array[0].command.if_return=0;
+								motor_array[0].command.if_return=0;
 								portBASE_TYPE status = xQueueSendToBack(send_queueHandle, &enable_motor, 0);
 								if(status!=pdPASS)
 								{
@@ -1599,6 +1607,8 @@ void start_tk_conflict_monitor(void *argument)
 								//向主机发送返回帧
 								if(motor_array[2].command.if_return==1)
 								{
+									motor_array[2].command.if_return=0;
+									motor_array[2].command.if_return=0;
 									enable_motor.property=0x00;             //can send
 									if(motor_array[2].command.command_union==0x06)
 									{
@@ -1617,6 +1627,8 @@ void start_tk_conflict_monitor(void *argument)
 									enable_motor.length=4;
 									return_error(enable_motor.data,ERROR_COMMAND_CONFLICT_DETECT);
 									taskENTER_CRITICAL();
+									motor_array[2].command.if_return=0;
+									motor_array[2].command.if_return=0;
 									portBASE_TYPE status = xQueueSendToBack(send_queueHandle, &enable_motor, 0);
 									if(status!=pdPASS)
 									{
@@ -1679,6 +1691,8 @@ void start_tk_conflict_monitor(void *argument)
 								//向主机发送返回帧
 								if(motor_array[2].command.if_return==1)
 								{
+									motor_array[2].command.if_return=0;
+									motor_array[2].command.if_return=0;
 									enable_motor.property=0x00;             //can send
 									enable_motor.can_command=0x0E;         
 									enable_motor.can_if_ack=0x01;           //需要ACK
@@ -1690,6 +1704,8 @@ void start_tk_conflict_monitor(void *argument)
 									enable_motor.length=4;
 									return_error(enable_motor.data,ERROR_COMMAND_CONFLICT_DETECT);
 									taskENTER_CRITICAL();
+									motor_array[2].command.if_return=0;
+									motor_array[2].command.if_return=0;
 									portBASE_TYPE status = xQueueSendToBack(send_queueHandle, &enable_motor, 0);
 									if(status!=pdPASS)
 									{
@@ -1755,6 +1771,8 @@ void start_tk_conflict_monitor(void *argument)
 						//向主机发送返回帧
 						if(motor_array[3].command.if_return==1)
 						{
+							motor_array[3].command.if_return=0;
+							motor_array[3].command.if_return=0;
 							enable_motor.property=0x00;             //can send
 							if(motor_array[3].command.command_union==0x06)
 							{
@@ -1777,6 +1795,8 @@ void start_tk_conflict_monitor(void *argument)
 							enable_motor.length=4;
 							return_error(enable_motor.data,ERROR_COMMAND_CONFLICT_DETECT);
 							taskENTER_CRITICAL();
+							motor_array[3].command.if_return=0;
+							motor_array[3].command.if_return=0;
 							portBASE_TYPE status = xQueueSendToBack(send_queueHandle, &enable_motor, 0);
 							if(status!=pdPASS)
 							{
