@@ -112,6 +112,8 @@ uint8_t communication_reset_counter=0;
 uint8_t left=0,right=0;
 
 int32_t speed_terminal=10;
+
+int32_t cover_pos=0;
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -454,7 +456,8 @@ uint8_t motor_array_init(void)
 		//测试代码
 		//motor_array[i].speed_value.calibrate_speed=50;//设置默认校准速度为50
 	}
-	
+	//天窗遮阳位置设置
+	cover_pos=0xFFFDB610;
 	
 	
 	
@@ -782,6 +785,52 @@ QUEUE_STRUCT command_abs[3]=
 	{
 		.property=1,                            //485 send
 		.modbus_addr=0,                       //电机号需要根据命令中的电机号赋值
+		.modbus_func=0x10,                    //写多个寄存器
+		.modbus_addr_h=(uint8_t)(2040>>8),
+		.modbus_addr_l=(uint8_t)(2040&0xFF),        //写使能寄存器
+		.modbus_data_len_h=0x00,
+		.modbus_data_len_l=0x02,
+		.modbus_data_byte=0x04,
+		.modbus_data_1=0x00,                      //使能寄存器全部写为00
+		.modbus_data_2=0x00,                      
+		.modbus_data_3=0x00,                      
+		.modbus_data_4=0x00,
+	},
+};
+
+QUEUE_STRUCT command_abs_cover_sun[3]=
+{
+	{
+		.property=1,                            //485 send
+		.modbus_addr=1,                       //电机号需要根据命令中的电机号赋值
+		.modbus_func=0x10,                    //写多个寄存器
+		.modbus_addr_h=(uint8_t)(3202>>8),
+		.modbus_addr_l=(uint8_t)(3202&0xFF),        //写目标位置
+		.modbus_data_len_h=0x00,
+		.modbus_data_len_l=0x02,
+		.modbus_data_byte=0x04,
+		.modbus_data_1=0,                      //执行打开位置自检，此处无法直接填充tp数组的值，需要到cmd15命令中填充
+		.modbus_data_2=0,                      //先赋值为命令中的数值，当前位置读取成功后修改值
+		.modbus_data_3=0,                      //先赋值为命令中的数值，当前位置读取成功后修改值
+		.modbus_data_4=0,                      //先赋值为命令中的数值，当前位置读取成功后修改值
+	},
+	{
+		.property=1,                            //485 send
+		.modbus_addr=1,                       //电机号需要根据命令中的电机号赋值
+		.modbus_func=0x10,                    //写多个寄存器
+		.modbus_addr_h=(uint8_t)(2040>>8),
+		.modbus_addr_l=(uint8_t)(2040&0xFF),        //写使能寄存器
+		.modbus_data_len_h=0x00,
+		.modbus_data_len_l=0x02,
+		.modbus_data_byte=0x04,
+		.modbus_data_1=0xFF,                      //使能寄存器全部写为FF
+		.modbus_data_2=0xFF,                      
+		.modbus_data_3=0xFF,                      
+		.modbus_data_4=0xFF,                      
+	},
+	{
+		.property=1,                            //485 send
+		.modbus_addr=1,                       //电机号需要根据命令中的电机号赋值
 		.modbus_func=0x10,                    //写多个寄存器
 		.modbus_addr_h=(uint8_t)(2040>>8),
 		.modbus_addr_l=(uint8_t)(2040&0xFF),        //写使能寄存器
@@ -5129,6 +5178,23 @@ int command_20(uint8_t* data,uint32_t para)
 	}
 	if(data[0]==1)
 	{
+		//天窗动作，遮挡阳光
+		command_abs_cover_sun[0].modbus_data_1=(uint8_t)((cover_pos >> 8) & 0xFF);            
+		command_abs_cover_sun[0].modbus_data_2=(uint8_t)((cover_pos) & 0xFF);                           
+		command_abs_cover_sun[0].modbus_data_3=(uint8_t)((cover_pos >> 24) & 0xFF);                     
+		command_abs_cover_sun[0].modbus_data_4=(uint8_t)((cover_pos >> 16) & 0xFF);                     
+		//发送指令
+		taskENTER_CRITICAL();
+		xQueueSendToBack(send_queueHandle, &command_abs_cover_sun[0], 0);
+		
+		xQueueSendToBack(send_queueHandle, &command_abs_cover_sun[1], 0);
+		
+		xQueueSendToBack(send_queueHandle, &command_abs_cover_sun[2], 0);
+		
+		taskEXIT_CRITICAL();
+		
+		
+		
 		motor_array[2].command.data_0=1;
 		motor_array[3].command.data_0=1;
 		//需要根据位置值添加不同的命令值
@@ -5506,6 +5572,20 @@ void result_parse_2(uint8_t* data, uint8_t num)
 					motor_array[3].command.data_0=0;
 					
 					subindex_for_cmd20=30;
+					//天窗动作，返回打开位置
+					command_abs_cover_sun[0].modbus_data_1=(uint8_t)((motor_array[0].position_value.tp[1] >> 8) & 0xFF);            
+					command_abs_cover_sun[0].modbus_data_2=(uint8_t)((motor_array[0].position_value.tp[1]) & 0xFF);                           
+					command_abs_cover_sun[0].modbus_data_3=(uint8_t)((motor_array[0].position_value.tp[1] >> 24) & 0xFF);                     
+					command_abs_cover_sun[0].modbus_data_4=(uint8_t)((motor_array[0].position_value.tp[1] >> 16) & 0xFF);                     
+					//发送指令
+					taskENTER_CRITICAL();
+					xQueueSendToBack(send_queueHandle, &command_abs_cover_sun[0], 0);
+					
+					xQueueSendToBack(send_queueHandle, &command_abs_cover_sun[1], 0);
+					
+					xQueueSendToBack(send_queueHandle, &command_abs_cover_sun[2], 0);
+					
+					taskEXIT_CRITICAL();
 					//if(motor_array[2].command.if_return==1 && motor_array[3].command.if_return==1)
 					{
 						motor_array[2].command.if_return=0;

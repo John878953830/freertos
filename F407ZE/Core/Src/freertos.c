@@ -1374,8 +1374,15 @@ void start_tk_conflict_monitor(void *argument)
 					{
 						if(motor_array[0].command.data_0==1)
 						{
-							
-						  motor_array[0].conflict_value.if_conflict=1;
+							if(motor_array[2].command.command_union!=0x14)
+							{
+								motor_array[0].conflict_value.if_conflict=1;
+							}
+							else
+							{
+								motor_array[0].conflict_value.if_conflict=0;
+							}
+						  //motor_array[0].conflict_value.if_conflict=1;
 						}
 					}
 				}
@@ -1389,8 +1396,15 @@ void start_tk_conflict_monitor(void *argument)
 					{
 						if(motor_array[0].command.data_0==1)
 						{
-							
-						  motor_array[0].conflict_value.if_conflict=1;
+							if(motor_array[2].command.command_union!=0x14)
+							{
+								motor_array[0].conflict_value.if_conflict=1;
+							}
+							else
+							{
+								motor_array[0].conflict_value.if_conflict=0;
+							}
+						  //motor_array[0].conflict_value.if_conflict=1;
 						}
 					}
 					//motor_array[0].conflict_value.if_conflict=1;
