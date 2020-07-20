@@ -2635,7 +2635,7 @@ void start_tk_result_process_rece_5(void *argument)
 						modbus_status_5=0;
 						modbus_time_flag_5=0;
 					}
-					if((grating_value.data[0] | grating_value.data[1] | grating_value.data[2] | grating_value.data[4] | grating_value.data[5])==0x00 && (grating_value.data[3] ==0x10 || grating_value.data[3] ==0))
+					if(((grating_value.data[0] | grating_value.data[1] | grating_value.data[2] | grating_value.data[4] | grating_value.data[5])==0x00 && (grating_value.data[3] ==0x10 || grating_value.data[3] ==0)) || work_model==1)
 					{
 						grating_value.if_have_target=0;
 						grating_value.status=0;
