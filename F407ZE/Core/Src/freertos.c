@@ -1366,7 +1366,7 @@ void start_tk_conflict_monitor(void *argument)
 				 || (motor_array[0].conflict_value.conflict_mask[1] & motor_array[0].conflict_value.conflict_data_0)==motor_array[0].conflict_value.conflict_condition[1])
 				{
 					motor_array[0].conflict_value.if_conflict=0;
-					if(grating_value.if_have_target==0)
+					if(grating_value.if_have_target==0 || motor_array[0].position_value.current_position>cover_pos)
 					{
 						motor_array[0].conflict_value.if_conflict=0;
 					}
@@ -1388,7 +1388,7 @@ void start_tk_conflict_monitor(void *argument)
 				}
 				else
 				{
-					if(grating_value.if_have_target==0)
+					if(grating_value.if_have_target==0 || motor_array[0].position_value.current_position>cover_pos)
 					{
 						motor_array[0].conflict_value.if_conflict=0;
 					}
@@ -1408,7 +1408,7 @@ void start_tk_conflict_monitor(void *argument)
 						}
 					}
 					//motor_array[0].conflict_value.if_conflict=1;
-					if(motor_array[0].command.data_0==1)
+					if(motor_array[0].command.data_0==1 && motor_array[0].position_value.current_position<cover_pos)
 					{
 						motor_array[0].command.command_id=0;
 						//停止电机，并发送错误ID
