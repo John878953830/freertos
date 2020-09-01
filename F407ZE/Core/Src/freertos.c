@@ -640,6 +640,7 @@ void start_soft_timer(void)
 	{
 		xTimerStart(broadcast_timer,0);
 		xTimerChangePeriod(broadcast_timer,timer_period/portTICK_PERIOD_MS,50);
+		//xTimerChangePeriod(broadcast_timer,100/portTICK_PERIOD_MS,50);   //test board
 	}
 	xTimerStart(motor_status_timer,0);
 	;
@@ -2593,8 +2594,17 @@ void start_tk_result_process_rece_5(void *argument)
 			uint16_t crc_tmp=usMBCRC16(rece_cache_5,rece_count_5 - 2);
 			crcl=(uint8_t)(crc_tmp & 0xFF);
 			crch=(uint8_t)(crc_tmp >> 8);
+			if(if_grating_enable==0)
+			{
+				uint8_t ktmp=0;
+				for(ktmp=0;ktmp<6;ktmp++)
+				{
+					grating_value.data[ktmp]=0;
+					;
+				}
+			}
 			
-			if(crcl==rece_cache_5[rece_count_5-2] && crch==rece_cache_5[rece_count_5-1])
+			if(crcl==rece_cache_5[rece_count_5-2] && crch==rece_cache_5[rece_count_5-1] && if_grating_enable==1)
 			{
 				if(modbus_list_head_5!=NULL && modbus_list_head_5->next!=NULL)
 				{

@@ -112,6 +112,8 @@ uint8_t communication_reset_counter=0;
 uint8_t left=0,right=0;
 
 int32_t speed_terminal=10;
+
+uint8_t if_grating_enable=1;
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -219,6 +221,12 @@ uint8_t motor_array_init(void)
 	rw_flag=0;
 	//读取EEPROM设置完成标志位
 	uint8_t tmp_flag=153;
+	/*
+	data[0]=0x77;
+	iic_rw(1,10,data,1);
+	HAL_Delay(10);
+	iic_rw(0,10,&data[1],1);
+	*/
 	
 	if(iic_rw(rw_flag, tmp_addr,data,1)!=0)
 	{
@@ -5033,6 +5041,47 @@ int command_20(uint8_t* data,uint32_t para)
 		}
 		return ERROR_COMMAND_20_FAIL;
 	}
+	if(data[0]==3)
+	{
+		if_grating_enable=0;
+	}
+	if(data[0]==4)
+	{
+		if_grating_enable=1;
+	}
+	if(data[0]==3 || data[0]==4)
+	{
+		if(if_return == 0x01)
+		{
+			QUEUE_STRUCT tmp;
+			tmp.property=0x00;             //can send
+			tmp.can_command=0x14;          //停止指令
+			tmp.can_if_ack=0x01;           //需要ACK
+			tmp.can_source=0x03;           //本模块
+			tmp.can_target=0x00;
+			tmp.can_priority=0x03;         //命令结束返回帧
+			tmp.can_if_last=0x00;
+			tmp.can_if_return=0x00;
+			tmp.length=4;
+			return_error(tmp.data,RETURN_OK);
+			BaseType_t status_q = xQueueSendToBack(send_queueHandle, &tmp, 0);
+			if(status_q!=pdPASS)
+			{
+				#ifdef DEBUG_OUTPUT
+				printf("%s\n","queue overflow");
+				#endif
+			}
+			else
+			{
+				#ifdef DEBUG_OUTPUT
+				printf("%s\n","send command 1 success to queue already");
+				#endif
+			}
+		}
+		return 0;
+	}
+		
+	
 	//碰撞检测判定，不管是否需要返回帧，强制发送
 	if((motor_array[2].conflict_value.if_conflict==0x01) || (motor_array[3].conflict_value.if_conflict==0x01))
 	{

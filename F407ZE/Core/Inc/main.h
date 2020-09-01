@@ -552,6 +552,7 @@ extern uint8_t right;
 extern uint8_t subindex_for_cmd20;
 extern uint8_t subindex_for_cmd6;
 extern uint8_t communication_reset_counter;
+extern uint8_t if_grating_enable;
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus
