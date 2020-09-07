@@ -298,9 +298,9 @@ uint8_t motor_array_init(void)
 		}
 	}
 	//测试代码
-	//motor_array[3].position_value.tp[0]=0x0000AECE;//0x0000BF8C;AC07 AB80
-	//motor_array[3].position_value.tp[1]=0x00000089;
-	//motor_array[3].position_value.tp[2]=0x00009E44;
+	//motor_array[3].position_value.tp[0]=0x0000AECE;//0x0000BF8C;AC07 AB80//全夹紧
+	//motor_array[3].position_value.tp[1]=0x00000089;//全开
+	//motor_array[3].position_value.tp[2]=0x00009E44;//45度
 	motor_array[3].position_value.if_tp_already=0x01;
 	
 	
