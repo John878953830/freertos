@@ -2602,6 +2602,8 @@ void start_tk_result_process_rece_5(void *argument)
 					grating_value.data[ktmp]=0;
 					;
 				}
+				modbus_list_head_5->if_over=0;
+				modbus_list_head_5=modbus_list_head_5->next;
 			}
 			
 			if(crcl==rece_cache_5[rece_count_5-2] && crch==rece_cache_5[rece_count_5-1] && if_grating_enable==1)

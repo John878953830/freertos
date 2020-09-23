@@ -113,7 +113,7 @@ uint8_t left=0,right=0;
 
 int32_t speed_terminal=10;
 
-uint8_t if_grating_enable=1;
+uint8_t if_grating_enable=0;
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -5456,7 +5456,7 @@ void result_parse_2(uint8_t* data, uint8_t num)
 				if(subindex_for_cmd20==1 && motor_array[3].command.command_status==0x02)
 				{
 					//光栅判定
-					if((grating_value.if_have_target==1 && grating_value.status_angle==0) || grating_value.if_have_target==0)//光栅角度正常
+					if((grating_value.if_have_target==1 && grating_value.status_angle==0) || grating_value.if_have_target==0 || if_grating_enable==0)//光栅角度正常
 					{
 						HAL_Delay(100);
 						motor_array[2].command.command_status=0x01;
